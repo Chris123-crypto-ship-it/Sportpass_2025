@@ -1,0 +1,59 @@
+/* src/components/Achievements.css */
+.achievements {
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-radius: 10px;
+  margin: 20px 0;
+  text-align: center;
+}
+
+.badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center; /* Damit die Badges in der Mitte des Containers sind */
+}
+
+.badge {
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* Vertikal zentrieren */
+  align-items: center; /* Horizontal zentrieren */
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  width: 120px;
+  height: 150px; /* Höhe der Badge festgelegt */
+  background-color: #fff;
+  transition: background-color 0.3s, border-color 0.3s;
+  text-align: center;
+}
+
+.badge.unlocked {
+  border-color: #4caf50;
+  background-color: #e8f5e9;
+}
+
+.badge.locked {
+  border-color: #ccc;
+  background-color: #f1f1f1;
+}
+
+.badge .icon {
+  font-size: 3em; /* Etwas größer für die Icons */
+  display: flex;
+  justify-content: center; /* Horizontal zentrieren */
+  align-items: center; /* Vertikal zentrieren */
+  flex-grow: 1; /* Icon nimmt den verfügbaren Platz ein */
+}
+
+.badge .title {
+  font-weight: bold;
+  margin-top: 5px;
+}
+
+.badge .locked-text {
+  font-size: 0.8em;
+  color: #888;
+  margin-top: 3px;
+}

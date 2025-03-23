@@ -1,0 +1,50 @@
+.task-actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.visibility-button {
+  background-color: #6c757d;
+  color: white;
+  border: none;
+  padding: 0.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.3s;
+}
+
+.visibility-button:hover {
+  background-color: #5a6268;
+}
+
+.visibility-button.hidden {
+  background-color: #28a745;
+}
+
+.visibility-button.hidden:hover {
+  background-color: #218838;
+}
+
+.hidden-badge {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background-color: #dc3545;
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.875rem;
+}
+
+.task-card {
+  position: relative;
+}
+
+.task-card.hidden {
+  opacity: 0.7;
+  background-color: #f8f9fa;
+} 
