@@ -15,10 +15,9 @@ app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
 // Konfiguriere CORS
 app.use(cors({
-  origin: ['http://localhost:3000', 'http://localhost:3001', 'https://sportpass-2025.onrender.com', 'https://sportpass-2025.vercel.app'],
+  origin: '*', // Erlaubt Anfragen von jeder Domain
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
-  exposedHeaders: ['Authorization'],
   credentials: true
 }));
 
