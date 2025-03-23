@@ -2,6 +2,7 @@ import React, { createContext, useState, useContext, useCallback } from 'react';
 import { useAuth } from './AuthContext';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import config from '../config';
 
 const TaskContext = createContext();
 
@@ -40,7 +41,7 @@ export const TaskProvider = ({ children }) => {
       setLoading(true);
       setError(null);
 
-      const response = await axios.get(`http://localhost:3001/tasks${view ? `?view=${view}` : ''}`, {
+      const response = await axios.get(`${config.API_URL}/tasks${view ? `?view=${view}` : ''}`, {
         headers: getHeaders()
       });
 
@@ -60,7 +61,7 @@ export const TaskProvider = ({ children }) => {
       setLoading(true);
       setError(null);
 
-      const response = await axios.get('http://localhost:3001/submissions', {
+      const response = await axios.get(`${config.API_URL}/submissions`, {
         headers: getHeaders()
       });
       
@@ -80,7 +81,7 @@ export const TaskProvider = ({ children }) => {
       setLoading(true);
       setError(null);
 
-      const response = await axios.get('http://localhost:3001/submissions', {
+      const response = await axios.get(`${config.API_URL}/submissions`, {
         headers: getHeaders()
       });
       
@@ -122,7 +123,7 @@ export const TaskProvider = ({ children }) => {
         calculatedPoints = Math.round(dynamicValue * (task.multiplier || 1));
       }
 
-      const response = await axios.post('http://localhost:3001/submit-task', {
+      const response = await axios.post(`${config.API_URL}/submit-task`, {
         taskId,
         userEmail,
         details: {
@@ -149,7 +150,7 @@ export const TaskProvider = ({ children }) => {
   const handleApproveSubmission = async (submissionId, adminComment = '') => {
     try {
       checkToken();
-      const response = await axios.post('http://localhost:3001/approve-submission', 
+      const response = await axios.post(`${config.API_URL}/approve-submission`, 
         { 
           submissionId, 
           adminComment
@@ -171,7 +172,7 @@ export const TaskProvider = ({ children }) => {
   const handleRejectSubmission = async (submissionId, adminComment = '') => {
     try {
       checkToken();
-      const response = await axios.post('http://localhost:3001/reject-submission',
+      const response = await axios.post(`${config.API_URL}/reject-submission`,
         { 
           submissionId, 
           adminComment
@@ -197,7 +198,7 @@ export const TaskProvider = ({ children }) => {
       setLoading(true);
       setError(null);
 
-      const response = await axios.delete(`http://localhost:3001/delete-submission/${submissionId}`, {
+      const response = await axios.delete(`${config.API_URL}/delete-submission/${submissionId}`, {
         headers: getHeaders()
       });
 
@@ -217,7 +218,7 @@ export const TaskProvider = ({ children }) => {
       checkToken();
       setLoading(true);
       
-      const response = await axios.delete(`http://localhost:3001/delete-task/${taskId}`, {
+      const response = await axios.delete(`${config.API_URL}/delete-task/${taskId}`, {
         headers: getHeaders()
       });
 
@@ -246,7 +247,7 @@ export const TaskProvider = ({ children }) => {
       setError(null);
 
       const response = await axios.post(
-        `http://localhost:3001/toggle-task-visibility/${taskId}`,
+        `${config.API_URL}/toggle-task-visibility/${taskId}`,
         { is_hidden: isHidden },
         { headers: getHeaders() }
       );

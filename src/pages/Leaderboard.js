@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { FaTrophy, FaMedal, FaStar, FaChartLine } from 'react-icons/fa';
 import './Leaderboard.css';
+import config from '../config';
 
 const Leaderboard = () => {
   const { user } = useAuth();
@@ -12,7 +13,7 @@ const Leaderboard = () => {
   useEffect(() => {
     const fetchLeaderboard = async () => {
       try {
-        const response = await fetch('http://localhost:3001/leaderboard');
+        const response = await fetch(`${config.API_URL}/leaderboard`);
         const data = await response.json();
         setLeaderboard(data);
       } catch (error) {

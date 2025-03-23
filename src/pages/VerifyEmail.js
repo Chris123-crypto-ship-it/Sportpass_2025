@@ -4,6 +4,7 @@ import axios from 'axios';
 import { toast } from 'react-toastify';
 import '../styles/VerifyEmail.css';
 import { FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
+import config from '../config';
 
 const VerifyEmail = () => {
   const [verificationStatus, setVerificationStatus] = useState('verifying');
@@ -23,7 +24,7 @@ const VerifyEmail = () => {
           return;
         }
 
-        const response = await axios.get(`http://localhost:3001/verify-email?code=${code}`);
+        const response = await axios.get(`${config.API_URL}/verify-email?code=${code}`);
         console.log('Verifizierungsantwort:', response.data);
 
         if (response.data && response.data.message === "E-Mail erfolgreich verifiziert") {

@@ -12,6 +12,7 @@ import {
   faRunning,
   faBicycle 
 } from '@fortawesome/free-solid-svg-icons';
+import config from '../config';
 
 const Profile = () => {
   const { user } = useAuth();
@@ -63,7 +64,7 @@ const Profile = () => {
       
       // Optional: Versuchen Sie den Namen auch im Backend zu aktualisieren
       try {
-        const response = await fetch(`http://localhost:3001/users/${user.id}`, {
+        const response = await fetch(`${config.API_URL}/users/${user.id}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',

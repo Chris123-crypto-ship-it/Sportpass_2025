@@ -4,6 +4,7 @@ import axios from 'axios';
 import '../styles/Participants.css';
 import { toast } from 'react-toastify';
 import { FaSort, FaSortUp, FaSortDown } from 'react-icons/fa';
+import config from '../config';
 
 const Participants = () => {
   const { user } = useAuth();
@@ -33,7 +34,7 @@ const Participants = () => {
       setLoading(true);
       setError(null);
 
-      const response = await axios.get('http://localhost:3001/users', {
+      const response = await axios.get(`${config.API_URL}/users`, {
         headers: getHeaders()
       });
 
@@ -54,7 +55,7 @@ const Participants = () => {
   const handlePointsChange = async (userId, newPoints) => {
     try {
       await axios.put(
-        `http://localhost:3001/users/${userId}`,
+        `${config.API_URL}/users/${userId}`,
         { points: parseInt(newPoints) },
         { headers: getHeaders() }
       );

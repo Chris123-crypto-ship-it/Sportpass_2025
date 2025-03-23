@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import '../styles/Register.css';
 import { FaUserPlus, FaUser, FaEnvelope, FaLock, FaGraduationCap } from 'react-icons/fa';
+import config from '../config';
 
 const Register = () => {
   const navigate = useNavigate();
@@ -56,7 +57,7 @@ const Register = () => {
         class: formData.class
       });
 
-      const response = await axios.post('http://localhost:3001/register', {
+      const response = await axios.post(`${config.API_URL}/register`, {
         name: formData.name,
         email: formData.email,
         password: formData.password,
@@ -91,7 +92,7 @@ const Register = () => {
   const handleResendVerification = async () => {
     try {
       setLoading(true);
-      const response = await axios.post('http://localhost:3001/resend-verification', {
+      const response = await axios.post(`${config.API_URL}/resend-verification`, {
         email: formData.email
       });
 

@@ -6,6 +6,7 @@ import { toast } from 'react-toastify';
 import '../styles/Login.css';
 import { FaEnvelope, FaLock } from 'react-icons/fa';
 import { useAuth } from '../context/AuthContext';
+import config from '../config';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -25,7 +26,7 @@ const Login = () => {
   const handleResendVerification = async () => {
     try {
       setLoading(true);
-      const response = await axios.post('http://localhost:3001/resend-verification', {
+      const response = await axios.post(`${config.API_URL}/resend-verification`, {
         email: formData.email
       });
 

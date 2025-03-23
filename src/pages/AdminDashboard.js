@@ -5,6 +5,7 @@ import { useTasks } from '../context/TaskContext';
 import { FaTrash, FaPlus, FaClock, FaMedal, FaTag, FaEye, FaEyeSlash } from 'react-icons/fa';
 import './AdminDashboard.css';
 import { toast } from 'react-toastify';
+import config from '../config';
 
 const AdminDashboard = () => {
   const { user } = useAuth();
@@ -63,7 +64,7 @@ const AdminDashboard = () => {
 
   const fetchUsers = async () => {
     try {
-      const response = await axios.get('http://localhost:3001/users', {
+      const response = await axios.get(`${config.API_URL}/users`, {
         headers: getHeaders()
       });
       setUsers(response.data);
@@ -123,7 +124,7 @@ const AdminDashboard = () => {
         expiration_date: newTask.expiration_date
       };
 
-      const response = await axios.post('http://localhost:3001/add-task', taskData, {
+      const response = await axios.post(`${config.API_URL}/add-task`, taskData, {
         headers: getHeaders()
       });
 
@@ -175,7 +176,7 @@ const AdminDashboard = () => {
         throw new Error('Bitte gebe eine gültige Punktzahl ein');
       }
       
-      const response = await fetch(`http://localhost:3001/update-points`, {
+      const response = await fetch(`${config.API_URL}/update-points`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
