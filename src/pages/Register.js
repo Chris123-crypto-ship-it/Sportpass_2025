@@ -5,7 +5,6 @@ import { toast } from 'react-toastify';
 import '../styles/Register.css';
 import { FaUserPlus, FaUser, FaEnvelope, FaLock, FaGraduationCap } from 'react-icons/fa';
 import config from '../config';
-import { Link } from 'react-router-dom';
 
 const Register = () => {
   const navigate = useNavigate();
@@ -143,75 +142,79 @@ const Register = () => {
       <h2>Registrieren</h2>
       <form onSubmit={handleSubmit} className="register-form">
         <div className="form-group">
-          <label>Name *</label>
-          <div className="input-group">
-            <i className="fas fa-user"></i>
+          <label htmlFor="name">Name *</label>
+          <div className="input-with-icon">
+            <FaUser className="input-icon" />
             <input
               type="text"
-              placeholder="Dein Name"
+              id="name"
+              name="name"
               value={formData.name}
               onChange={handleChange}
-              name="name"
+              placeholder="Dein Name"
               required
             />
           </div>
         </div>
         
         <div className="form-group">
-          <label>E-Mail *</label>
-          <div className="input-group">
-            <i className="fas fa-envelope"></i>
+          <label htmlFor="email">E-Mail *</label>
+          <div className="input-with-icon">
+            <FaEnvelope className="input-icon" />
             <input
               type="email"
-              placeholder="deine@email.de"
+              id="email"
+              name="email"
               value={formData.email}
               onChange={handleChange}
-              name="email"
+              placeholder="deine@email.de"
               required
             />
           </div>
         </div>
         
         <div className="form-group">
-          <label>Klasse</label>
-          <div className="input-group">
-            <i className="fas fa-graduation-cap"></i>
+          <label htmlFor="class">Klasse</label>
+          <div className="input-with-icon">
+            <FaGraduationCap className="input-icon" />
             <input
               type="text"
-              placeholder="10a oder LK Informatik"
+              id="class"
+              name="class"
               value={formData.class}
               onChange={handleChange}
-              name="class"
-              required
+              placeholder="z.B. 10a oder LK Informatik"
             />
           </div>
         </div>
         
         <div className="form-group">
-          <label>Passwort *</label>
-          <div className="input-group">
-            <i className="fas fa-lock"></i>
+          <label htmlFor="password">Passwort *</label>
+          <div className="input-with-icon">
+            <FaLock className="input-icon" />
             <input
               type="password"
-              placeholder="Passwort"
+              id="password"
+              name="password"
               value={formData.password}
               onChange={handleChange}
-              name="password"
+              placeholder="Passwort"
               required
             />
           </div>
         </div>
         
         <div className="form-group">
-          <label>Passwort bestätigen *</label>
-          <div className="input-group">
-            <i className="fas fa-lock"></i>
+          <label htmlFor="confirmPassword">Passwort bestätigen *</label>
+          <div className="input-with-icon">
+            <FaLock className="input-icon" />
             <input
               type="password"
-              placeholder="Passwort wiederholen"
+              id="confirmPassword"
+              name="confirmPassword"
               value={formData.confirmPassword}
               onChange={handleChange}
-              name="confirmPassword"
+              placeholder="Passwort wiederholen"
               required
             />
           </div>
@@ -225,7 +228,7 @@ const Register = () => {
       </form>
       
       <div className="login-link">
-        Bereits registriert? <Link to="/login">Hier anmelden</Link>
+        Bereits registriert? <a href="/login">Hier anmelden</a>
       </div>
     </div>
   );
