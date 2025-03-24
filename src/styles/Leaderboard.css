@@ -28,3 +28,66 @@
 .rank-3 {
   background: #cd7f32; /* Bronze */
 }
+
+.top-three-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 2rem;
+  margin: 2rem 0;
+}
+
+.position-card {
+  width: 300px;
+  height: 200px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  border-radius: 15px;
+  padding: 2rem;
+  color: white;
+  text-align: center;
+  transition: transform 0.3s ease;
+}
+
+.position-card:hover {
+  transform: translateY(-5px);
+}
+
+.position-card.first {
+  background-color: #ffa500;
+  box-shadow: 0 4px 15px rgba(255, 165, 0, 0.3);
+}
+
+.position-card.second {
+  background-color: #a9a9a9;
+  box-shadow: 0 4px 15px rgba(169, 169, 169, 0.3);
+}
+
+.position-card.third {
+  background-color: #cd853f;
+  box-shadow: 0 4px 15px rgba(205, 133, 63, 0.3);
+}
+
+.position-card .crown-icon {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+}
+
+.position-card .medal-icon {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+}
+
+.position-card .name {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+  word-break: break-word;
+}
+
+.position-card .points {
+  font-size: 1.2rem;
+  opacity: 0.9;
+}

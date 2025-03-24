@@ -47,6 +47,32 @@ const Leaderboard = () => {
     return achievements;
   };
 
+  const TopThree = ({ users }) => {
+    if (!users || users.length < 3) return null;
+
+    return (
+      <div className="top-three-container">
+        <div className="position-card second">
+          <div className="medal-icon">🥈</div>
+          <div className="name">{users[1].name}</div>
+          <div className="points">{users[1].points} Punkte</div>
+        </div>
+        
+        <div className="position-card first">
+          <div className="crown-icon">👑</div>
+          <div className="name">{users[0].name}</div>
+          <div className="points">{users[0].points} Punkte</div>
+        </div>
+        
+        <div className="position-card third">
+          <div className="medal-icon">🥉</div>
+          <div className="name">{users[2].name}</div>
+          <div className="points">{users[2].points} Punkte</div>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="leaderboard-container">
       <div className="leaderboard-header">
@@ -106,20 +132,7 @@ const Leaderboard = () => {
       )}
 
       <div className="podium-section">
-        {leaderboard.slice(0, 3).map((entry, index) => (
-          <div 
-            key={index} 
-            className={`podium-place podium-${index + 1}`}
-            style={{ order: index === 1 ? 0 : index === 0 ? 1 : 2 }}
-          >
-            <div className="podium-avatar">
-              {index === 0 ? '👑' : index === 1 ? '🥈' : '🥉'}
-            </div>
-            <h3 className="podium-name">{entry.name}</h3>
-            <p className="podium-points">{entry.points} Punkte</p>
-            {entry.name === user?.name && <span className="podium-badge">Du!</span>}
-          </div>
-        ))}
+        <TopThree users={leaderboard.slice(0, 3)} />
       </div>
 
       <div className="leaderboard-table">
