@@ -3,8 +3,9 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import '../styles/Register.css';
-import { FaUser, FaEnvelope, FaLock, FaGraduationCap } from 'react-icons/fa';
+import { FaUserPlus, FaUser, FaEnvelope, FaLock, FaGraduationCap } from 'react-icons/fa';
 import config from '../config';
+import { Link } from 'react-router-dom';
 
 const Register = () => {
   const navigate = useNavigate();
@@ -139,94 +140,93 @@ const Register = () => {
 
   return (
     <div className="register-container">
+      <h2>Registrieren</h2>
       <form onSubmit={handleSubmit} className="register-form">
-        <h2>Registrierung</h2>
-        
         <div className="form-group">
           <label>Name *</label>
           <div className="input-group">
-            <FaUser className="input-icon" />
+            <i className="fas fa-user"></i>
             <input
               type="text"
-              name="name"
+              placeholder="Dein Name"
               value={formData.name}
               onChange={handleChange}
-              placeholder="Name eingeben"
+              name="name"
               required
             />
           </div>
         </div>
-
+        
         <div className="form-group">
           <label>E-Mail *</label>
           <div className="input-group">
-            <FaEnvelope className="input-icon" />
+            <i className="fas fa-envelope"></i>
             <input
               type="email"
-              name="email"
+              placeholder="deine@email.de"
               value={formData.email}
               onChange={handleChange}
-              placeholder="E-Mail eingeben"
+              name="email"
               required
             />
           </div>
         </div>
-
+        
         <div className="form-group">
-          <label>Klasse *</label>
+          <label>Klasse</label>
           <div className="input-group">
-            <FaGraduationCap className="input-icon" />
+            <i className="fas fa-graduation-cap"></i>
             <input
               type="text"
-              name="class"
+              placeholder="10a oder LK Informatik"
               value={formData.class}
               onChange={handleChange}
-              placeholder="Klasse eingeben (z.B. 10a)"
+              name="class"
               required
             />
           </div>
         </div>
-
+        
         <div className="form-group">
           <label>Passwort *</label>
           <div className="input-group">
-            <FaLock className="input-icon" />
+            <i className="fas fa-lock"></i>
             <input
               type="password"
-              name="password"
+              placeholder="Passwort"
               value={formData.password}
               onChange={handleChange}
-              placeholder="Passwort eingeben"
+              name="password"
               required
             />
           </div>
         </div>
-
+        
         <div className="form-group">
           <label>Passwort bestätigen *</label>
           <div className="input-group">
-            <FaLock className="input-icon" />
+            <i className="fas fa-lock"></i>
             <input
               type="password"
-              name="confirmPassword"
+              placeholder="Passwort wiederholen"
               value={formData.confirmPassword}
               onChange={handleChange}
-              placeholder="Passwort wiederholen"
+              name="confirmPassword"
               required
             />
           </div>
         </div>
-
+        
         {error && <div className="error-message">{error}</div>}
         
-        <button type="submit" disabled={loading}>
-          {loading ? 'Registriere...' : 'Registrieren'}
+        <button type="submit" className="btn-primary" disabled={loading}>
+          {loading ? 'Registrierung läuft...' : 'Registrieren'}
         </button>
-
-        <p className="login-link">
-          Bereits registriert? <span onClick={() => navigate('/login')}>Hier anmelden</span>
-        </p>
       </form>
+      
+      <div className="login-link">
+        Bereits registriert? <Link to="/login">Hier anmelden</Link>
+      </div>
     </div>
   );
 };

@@ -2,111 +2,110 @@
   max-width: 400px;
   margin: 2rem auto;
   padding: 2rem;
-  background: white;
+  background-color: white;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.register-form {
-  display: flex;
-  flex-direction: column;
-  gap: 2rem;
-}
-
-.register-form h2 {
+.register-container h2 {
   text-align: center;
   color: #333;
-  margin: 0;
-  font-size: 2rem;
-  font-weight: 500;
+  margin-bottom: 2rem;
 }
 
 .form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+  margin-bottom: 1.5rem;
 }
 
 .form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
   color: #555;
-  font-size: 1.1rem;
-  font-weight: normal;
+  font-weight: 500;
 }
 
 .input-group {
   position: relative;
-  background: white;
-  border: 1px solid #ddd;
-  border-radius: 6px;
   display: flex;
   align-items: center;
-  padding: 0.5rem;
+  background-color: #f8f9fa;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 0 12px;
+}
+
+.input-group svg,
+.input-group i {
+  color: #666;
+  margin-right: 12px;
+  min-width: 20px;
+  font-size: 1.1rem;
+}
+
+.input-group input {
+  width: 100%;
+  padding: 12px 0;
+  border: none;
+  background: transparent;
+  color: #333;
+  font-size: 1rem;
+}
+
+.input-group input:focus {
+  outline: none;
 }
 
 .input-group:focus-within {
   border-color: #4CAF50;
+  box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
 }
 
-.input-icon {
-  color: #666;
-  font-size: 1.2rem;
-  margin: 0 0.5rem;
-}
-
-.input-group input {
-  border: none;
-  outline: none;
-  padding: 0.5rem;
+.register-button {
   width: 100%;
-  font-size: 1rem;
-  background: transparent;
-}
-
-.input-group input::placeholder {
-  color: #999;
-}
-
-button {
-  background-color: #007bff;
+  padding: 12px;
+  background-color: #4CAF50;
   color: white;
   border: none;
-  border-radius: 6px;
-  padding: 1rem;
+  border-radius: 4px;
   font-size: 1rem;
+  font-weight: 500;
   cursor: pointer;
   transition: background-color 0.2s;
-  margin-top: 1rem;
 }
 
-button:hover {
-  background-color: #0056b3;
+.register-button:hover {
+  background-color: #45a049;
 }
 
-button:disabled {
+.register-button:disabled {
   background-color: #cccccc;
   cursor: not-allowed;
+}
+
+.error-message {
+  color: #dc3545;
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+}
+
+.success-message {
+  color: #28a745;
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
 }
 
 .login-link {
   text-align: center;
   margin-top: 1rem;
-  color: #666;
 }
 
-.login-link span {
-  color: #007bff;
-  cursor: pointer;
+.login-link a {
+  color: #4CAF50;
   text-decoration: none;
 }
 
-.login-link span:hover {
+.login-link a:hover {
   text-decoration: underline;
-}
-
-.error-message {
-  color: #dc3545;
-  font-size: 0.9rem;
-  margin-top: 0.5rem;
 }
 
 .verification-message {
