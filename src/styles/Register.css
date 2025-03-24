@@ -2,7 +2,7 @@
   max-width: 400px;
   margin: 2rem auto;
   padding: 2rem;
-  background-color: white;
+  background: white;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
@@ -10,7 +10,7 @@
 .register-container h2 {
   text-align: center;
   color: #333;
-  margin-bottom: 2.5rem;
+  margin-bottom: 2rem;
 }
 
 .register-form {
@@ -20,152 +20,156 @@
 }
 
 .form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+  margin-bottom: 1.5rem;
 }
 
 .form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
   color: #555;
-  font-size: 1rem;
+  font-weight: 500;
 }
 
-.input-container {
+.form-group input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+  transition: border-color 0.3s;
+}
+
+.form-group input:focus {
+  border-color: #4CAF50;
+  outline: none;
+}
+
+.input-with-icon {
   position: relative;
 }
 
-.icon-container {
-  position: absolute;
-  left: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #666;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.input-with-icon input {
+  padding-left: 2.5rem;
 }
 
-.input-icon {
+.input-with-icon .input-icon {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
   color: #666;
   font-size: 1.1rem;
 }
 
-.input-container input {
-  width: 100%;
-  padding: 0.75rem;
-  padding-left: 40px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 1rem;
-  outline: none;
-  transition: border-color 0.3s ease;
-}
-
-.input-container input:focus {
-  border-color: #2196F3;
-}
-
-.input-container input::placeholder {
-  color: #999;
-}
-
 .error-message {
   color: #d32f2f;
-  font-size: 0.9rem;
-  margin-top: 0.5rem;
+  margin-bottom: 1rem;
+  padding: 0.5rem;
+  background-color: #ffebee;
+  border-radius: 4px;
+  text-align: center;
 }
 
-.register-button {
+button {
   width: 100%;
   padding: 0.75rem;
-  background-color: #2196F3;
+  background-color: #4CAF50;
   color: white;
   border: none;
   border-radius: 4px;
   font-size: 1rem;
-  font-weight: 500;
   cursor: pointer;
-  transition: background-color 0.3s ease;
-  margin-top: 1rem;
+  transition: background-color 0.3s;
 }
 
-.register-button:hover {
-  background-color: #1976D2;
+button:hover {
+  background-color: #45a049;
 }
 
-.register-button:disabled {
-  background-color: #cccccc;
-  cursor: not-allowed;
-}
-
-.verification-message {
-  text-align: center;
-  padding: 2rem;
-}
-
-.verification-message h2 {
-  color: #2196F3;
-  margin-bottom: 1rem;
-}
-
-.verification-message p {
-  margin-bottom: 1rem;
-  color: #666;
-}
-
-.verification-actions {
-  display: flex;
-  gap: 1rem;
-  justify-content: center;
-  margin-top: 2rem;
-}
-
-.btn-secondary {
-  padding: 0.75rem 1.5rem;
-  background-color: #f5f5f5;
-  color: #333;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
-.btn-secondary:hover {
-  background-color: #e0e0e0;
-}
-
-.btn-primary {
-  padding: 0.75rem 1.5rem;
-  background-color: #2196F3;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
-.btn-primary:hover {
-  background-color: #1976D2;
-}
-
-.btn-primary:disabled,
-.btn-secondary:disabled {
+button:disabled {
   background-color: #cccccc;
   cursor: not-allowed;
 }
 
 .login-link {
   text-align: center;
-  margin-top: 1.5rem;
-  font-size: 0.9rem;
+  margin-top: 1rem;
   color: #666;
 }
 
-.login-link a {
-  color: #2196F3;
-  text-decoration: none;
+.login-link span {
+  color: #4CAF50;
+  cursor: pointer;
+  text-decoration: underline;
 }
 
-.login-link a:hover {
-  text-decoration: underline;
+.verification-message {
+  text-align: center;
+}
+
+.verification-message h2 {
+  color: #4CAF50;
+  margin-bottom: 1rem;
+}
+
+.verification-message p {
+  margin-bottom: 1.5rem;
+  color: #666;
+}
+
+.secondary-button {
+  background-color: #666;
+  margin-top: 1rem;
+}
+
+.secondary-button:hover {
+  background-color: #555;
+}
+
+.btn-primary {
+  background-color: #007bff;
+  color: white;
+  padding: 0.8rem;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.btn-primary:hover {
+  background-color: #0056b3;
+}
+
+.btn-primary:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  background-color: #6c757d;
+  color: white;
+  padding: 0.8rem;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin-right: 1rem;
+}
+
+.btn-secondary:hover {
+  background-color: #5a6268;
+}
+
+.btn-secondary:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.verification-actions {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 2rem;
 } 

@@ -3,7 +3,7 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import '../styles/Register.css';
-import { FaUserPlus, FaUser, FaEnvelope, FaLock, FaGraduationCap } from 'react-icons/fa';
+import { FaEnvelope, FaLock } from 'react-icons/fa';
 import config from '../config';
 
 const Register = () => {
@@ -109,144 +109,122 @@ const Register = () => {
 
   if (registrationComplete) {
     return (
-      <div className="register-container">
-        <div className="verification-message">
-          <h2>Registrierung erfolgreich!</h2>
-          <p>Wir haben eine E-Mail an <strong>{formData.email}</strong> gesendet.</p>
-          <p>Bitte klicke auf den Link in der E-Mail, um deine E-Mail-Adresse zu verifizieren.</p>
-          <p>Erst danach kannst du dich einloggen.</p>
-          
-          <div className="verification-actions">
-            <button 
-              onClick={handleResendVerification} 
-              className="btn-secondary"
-              disabled={loading}
-            >
-              {loading ? 'Wird gesendet...' : 'E-Mail erneut senden'}
-            </button>
-            
-            <button 
-              onClick={() => navigate('/login')} 
-              className="btn-primary"
-            >
-              Zum Login
-            </button>
-          </div>
-        </div>
+      <div className="verification-message">
+        <h2>Registrierung erfolgreich!</h2>
+        <p>
+          Bitte überprüfe deine E-Mails und klicke auf den Verifizierungslink.
+          Falls du keine E-Mail erhalten hast, kannst du sie erneut anfordern.
+        </p>
+        <button onClick={handleResendVerification} disabled={loading}>
+          {loading ? 'Sende...' : 'Verifizierungs-E-Mail erneut senden'}
+        </button>
+        <button onClick={() => navigate('/login')} className="secondary-button">
+          Zum Login
+        </button>
       </div>
     );
   }
 
   return (
     <div className="register-container">
-      <h2>Registrieren</h2>
-      <form onSubmit={handleSubmit} className="register-form">
-        <div className="form-group">
-          <label htmlFor="name">Name *</label>
-          <div className="input-container">
-            <div className="icon-container">
-              <FaUser className="input-icon" />
+      {!registrationComplete ? (
+        <>
+          <h2>Registrierung</h2>
+          <form onSubmit={handleSubmit}>
+            <div className="form-group">
+              <label>Name *</label>
+              <input
+                type="text"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                placeholder="Dein Name"
+                required
+              />
             </div>
-            <input
-              type="text"
-              id="name"
-              name="name"
-              placeholder="Dein Name"
-              value={formData.name}
-              onChange={handleChange}
-              required
-            />
-          </div>
-        </div>
 
-        <div className="form-group">
-          <label htmlFor="email">E-Mail *</label>
-          <div className="input-container">
-            <div className="icon-container">
-              <FaEnvelope className="input-icon" />
+            <div className="form-group">
+              <label>E-Mail *</label>
+              <div className="input-with-icon">
+                <FaEnvelope className="input-icon" />
+                <input
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  placeholder="deine@email.de"
+                  required
+                />
+              </div>
             </div>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              placeholder="deine@email.de"
-              value={formData.email}
-              onChange={handleChange}
-              required
-            />
-          </div>
-        </div>
 
-        <div className="form-group">
-          <label htmlFor="class">Klasse</label>
-          <div className="input-container">
-            <div className="icon-container">
-              <FaGraduationCap className="input-icon" />
+            <div className="form-group">
+              <label>Klasse</label>
+              <input
+                type="text"
+                name="class"
+                value={formData.class}
+                onChange={handleChange}
+                placeholder="10a oder LK Informatik"
+              />
             </div>
-            <input
-              type="text"
-              id="class"
-              name="class"
-              placeholder="10a oder LK Informatik"
-              value={formData.class}
-              onChange={handleChange}
-            />
-          </div>
-        </div>
 
-        <div className="form-group">
-          <label htmlFor="password">Passwort *</label>
-          <div className="input-container">
-            <div className="icon-container">
-              <FaLock className="input-icon" />
+            <div className="form-group">
+              <label>Passwort *</label>
+              <div className="input-with-icon">
+                <FaLock className="input-icon" />
+                <input
+                  type="password"
+                  name="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  placeholder="Passwort"
+                  required
+                />
+              </div>
             </div>
-            <input
-              type="password"
-              id="password"
-              name="password"
-              placeholder="Passwort"
-              value={formData.password}
-              onChange={handleChange}
-              required
-            />
-          </div>
-        </div>
 
-        <div className="form-group">
-          <label htmlFor="confirmPassword">Passwort bestätigen *</label>
-          <div className="input-container">
-            <div className="icon-container">
-              <FaLock className="input-icon" />
+            <div className="form-group">
+              <label>Passwort bestätigen *</label>
+              <div className="input-with-icon">
+                <FaLock className="input-icon" />
+                <input
+                  type="password"
+                  name="confirmPassword"
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  placeholder="Passwort wiederholen"
+                  required
+                />
+              </div>
             </div>
-            <input
-              type="password"
-              id="confirmPassword"
-              name="confirmPassword"
-              placeholder="Passwort wiederholen"
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              required
-            />
-          </div>
+
+            {error && <div className="error-message">{error}</div>}
+
+            <button type="submit" disabled={loading}>
+              {loading ? 'Registriere...' : 'Registrieren'}
+            </button>
+
+            <p className="login-link">
+              Bereits registriert? <span onClick={() => navigate('/login')}>Zum Login</span>
+            </p>
+          </form>
+        </>
+      ) : (
+        <div className="verification-message">
+          <h2>Registrierung erfolgreich!</h2>
+          <p>
+            Bitte überprüfe deine E-Mails und klicke auf den Verifizierungslink.
+            Falls du keine E-Mail erhalten hast, kannst du sie erneut anfordern.
+          </p>
+          <button onClick={handleResendVerification} disabled={loading}>
+            {loading ? 'Sende...' : 'Verifizierungs-E-Mail erneut senden'}
+          </button>
+          <button onClick={() => navigate('/login')} className="secondary-button">
+            Zum Login
+          </button>
         </div>
-
-        {error && <div className="error-message">{error}</div>}
-
-        <button type="submit" className="register-button" disabled={loading}>
-          {loading ? (
-            'Registrierung läuft...'
-          ) : (
-            <>
-              <FaUserPlus className="button-icon" />
-              Registrieren
-            </>
-          )}
-        </button>
-      </form>
-      
-      <div className="login-link">
-        Bereits registriert? <a href="/login">Hier anmelden</a>
-      </div>
+      )}
     </div>
   );
 };
