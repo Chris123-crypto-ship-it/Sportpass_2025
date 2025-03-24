@@ -10,13 +10,15 @@
 .register-form {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 2rem;
 }
 
 .register-form h2 {
   text-align: center;
   color: #333;
-  margin-bottom: 1.5rem;
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 500;
 }
 
 .form-group {
@@ -26,61 +28,58 @@
 }
 
 .form-group label {
-  font-weight: 500;
   color: #555;
-  font-size: 1rem;
+  font-size: 1.1rem;
+  font-weight: normal;
 }
 
 .input-group {
   position: relative;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  padding: 0.5rem;
+}
+
+.input-group:focus-within {
+  border-color: #4CAF50;
+}
+
+.input-icon {
+  color: #666;
+  font-size: 1.2rem;
+  margin: 0 0.5rem;
 }
 
 .input-group input {
-  width: 100%;
-  height: 45px;
-  padding: 0.75rem 1rem 0.75rem 2.5rem;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  font-size: 1rem;
-  transition: all 0.2s ease;
-  background-color: white;
-}
-
-.input-group input:focus {
+  border: none;
   outline: none;
-  border-color: #4CAF50;
-  box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.1);
+  padding: 0.5rem;
+  width: 100%;
+  font-size: 1rem;
+  background: transparent;
 }
 
 .input-group input::placeholder {
   color: #999;
 }
 
-.input-icon {
-  position: absolute;
-  left: 0.75rem;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #666;
-  font-size: 1.1rem;
-  pointer-events: none;
-}
-
 button {
-  width: 100%;
-  height: 45px;
-  background-color: #4CAF50;
+  background-color: #007bff;
   color: white;
   border: none;
   border-radius: 6px;
+  padding: 1rem;
   font-size: 1rem;
-  font-weight: 500;
   cursor: pointer;
-  transition: background-color 0.2s ease;
+  transition: background-color 0.2s;
+  margin-top: 1rem;
 }
 
 button:hover {
-  background-color: #45a049;
+  background-color: #0056b3;
 }
 
 button:disabled {
@@ -95,17 +94,17 @@ button:disabled {
 }
 
 .login-link span {
-  color: #4CAF50;
+  color: #007bff;
   cursor: pointer;
-  text-decoration: underline;
+  text-decoration: none;
 }
 
 .login-link span:hover {
-  color: #45a049;
+  text-decoration: underline;
 }
 
 .error-message {
-  color: #d32f2f;
+  color: #dc3545;
   font-size: 0.9rem;
   margin-top: 0.5rem;
 }
