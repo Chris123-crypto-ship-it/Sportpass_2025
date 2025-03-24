@@ -19,15 +19,18 @@ const VerifyEmail = () => {
       }
 
       try {
-        const response = await fetch(`${config.API_URL}/api/verify-email`, {
-          method: 'POST',
+        console.log('Sende Verifizierungsanfrage an:', `${config.API_URL}/verify-email?code=${code}`);
+        const response = await fetch(`${config.API_URL}/verify-email?code=${code}`, {
+          method: 'GET',
           headers: {
             'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ code }),
+            'Accept': 'application/json'
+          }
         });
 
+        console.log('Server Antwort Status:', response.status);
         const data = await response.json();
+        console.log('Server Antwort Daten:', data);
 
         if (response.ok) {
           setStatus('success');
@@ -37,9 +40,10 @@ const VerifyEmail = () => {
           }, 3000);
         } else {
           setStatus('error');
-          setError(data.message || 'Verifizierung fehlgeschlagen');
+          setError(data.error || 'Verifizierung fehlgeschlagen');
         }
       } catch (error) {
+        console.error('Verifizierungsfehler:', error);
         setStatus('error');
         setError('Ein Fehler ist aufgetreten. Bitte versuche es später erneut.');
       }
