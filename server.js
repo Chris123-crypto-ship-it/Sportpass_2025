@@ -6,7 +6,6 @@ const jwt = require('jsonwebtoken');
 const cors = require('cors');
 const crypto = require('crypto');
 const nodemailer = require('nodemailer');
-const mysql = require('mysql2/promise');
 
 const app = express();
 
@@ -1428,8 +1427,13 @@ app.post('/forgot-password', async (req, res) => {
     const { email } = req.body;
 
     // Überprüfen, ob der Benutzer existiert
-    const user = await db.query('SELECT * FROM users WHERE email = ?', [email]);
-    if (user.length === 0) {
+    const { data: user, error: userError } = await supabase
+      .from('users')
+      .select('*')
+      .eq('email', email)
+      .single();
+
+    if (userError || !user) {
       return res.status(404).json({ error: 'Benutzer mit dieser E-Mail-Adresse nicht gefunden.' });
     }
 
@@ -1438,10 +1442,18 @@ app.post('/forgot-password', async (req, res) => {
     const resetTokenExpiry = new Date(Date.now() + 3600000); // 1 Stunde gültig
 
     // Speichere Token in der Datenbank
-    await db.query(
-      'UPDATE users SET reset_token = ?, reset_token_expiry = ? WHERE email = ?',
-      [resetToken, resetTokenExpiry, email]
-    );
+    const { error: updateError } = await supabase
+      .from('users')
+      .update({ 
+        reset_token: resetToken, 
+        reset_token_expiry: resetTokenExpiry.toISOString() 
+      })
+      .eq('email', email);
+
+    if (updateError) {
+      console.error('Fehler beim Speichern des Reset-Tokens:', updateError);
+      throw updateError;
+    }
 
     // Link zum Zurücksetzen des Passworts senden
     const frontendUrl = process.env.NODE_ENV === 'production' 
@@ -1488,12 +1500,18 @@ app.post('/reset-password', async (req, res) => {
     const { token, password } = req.body;
 
     // Überprüfen, ob der Token existiert und noch gültig ist
-    const users = await db.query(
-      'SELECT * FROM users WHERE reset_token = ? AND reset_token_expiry > ?',
-      [token, new Date()]
-    );
+    const { data: users, error: userError } = await supabase
+      .from('users')
+      .select('*')
+      .eq('reset_token', token)
+      .gt('reset_token_expiry', new Date().toISOString());
 
-    if (users.length === 0) {
+    if (userError) {
+      console.error('Fehler beim Suchen des Tokens:', userError);
+      throw userError;
+    }
+
+    if (!users || users.length === 0) {
       return res.status(400).json({ error: 'Ungültiger oder abgelaufener Token.' });
     }
 
@@ -1501,10 +1519,19 @@ app.post('/reset-password', async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // Passwort aktualisieren und Token löschen
-    await db.query(
-      'UPDATE users SET password = ?, reset_token = NULL, reset_token_expiry = NULL WHERE reset_token = ?',
-      [hashedPassword, token]
-    );
+    const { error: updateError } = await supabase
+      .from('users')
+      .update({ 
+        password: hashedPassword,
+        reset_token: null,
+        reset_token_expiry: null
+      })
+      .eq('reset_token', token);
+
+    if (updateError) {
+      console.error('Fehler beim Aktualisieren des Passworts:', updateError);
+      throw updateError;
+    }
 
     res.json({ success: true, message: 'Passwort erfolgreich zurückgesetzt.' });
   } catch (error) {
@@ -1513,36 +1540,34 @@ app.post('/reset-password', async (req, res) => {
   }
 });
 
-// Datenbanktabellen vorbereiten
-async function setupDatabase() {
+// Supabase-Tabelle prüfen und aktualisieren
+app.get('/api/update-schema', authenticateToken, isAdmin, async (req, res) => {
   try {
-    // Users-Tabelle
-    await db.query(`
-      CREATE TABLE IF NOT EXISTS users (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        name VARCHAR(255) NOT NULL,
-        email VARCHAR(255) NOT NULL UNIQUE,
-        password VARCHAR(255) NOT NULL,
-        class VARCHAR(255),
-        points INT DEFAULT 0,
-        role ENUM('user', 'admin') DEFAULT 'user',
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        verified BOOLEAN DEFAULT false,
-        verification_code VARCHAR(255),
-        verification_expiry TIMESTAMP,
-        reset_token VARCHAR(255),
-        reset_token_expiry TIMESTAMP
-      )
-    `);
+    // Prüfen, ob die reset_token und reset_token_expiry Spalten existieren
+    // Hier können wir nicht direkt die Spaltenstruktur abfragen, daher führen wir
+    // einfach ein Update durch und betrachten das Ergebnis
+
+    // Füge die Spalten hinzu, falls sie nicht existieren
+    // Supabase unterstützt keine direkten DDL-Operationen über die API
+    // Daher sollte diese Änderung in der Supabase UI oder mit SQL-Befehlen
+    // über die Supabase SQL Editor durchgeführt werden
+
+    res.json({ 
+      message: "Bitte prüfe die Supabase-Tabelle 'users' und füge folgende Spalten hinzu, falls sie fehlen:",
+      columns: [
+        "reset_token (text)",
+        "reset_token_expiry (timestamptz)"
+      ],
+      info: "Diese Spalten müssen manuell über die Supabase UI oder SQL Editor hinzugefügt werden."
+    });
   } catch (error) {
-    console.error('Fehler beim Einrichten der Datenbank:', error);
+    console.error('Fehler bei der Schemaaktualisierung:', error);
+    res.status(500).json({ error: 'Interner Serverfehler' });
   }
-}
+});
 
 // 🔹 Server starten
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, async () => {
   console.log(`Server läuft auf Port ${PORT}`);
-  await setupDatabase();
-  console.log('Datenbank eingerichtet');
 });
