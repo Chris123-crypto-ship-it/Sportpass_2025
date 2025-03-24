@@ -3,7 +3,7 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import '../styles/Register.css';
-import { FaUserPlus, FaUser, FaEnvelope, FaLock, FaGraduationCap } from 'react-icons/fa';
+import { FaUser, FaEnvelope, FaLock, FaGraduationCap } from 'react-icons/fa';
 import config from '../config';
 
 const Register = () => {
@@ -139,78 +139,75 @@ const Register = () => {
 
   return (
     <div className="register-container">
-      <h2>Registrieren</h2>
       <form onSubmit={handleSubmit} className="register-form">
+        <h2>Registrierung</h2>
+        
         <div className="form-group">
-          <label htmlFor="name">Name *</label>
+          <label>Name *</label>
           <div className="input-with-icon">
             <FaUser className="input-icon" />
             <input
               type="text"
-              id="name"
               name="name"
               value={formData.name}
               onChange={handleChange}
-              placeholder="Dein Name"
+              placeholder="Name eingeben"
               required
             />
           </div>
         </div>
-        
+
         <div className="form-group">
-          <label htmlFor="email">E-Mail *</label>
+          <label>E-Mail *</label>
           <div className="input-with-icon">
             <FaEnvelope className="input-icon" />
             <input
               type="email"
-              id="email"
               name="email"
               value={formData.email}
               onChange={handleChange}
-              placeholder="deine@email.de"
+              placeholder="E-Mail eingeben"
               required
             />
           </div>
         </div>
-        
+
         <div className="form-group">
-          <label htmlFor="class">Klasse</label>
+          <label>Klasse *</label>
           <div className="input-with-icon">
             <FaGraduationCap className="input-icon" />
             <input
               type="text"
-              id="class"
               name="class"
               value={formData.class}
               onChange={handleChange}
-              placeholder="z.B. 10a oder LK Informatik"
-            />
-          </div>
-        </div>
-        
-        <div className="form-group">
-          <label htmlFor="password">Passwort *</label>
-          <div className="input-with-icon">
-            <FaLock className="input-icon" />
-            <input
-              type="password"
-              id="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              placeholder="Passwort"
+              placeholder="Klasse eingeben (z.B. 10a)"
               required
             />
           </div>
         </div>
-        
+
         <div className="form-group">
-          <label htmlFor="confirmPassword">Passwort bestätigen *</label>
+          <label>Passwort *</label>
           <div className="input-with-icon">
             <FaLock className="input-icon" />
             <input
               type="password"
-              id="confirmPassword"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              placeholder="Passwort eingeben"
+              required
+            />
+          </div>
+        </div>
+
+        <div className="form-group">
+          <label>Passwort bestätigen *</label>
+          <div className="input-with-icon">
+            <FaLock className="input-icon" />
+            <input
+              type="password"
               name="confirmPassword"
               value={formData.confirmPassword}
               onChange={handleChange}
@@ -219,17 +216,17 @@ const Register = () => {
             />
           </div>
         </div>
-        
+
         {error && <div className="error-message">{error}</div>}
         
-        <button type="submit" className="btn-primary" disabled={loading}>
-          {loading ? 'Registrierung läuft...' : 'Registrieren'}
+        <button type="submit" disabled={loading}>
+          {loading ? 'Registriere...' : 'Registrieren'}
         </button>
+
+        <p className="login-link">
+          Bereits registriert? <span onClick={() => navigate('/login')}>Hier anmelden</span>
+        </p>
       </form>
-      
-      <div className="login-link">
-        Bereits registriert? <a href="/login">Hier anmelden</a>
-      </div>
     </div>
   );
 };
