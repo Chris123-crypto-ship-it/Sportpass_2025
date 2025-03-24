@@ -143,87 +143,104 @@ const Register = () => {
       <form onSubmit={handleSubmit} className="register-form">
         <div className="form-group">
           <label htmlFor="name">Name *</label>
-          <div className="input-with-icon">
-            <FaUser className="input-icon" />
+          <div className="input-container">
+            <div className="icon-container">
+              <FaUser className="input-icon" />
+            </div>
             <input
               type="text"
               id="name"
               name="name"
+              placeholder="Dein Name"
               value={formData.name}
               onChange={handleChange}
-              placeholder="Dein Name"
               required
             />
           </div>
         </div>
-        
+
         <div className="form-group">
           <label htmlFor="email">E-Mail *</label>
-          <div className="input-with-icon">
-            <FaEnvelope className="input-icon" />
+          <div className="input-container">
+            <div className="icon-container">
+              <FaEnvelope className="input-icon" />
+            </div>
             <input
               type="email"
               id="email"
               name="email"
+              placeholder="deine@email.de"
               value={formData.email}
               onChange={handleChange}
-              placeholder="deine@email.de"
               required
             />
           </div>
         </div>
-        
+
         <div className="form-group">
           <label htmlFor="class">Klasse</label>
-          <div className="input-with-icon">
-            <FaGraduationCap className="input-icon" />
+          <div className="input-container">
+            <div className="icon-container">
+              <FaGraduationCap className="input-icon" />
+            </div>
             <input
               type="text"
               id="class"
               name="class"
+              placeholder="10a oder LK Informatik"
               value={formData.class}
               onChange={handleChange}
-              placeholder="z.B. 10a oder LK Informatik"
             />
           </div>
         </div>
-        
+
         <div className="form-group">
           <label htmlFor="password">Passwort *</label>
-          <div className="input-with-icon">
-            <FaLock className="input-icon" />
+          <div className="input-container">
+            <div className="icon-container">
+              <FaLock className="input-icon" />
+            </div>
             <input
               type="password"
               id="password"
               name="password"
+              placeholder="Passwort"
               value={formData.password}
               onChange={handleChange}
-              placeholder="Passwort"
               required
             />
           </div>
         </div>
-        
+
         <div className="form-group">
           <label htmlFor="confirmPassword">Passwort bestätigen *</label>
-          <div className="input-with-icon">
-            <FaLock className="input-icon" />
+          <div className="input-container">
+            <div className="icon-container">
+              <FaLock className="input-icon" />
+            </div>
             <input
               type="password"
               id="confirmPassword"
               name="confirmPassword"
+              placeholder="Passwort wiederholen"
               value={formData.confirmPassword}
               onChange={handleChange}
-              placeholder="Passwort wiederholen"
               required
             />
           </div>
         </div>
-        
+
         {error && <div className="error-message">{error}</div>}
-        
-        <button type="submit" className="btn-primary" disabled={loading}>
-          {loading ? 'Registrierung läuft...' : 'Registrieren'}
+
+        <button type="submit" className="register-button" disabled={loading}>
+          {loading ? (
+            'Registrierung läuft...'
+          ) : (
+            <>
+              <FaUserPlus className="button-icon" />
+              Registrieren
+            </>
+          )}
         </button>
       </form>
       
