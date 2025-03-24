@@ -61,6 +61,46 @@ const transporter = nodemailer.createTransport({
   }
 });
 
+// Funktion zum Senden der Verifizierungs-E-Mail
+const sendVerificationEmail = async (email, verificationCode) => {
+  const frontendUrl = process.env.NODE_ENV === 'production' 
+    ? 'https://sportpass-2025.vercel.app' 
+    : 'http://localhost:3000';
+    
+  const verificationLink = `${frontendUrl}/verify-email?code=${verificationCode}`;
+  
+  const mailOptions = {
+    from: process.env.EMAIL_USER,
+    to: email,
+    subject: 'E-Mail Verifizierung - Sportpass',
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2 style="color: #333;">Willkommen bei Sportpass!</h2>
+        <p>Vielen Dank für deine Registrierung. Bitte verifiziere deine E-Mail-Adresse, indem du auf den folgenden Link klickst:</p>
+        <p style="margin: 20px 0;">
+          <a href="${verificationLink}" 
+             style="background-color: #4CAF50; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">
+            E-Mail verifizieren
+          </a>
+        </p>
+        <p>Falls der Button nicht funktioniert, kopiere bitte diesen Link in deinen Browser:</p>
+        <p style="word-break: break-all; color: #666;">${verificationLink}</p>
+        <p>Dieser Link ist 24 Stunden gültig.</p>
+        <p>Falls du dich nicht registriert hast, ignoriere diese E-Mail bitte.</p>
+      </div>
+    `
+  };
+
+  try {
+    await transporter.sendMail(mailOptions);
+    console.log('Verifizierungs-E-Mail gesendet an:', email);
+    return true;
+  } catch (error) {
+    console.error('Fehler beim Senden der Verifizierungs-E-Mail:', error);
+    throw error;
+  }
+};
+
 // 🔹 Registrierung
 app.post("/register", async (req, res) => {
   try {
@@ -121,21 +161,7 @@ app.post("/register", async (req, res) => {
     }
 
     // Verifizierungs-E-Mail senden
-    const verificationLink = `http://localhost:3002/verify-email?code=${verificationCode}`;
-    const mailOptions = {
-      from: process.env.EMAIL_USER,
-      to: email,
-      subject: 'E-Mail-Verifizierung für SportPass',
-      html: `
-        <h1>Willkommen bei SportPass!</h1>
-        <p>Bitte klicken Sie auf den folgenden Link, um Ihre E-Mail-Adresse zu verifizieren:</p>
-        <a href="${verificationLink}">${verificationLink}</a>
-        <p>Dieser Link ist 24 Stunden gültig.</p>
-        <p>Mit freundlichen Grüßen,<br>Ihr SportPass Team</p>
-      `
-    };
-    
-    await transporter.sendMail(mailOptions);
+    await sendVerificationEmail(email, verificationCode);
     
     console.log("Benutzer erfolgreich registriert und Verifizierungs-E-Mail gesendet");
     return res.status(201).json({ 
@@ -1385,21 +1411,7 @@ app.post('/resend-verification', async (req, res) => {
     }
 
     // Neue Verifizierungs-E-Mail senden
-    const verificationLink = `http://localhost:3002/verify-email?code=${verificationCode}`;
-    const mailOptions = {
-      from: process.env.EMAIL_USER,
-      to: email,
-      subject: 'E-Mail-Verifizierung für SportPass',
-      html: `
-        <h1>Willkommen bei SportPass!</h1>
-        <p>Bitte klicken Sie auf den folgenden Link, um Ihre E-Mail-Adresse zu verifizieren:</p>
-        <a href="${verificationLink}">${verificationLink}</a>
-        <p>Dieser Link ist 24 Stunden gültig.</p>
-        <p>Mit freundlichen Grüßen,<br>Ihr SportPass Team</p>
-      `
-    };
-
-    await transporter.sendMail(mailOptions);
+    await sendVerificationEmail(email, verificationCode);
 
     res.json({ message: "Verifizierungs-E-Mail wurde erneut gesendet" });
 

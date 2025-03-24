@@ -1,94 +1,76 @@
 import React, { useEffect, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import { toast } from 'react-toastify';
-import '../styles/VerifyEmail.css';
-import { FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import config from '../config';
 
 const VerifyEmail = () => {
-  const [verificationStatus, setVerificationStatus] = useState('verifying');
-  const [error, setError] = useState('');
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const location = useLocation();
+  const [status, setStatus] = useState('verifying');
+  const [error, setError] = useState('');
 
   useEffect(() => {
     const verifyEmail = async () => {
+      const code = searchParams.get('code');
+      
+      if (!code) {
+        setStatus('error');
+        setError('Kein Verifizierungscode gefunden');
+        return;
+      }
+
       try {
-        const searchParams = new URLSearchParams(location.search);
-        const code = searchParams.get('code');
+        const response = await fetch(`${config.API_URL}/api/verify-email`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ code }),
+        });
 
-        if (!code) {
-          setVerificationStatus('error');
-          setError('Kein Verifizierungscode gefunden');
-          return;
-        }
+        const data = await response.json();
 
-        const response = await axios.get(`${config.API_URL}/verify-email?code=${code}`);
-        console.log('Verifizierungsantwort:', response.data);
-
-        if (response.data && response.data.message === "E-Mail erfolgreich verifiziert") {
-          setVerificationStatus('success');
-          toast.success('E-Mail erfolgreich verifiziert!');
-          // Kurz warten und dann zum Login weiterleiten
+        if (response.ok) {
+          setStatus('success');
+          // Nach 3 Sekunden zur Login-Seite weiterleiten
           setTimeout(() => {
             navigate('/login');
-          }, 2000);
+          }, 3000);
         } else {
-          throw new Error('Unerwartete Serverantwort');
+          setStatus('error');
+          setError(data.message || 'Verifizierung fehlgeschlagen');
         }
       } catch (error) {
-        console.error('Verifizierungsfehler:', error.response || error);
-        setVerificationStatus('error');
-        if (error.response?.data?.error) {
-          setError(error.response.data.error);
-        } else {
-          setError('Ein Fehler ist bei der Verifizierung aufgetreten. Bitte versuchen Sie es erneut.');
-        }
-        toast.error('Fehler bei der Verifizierung');
+        setStatus('error');
+        setError('Ein Fehler ist aufgetreten. Bitte versuche es später erneut.');
       }
     };
 
     verifyEmail();
-  }, [location, navigate]);
+  }, [searchParams, navigate]);
 
   return (
     <div className="verify-email-container">
-      {verificationStatus === 'verifying' && (
-        <div className="verifying-message">
-          <div className="spinner"></div>
-          <h2>Verifizierung läuft...</h2>
-          <p>Bitte warten Sie einen Moment.</p>
+      {status === 'verifying' && (
+        <div className="verifying">
+          <h2>E-Mail wird verifiziert...</h2>
+          <div className="loading-spinner"></div>
         </div>
       )}
 
-      {verificationStatus === 'success' && (
-        <div className="success-message">
-          <FaCheckCircle className="success-icon" />
+      {status === 'success' && (
+        <div className="success">
           <h2>E-Mail erfolgreich verifiziert!</h2>
-          <p>Sie werden automatisch zum Login weitergeleitet...</p>
+          <p>Du wirst in wenigen Sekunden zur Login-Seite weitergeleitet.</p>
         </div>
       )}
 
-      {verificationStatus === 'error' && (
-        <div className="error-message">
-          <FaTimesCircle className="error-icon" />
+      {status === 'error' && (
+        <div className="error">
           <h2>Verifizierung fehlgeschlagen</h2>
           <p>{error}</p>
-          <div className="error-actions">
-            <button 
-              onClick={() => window.location.reload()} 
-              className="btn-secondary"
-            >
-              Erneut versuchen
-            </button>
-            <button 
-              onClick={() => navigate('/login')} 
-              className="btn-primary"
-            >
-              Zum Login
-            </button>
-          </div>
+          <button onClick={() => navigate('/login')}>
+            Zurück zur Login-Seite
+          </button>
         </div>
       )}
     </div>
