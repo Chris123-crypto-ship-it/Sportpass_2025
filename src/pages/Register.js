@@ -3,7 +3,7 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import '../styles/Register.css';
-import { FaEnvelope, FaLock } from 'react-icons/fa';
+import { FaEnvelope, FaLock, FaUser, FaGraduationCap } from 'react-icons/fa';
 import config from '../config';
 
 const Register = () => {
@@ -112,6 +112,9 @@ const Register = () => {
       <div className="verification-message">
         <h2>Registrierung erfolgreich!</h2>
         <p>
+          Wir haben eine Bestätigungs-E-Mail an <strong>{formData.email}</strong> gesendet.
+        </p>
+        <p>
           Bitte überprüfe deine E-Mails und klicke auf den Verifizierungslink.
           Falls du keine E-Mail erhalten hast, kannst du sie erneut anfordern.
         </p>
@@ -133,14 +136,17 @@ const Register = () => {
           <form onSubmit={handleSubmit}>
             <div className="form-group">
               <label>Name *</label>
-              <input
-                type="text"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                placeholder="Dein Name"
-                required
-              />
+              <div className="input-with-icon">
+                <FaUser className="input-icon" />
+                <input
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  placeholder="Dein Name"
+                  required
+                />
+              </div>
             </div>
 
             <div className="form-group">
@@ -160,13 +166,16 @@ const Register = () => {
 
             <div className="form-group">
               <label>Klasse</label>
-              <input
-                type="text"
-                name="class"
-                value={formData.class}
-                onChange={handleChange}
-                placeholder="10a oder LK Informatik"
-              />
+              <div className="input-with-icon">
+                <FaGraduationCap className="input-icon" />
+                <input
+                  type="text"
+                  name="class"
+                  value={formData.class}
+                  onChange={handleChange}
+                  placeholder="10a"
+                />
+              </div>
             </div>
 
             <div className="form-group">
@@ -213,6 +222,9 @@ const Register = () => {
       ) : (
         <div className="verification-message">
           <h2>Registrierung erfolgreich!</h2>
+          <p>
+            Wir haben eine Bestätigungs-E-Mail an <strong>{formData.email}</strong> gesendet.
+          </p>
           <p>
             Bitte überprüfe deine E-Mails und klicke auf den Verifizierungslink.
             Falls du keine E-Mail erhalten hast, kannst du sie erneut anfordern.

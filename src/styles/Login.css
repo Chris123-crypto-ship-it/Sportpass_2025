@@ -118,4 +118,20 @@
 
 .register-link a:hover {
   text-decoration: underline;
+}
+
+.forgot-password-link {
+  text-align: center;
+  margin-top: 1rem;
+  font-size: 0.9rem;
+}
+
+.forgot-password-link span {
+  color: #4CAF50;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.forgot-password-link span:hover {
+  color: #45a049;
 } 

@@ -136,6 +136,10 @@ const Login = () => {
         <button type="submit" className="btn-primary" disabled={loading}>
           {loading ? 'Anmeldung läuft...' : 'Anmelden'}
         </button>
+        
+        <div className="forgot-password-link">
+          <span onClick={() => navigate('/forgot-password')}>Passwort vergessen?</span>
+        </div>
       </form>
 
       <div className="register-link">
