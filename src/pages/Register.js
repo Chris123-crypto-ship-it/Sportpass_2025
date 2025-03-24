@@ -3,7 +3,7 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import '../styles/Register.css';
-import { FaEnvelope, FaLock, FaUser, FaGraduationCap } from 'react-icons/fa';
+import { FaEnvelope, FaLock } from 'react-icons/fa';
 import config from '../config';
 
 const Register = () => {
@@ -136,17 +136,14 @@ const Register = () => {
           <form onSubmit={handleSubmit}>
             <div className="form-group">
               <label>Name *</label>
-              <div className="input-with-icon">
-                <FaUser className="input-icon" />
-                <input
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  placeholder="Dein Name"
-                  required
-                />
-              </div>
+              <input
+                type="text"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                placeholder="Dein Name"
+                required
+              />
             </div>
 
             <div className="form-group">
@@ -166,16 +163,13 @@ const Register = () => {
 
             <div className="form-group">
               <label>Klasse</label>
-              <div className="input-with-icon">
-                <FaGraduationCap className="input-icon" />
-                <input
-                  type="text"
-                  name="class"
-                  value={formData.class}
-                  onChange={handleChange}
-                  placeholder="10a"
-                />
-              </div>
+              <input
+                type="text"
+                name="class"
+                value={formData.class}
+                onChange={handleChange}
+                placeholder="10a"
+              />
             </div>
 
             <div className="form-group">
@@ -210,7 +204,7 @@ const Register = () => {
 
             {error && <div className="error-message">{error}</div>}
 
-            <button type="submit" disabled={loading} className="primary-button">
+            <button type="submit" disabled={loading}>
               {loading ? 'Registriere...' : 'Registrieren'}
             </button>
 

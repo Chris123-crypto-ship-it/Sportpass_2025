@@ -32,27 +32,24 @@
 
 .input-with-icon {
   position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-icon {
+  position: absolute;
+  left: 12px;
+  color: #666;
 }
 
 .input-with-icon input {
   width: 100%;
-  padding: 0.75rem;
+  padding: 0.8rem;
   padding-left: 2.5rem;
   border: 1px solid #ddd;
   border-radius: 4px;
   font-size: 1rem;
-  transition: border-color 0.3s;
-}
-
-.input-with-icon .input-icon {
-  position: absolute;
-  left: 0.75rem;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #666;
-  font-size: 1.1rem;
-  z-index: 1;
-  pointer-events: none;
+  transition: border-color 0.3s ease;
 }
 
 .input-with-icon input:focus {
@@ -69,39 +66,41 @@
   gap: 0.5rem;
 }
 
-.btn-primary, button {
-  width: 100%;
-  padding: 0.75rem;
-  background-color: #1976d2;
+.btn-primary {
+  background-color: #007bff;
   color: white;
+  padding: 0.8rem;
   border: none;
   border-radius: 4px;
   font-size: 1rem;
   cursor: pointer;
-  transition: background-color 0.3s;
+  transition: background-color 0.3s ease;
 }
 
-.btn-primary:hover, button:hover {
-  background-color: #0d47a1;
+.btn-primary:hover {
+  background-color: #0056b3;
 }
 
-.btn-primary:disabled, button:disabled {
-  background-color: #cccccc;
+.btn-primary:disabled {
+  background-color: #ccc;
   cursor: not-allowed;
 }
 
 .btn-link {
+  color: #0066cc;
+  text-decoration: underline;
   background: none;
   border: none;
-  color: #1976d2;
-  text-decoration: underline;
-  cursor: pointer;
-  padding: 0;
-  font-size: 0.9rem;
+  margin: 0;
+  padding: 5px;
+  display: block;
+  width: auto;
+  text-align: center;
 }
 
 .btn-link:hover {
-  color: #0d47a1;
+  color: #004d99;
+  background: none;
 }
 
 .btn-link:disabled {
@@ -116,12 +115,12 @@
 }
 
 .register-link a {
-  color: #1976d2;
-  text-decoration: none;
+  color: #0066cc;
+  text-decoration: underline;
 }
 
 .register-link a:hover {
-  text-decoration: underline;
+  color: #004d99;
 }
 
 .forgot-password-link {
@@ -130,20 +129,12 @@
   font-size: 0.9rem;
 }
 
-.forgot-password-link span,
-.login-link span,
-.login-link a,
-.register-link a,
-.btn-link {
-  color: #1976d2;
+.forgot-password-link span {
+  color: #0066cc;
   cursor: pointer;
   text-decoration: underline;
 }
 
-.forgot-password-link span:hover,
-.login-link span:hover,
-.login-link a:hover,
-.register-link a:hover,
-.btn-link:hover {
-  color: #0d47a1;
+.forgot-password-link span:hover {
+  color: #004d99;
 } 
