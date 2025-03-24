@@ -29,6 +29,12 @@
   background: #cd7f32; /* Bronze */
 }
 
+.leaderboard-container {
+  max-width: 1200px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+
 .top-three-container {
   display: flex;
   justify-content: center;
@@ -90,4 +96,88 @@
 .position-card .points {
   font-size: 1.2rem;
   opacity: 0.9;
+}
+
+.leaderboard-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.leaderboard-table th,
+.leaderboard-table td {
+  padding: 1rem;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+
+.leaderboard-table th {
+  background-color: #f8f9fa;
+  font-weight: 600;
+  color: #333;
+}
+
+.leaderboard-table tr:last-child td {
+  border-bottom: none;
+}
+
+.leaderboard-table tr:hover {
+  background-color: #f8f9fa;
+}
+
+.rank-cell {
+  width: 80px;
+  text-align: center;
+}
+
+.name-cell {
+  min-width: 200px;
+}
+
+.points-cell {
+  width: 120px;
+  text-align: right;
+  color: #28a745;
+  font-weight: 600;
+}
+
+.achievements-cell {
+  width: 150px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding-right: 2rem;
+}
+
+.achievement-icon {
+  font-size: 1.4rem;
+}
+
+.top-10-star {
+  color: #ffd700;
+  font-size: 1.4rem;
+}
+
+.current-user-row {
+  background-color: #e8f5e9 !important;
+}
+
+.table-container {
+  margin-top: 2rem;
+  overflow-x: auto;
+}
+
+@media (max-width: 768px) {
+  .top-three-container {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .position-card {
+    width: 100%;
+    max-width: 300px;
+  }
 }

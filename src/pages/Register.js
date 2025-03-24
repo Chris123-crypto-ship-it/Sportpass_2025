@@ -144,7 +144,7 @@ const Register = () => {
         
         <div className="form-group">
           <label>Name *</label>
-          <div className="input-with-icon">
+          <div className="input-group">
             <FaUser className="input-icon" />
             <input
               type="text"
@@ -159,7 +159,7 @@ const Register = () => {
 
         <div className="form-group">
           <label>E-Mail *</label>
-          <div className="input-with-icon">
+          <div className="input-group">
             <FaEnvelope className="input-icon" />
             <input
               type="email"
@@ -174,7 +174,7 @@ const Register = () => {
 
         <div className="form-group">
           <label>Klasse *</label>
-          <div className="input-with-icon">
+          <div className="input-group">
             <FaGraduationCap className="input-icon" />
             <input
               type="text"
@@ -189,7 +189,7 @@ const Register = () => {
 
         <div className="form-group">
           <label>Passwort *</label>
-          <div className="input-with-icon">
+          <div className="input-group">
             <FaLock className="input-icon" />
             <input
               type="password"
@@ -204,7 +204,7 @@ const Register = () => {
 
         <div className="form-group">
           <label>Passwort bestätigen *</label>
-          <div className="input-with-icon">
+          <div className="input-group">
             <FaLock className="input-icon" />
             <input
               type="password"
