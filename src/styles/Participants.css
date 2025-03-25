@@ -105,12 +105,12 @@
 
 .participants-table th:nth-child(2), /* Email */
 .participants-table td:nth-child(2) {
-  width: 18%;
+  width: 20%;
 }
 
 .participants-table th:nth-child(3), /* Klasse */
 .participants-table td:nth-child(3) {
-  width: 5%;
+  width: 7%;
 }
 
 .participants-table th:nth-child(4), /* Punkte */
@@ -121,16 +121,13 @@
 
 .participants-table th:nth-child(5), /* Status */
 .participants-table td:nth-child(5) {
-  width: 10%;
+  width: 12%;
   white-space: nowrap;
 }
 
 .participants-table th:nth-child(6), /* Aktionen */
 .participants-table td:nth-child(6) {
-  width: 50%;
-  min-width: 320px;
-  text-align: right;
-  padding-right: 20px;
+  width: 44%;
 }
 
 @media (min-width: 1200px) {
@@ -201,19 +198,16 @@
 
 /* Buttons in der Aktionsspalte */
 .action-buttons {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  width: 100%;
-  min-width: 300px;
+  display: block;
+  text-align: right;
+  padding-right: 20px;
 }
 
 .button-group {
-  display: flex;
-  gap: 12px;
+  display: inline-flex;
+  gap: 8px;
   flex-wrap: nowrap;
   justify-content: flex-end;
-  width: 100%;
 }
 
 .edit-button,
@@ -232,9 +226,6 @@
   height: 32px;
   white-space: nowrap;
   min-width: 90px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
 }
 
 .edit-button {

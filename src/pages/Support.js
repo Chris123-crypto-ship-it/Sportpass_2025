@@ -20,7 +20,7 @@ const Support = () => {
           <h2>Hilfreiche Informationen</h2>
           <p>Um Ihnen schneller helfen zu können, geben Sie bitte folgende Informationen an:</p>
           <ul>
-            <li>Ihr Benutzername</li>
+            <li>Ihre E-Mail Adresse und ihren Benutzernamen</li>
             <li>Eine detaillierte Beschreibung des Problems</li>
             <li>Screenshots (falls möglich)</li>
             <li>Welchen Browser und welches Gerät Sie verwenden</li>
