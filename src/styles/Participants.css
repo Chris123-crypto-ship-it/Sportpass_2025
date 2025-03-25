@@ -2,93 +2,99 @@
   padding: 2rem;
   max-width: 1200px;
   margin: 0 auto;
+  background-color: #f9f9f9;
+  border-radius: 12px;
+  box-shadow: 0 2px 15px rgba(0,0,0,0.05);
 }
 
 .participants-container h1 {
   color: #333;
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
   text-align: center;
+  font-size: 1.8rem;
 }
 
 .filter-controls {
-  display: flex;
+  display: grid;
+  grid-template-columns: 3fr 2fr 1fr;
   gap: 1rem;
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
+  background-color: white;
+  padding: 16px;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
   align-items: center;
-}
-
-.filter-group {
-  flex: 1;
 }
 
 .filter-group input,
 .filter-group select {
   width: 100%;
-  padding: 0.5rem;
+  padding: 10px 12px;
   border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 1rem;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
 }
 
 .refresh-button {
-  padding: 0.5rem 1rem;
+  padding: 10px 16px;
   background-color: #4CAF50;
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: 6px;
   cursor: pointer;
-  transition: background-color 0.3s;
-  height: 38px;
-  min-width: 120px;
+  transition: all 0.2s ease;
+  height: 42px;
+  font-weight: 500;
+  text-align: center;
 }
 
 .refresh-button:hover {
   background-color: #45a049;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
 .participants-table-container {
   overflow-x: auto;
   background: white;
   border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
 }
 
 .participants-table {
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
   min-width: 800px;
-  table-layout: fixed;
 }
 
 .participants-table th,
 .participants-table td {
-  padding: 0.75rem 1rem;
+  padding: 12px 16px;
   text-align: left;
   border-bottom: 1px solid #eee;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 /* Spaltenbreiten definieren */
 .participants-table th:nth-child(1), /* Name */
 .participants-table td:nth-child(1) {
-  width: 20%;
+  width: 16%;
 }
 
 .participants-table th:nth-child(2), /* Email */
 .participants-table td:nth-child(2) {
-  width: 30%;
+  width: 25%;
 }
 
 .participants-table th:nth-child(3), /* Klasse */
 .participants-table td:nth-child(3) {
-  width: 15%;
+  width: 10%;
 }
 
 .participants-table th:nth-child(4), /* Punkte */
 .participants-table td:nth-child(4) {
-  width: 15%;
+  width: 12%;
 }
 
 .participants-table th:nth-child(5), /* Status */
@@ -98,7 +104,7 @@
 
 .participants-table th:nth-child(6), /* Aktionen */
 .participants-table td:nth-child(6) {
-  width: 25%;
+  width: 22%;
 }
 
 .participants-table th {
@@ -108,11 +114,11 @@
   position: sticky;
   top: 0;
   z-index: 1;
-  padding: 0;
+  border-bottom: 2px solid #ddd;
 }
 
 .participants-table tbody tr:hover {
-  background-color: #f8f9fa;
+  background-color: #f5f9ff;
 }
 
 .sortable-header {
@@ -120,53 +126,49 @@
   user-select: none;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1rem;
-  position: relative;
+  padding: 12px 16px;
 }
 
 .sortable-header svg {
-  margin-left: 0.5rem;
+  margin-left: 8px;
   font-size: 0.875rem;
+  opacity: 0.7;
 }
 
 .points-cell {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
   width: 100%;
 }
 
 .points-cell input {
   width: 100%;
-  padding: 0.5rem;
+  padding: 8px 10px;
   border: 1px solid #ddd;
   border-radius: 4px;
-  font-size: 1rem;
-  min-width: 120px;
+  font-size: 0.95rem;
 }
 
 .points-cell span {
-  width: 100%;
-  display: block;
+  font-weight: 500;
+  color: #28a745;
 }
 
 .button-group {
   display: flex;
-  gap: 0.5rem;
-  justify-content: flex-start;
+  gap: 6px;
 }
 
 .edit-button,
 .save-button,
 .cancel-button {
-  padding: 0.5rem 1rem;
+  padding: 6px 12px;
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  transition: background-color 0.3s;
-  white-space: nowrap;
-  min-width: 100px;
+  transition: all 0.2s ease;
+  font-weight: 500;
+  font-size: 0.9rem;
 }
 
 .edit-button {
@@ -175,7 +177,7 @@
 }
 
 .edit-button:hover {
-  background-color: #0056b3;
+  background-color: #0069d9;
 }
 
 .save-button {
@@ -196,6 +198,23 @@
   background-color: #c82333;
 }
 
+.verify-button {
+  background-color: #28a745;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.verify-button:hover {
+  background-color: #218838;
+  transform: translateY(-1px);
+}
+
 .participants-loading {
   text-align: center;
   padding: 2rem;
@@ -214,7 +233,6 @@
 .verified-status {
   display: flex;
   align-items: center;
-  gap: 8px;
   color: #28a745;
   font-weight: 500;
   white-space: nowrap;
@@ -223,7 +241,6 @@
 .unverified-status {
   display: flex;
   align-items: center;
-  gap: 8px;
   color: #dc3545;
   font-weight: 500;
   white-space: nowrap;
@@ -232,13 +249,13 @@
 .verified-icon {
   font-size: 1.2rem;
   color: #28a745;
-  margin-right: 4px;
+  margin-right: 8px;
 }
 
 .unverified-icon {
   font-size: 1.2rem;
   color: #dc3545;
-  margin-right: 4px;
+  margin-right: 8px;
 }
 
 .action-buttons {
@@ -247,46 +264,24 @@
   gap: 8px;
 }
 
-.verify-button {
-  background-color: #28a745;
-  color: white;
-  border: none;
-  padding: 6px 12px;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-  min-width: 100px;
-  font-weight: 500;
-  display: inline-block;
-  text-align: center;
-}
-
-.verify-button:hover {
-  background-color: #218838;
+@media (max-width: 992px) {
+  .filter-controls {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
 }
 
 @media (max-width: 768px) {
   .filter-controls {
-    flex-direction: column;
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto auto;
   }
-
-  .filter-group {
-    width: 100%;
+  
+  .participants-container {
+    padding: 1rem;
   }
-
-  .refresh-button {
-    width: 100%;
-  }
-
-  .button-group {
-    flex-direction: row;
-    justify-content: flex-start;
-  }
-
-  .edit-button,
-  .save-button,
-  .cancel-button {
-    min-width: auto;
-    flex: 1;
+  
+  .participants-table th, 
+  .participants-table td {
+    padding: 10px 12px;
   }
 } 
