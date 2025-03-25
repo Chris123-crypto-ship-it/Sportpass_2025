@@ -825,34 +825,19 @@ app.post('/reject-submission', authenticateToken, isAdmin, async (req, res) => {
 });
 
 // 🔹 Leaderboard abrufen
-app.get('/api/leaderboard', async (req, res) => {
+app.get('/leaderboard', async (req, res) => {
   try {
-    const { data: scores, error } = await supabase
-      .from('scores')
-      .select(`
-        score,
-        users (
-          name,
-          class,
-          is_verified
-        )
-      `)
-      .eq('users.is_verified', true)
-      .order('score', { ascending: false })
-      .limit(100);
+    const { data: users, error } = await supabase
+      .from('users')
+      .select('name, points')
+      .eq('is_verified', true)  // Nur verifizierte Benutzer
+      .order('points', { ascending: false });
 
     if (error) throw error;
-
-    const leaderboard = scores.map(score => ({
-      name: score.users.name,
-      class: score.users.class,
-      score: score.score
-    }));
-
-    res.json(leaderboard);
+    res.json(users || []);
   } catch (error) {
     console.error('Fehler beim Abrufen des Leaderboards:', error);
-    res.status(500).json({ error: 'Fehler beim Abrufen des Leaderboards' });
+    res.status(500).json({ message: 'Fehler beim Abrufen der Rangliste' });
   }
 });
 
@@ -1582,140 +1567,8 @@ app.get('/api/update-schema', authenticateToken, isAdmin, async (req, res) => {
   }
 });
 
-// Verifizierungsstatus eines Benutzers aktualisieren (nur für Admins)
-app.put('/api/users/:userId/verify', authenticateToken, async (req, res) => {
-  try {
-    // Prüfe, ob der Benutzer Admin ist
-    const { data: user, error: userError } = await supabase
-      .from('users')
-      .select('is_admin')
-      .eq('id', req.user.id)
-      .single();
-
-    if (userError) throw userError;
-    if (!user.is_admin) {
-      return res.status(403).json({ error: 'Nur Administratoren können Benutzer verifizieren' });
-    }
-
-    const { error: updateError } = await supabase
-      .from('users')
-      .update({ is_verified: true })
-      .eq('id', req.params.userId);
-
-    if (updateError) throw updateError;
-
-    res.json({ message: 'Benutzer erfolgreich verifiziert' });
-  } catch (error) {
-    console.error('Fehler beim Aktualisieren des Verifizierungsstatus:', error);
-    res.status(500).json({ error: 'Fehler beim Aktualisieren des Verifizierungsstatus' });
-  }
-});
-
-// Alle Benutzer abrufen (nur für Admins)
-app.get('/api/users', authenticateToken, async (req, res) => {
-  try {
-    // Prüfe, ob der Benutzer Admin ist
-    const { data: user, error: userError } = await supabase
-      .from('users')
-      .select('is_admin')
-      .eq('id', req.user.id)
-      .single();
-
-    if (userError) throw userError;
-    if (!user.is_admin) {
-      return res.status(403).json({ error: 'Nur Administratoren können alle Benutzer sehen' });
-    }
-
-    const { data: users, error } = await supabase
-      .from('users')
-      .select('id, name, email, class, is_verified, created_at')
-      .order('created_at', { ascending: false });
-
-    if (error) throw error;
-
-    res.json(users);
-  } catch (error) {
-    console.error('Fehler beim Abrufen der Benutzer:', error);
-    res.status(500).json({ error: 'Fehler beim Abrufen der Benutzer' });
-  }
-});
-
-// Aktuellen Benutzer abrufen
-app.get('/api/me', authenticateToken, async (req, res) => {
-  try {
-    const { data: user, error } = await supabase
-      .from('users')
-      .select('id, name, email, role, class, is_verified')
-      .eq('id', req.user.userId)
-      .single();
-
-    if (error) throw error;
-
-    res.json(user);
-  } catch (error) {
-    console.error('Fehler beim Abrufen des Benutzerprofils:', error);
-    res.status(500).json({ error: 'Fehler beim Abrufen des Benutzerprofils' });
-  }
-});
-
 // 🔹 Server starten
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, async () => {
   console.log(`Server läuft auf Port ${PORT}`);
 });
-
-async function setupDatabase() {
-  try {
-    // Erstelle die users Tabelle
-    const { error: usersError } = await supabase
-      .from('users')
-      .select('*')
-      .limit(1);
-
-    if (usersError) {
-      const { error: createError } = await supabase.rpc('create_users_table', {
-        sql: `
-          CREATE TABLE IF NOT EXISTS users (
-            id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-            name TEXT NOT NULL,
-            email TEXT UNIQUE NOT NULL,
-            password TEXT NOT NULL,
-            class TEXT,
-            is_verified BOOLEAN DEFAULT FALSE,
-            created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()),
-            updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW())
-          );
-        `
-      });
-
-      if (createError) throw createError;
-    }
-
-    // Erstelle die scores Tabelle
-    const { error: scoresError } = await supabase
-      .from('scores')
-      .select('*')
-      .limit(1);
-
-    if (scoresError) {
-      const { error: createError } = await supabase.rpc('create_scores_table', {
-        sql: `
-          CREATE TABLE IF NOT EXISTS scores (
-            id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-            user_id UUID REFERENCES users(id) ON DELETE CASCADE,
-            score INTEGER NOT NULL,
-            created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()),
-            updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW())
-          );
-        `
-      });
-
-      if (createError) throw createError;
-    }
-
-    console.log('Datenbank-Tabellen erfolgreich erstellt');
-  } catch (error) {
-    console.error('Fehler beim Erstellen der Datenbank-Tabellen:', error);
-    throw error;
-  }
-}
