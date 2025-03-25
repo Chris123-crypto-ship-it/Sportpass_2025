@@ -61,6 +61,8 @@
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.08);
   margin-bottom: 30px;
+  padding: 0;
+  width: 100%;
 }
 
 .participants-table {
@@ -81,6 +83,11 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.participants-table th:last-child,
+.participants-table td:last-child {
+  padding-right: 0;
 }
 
 /* Spaltenbreiten präzise definieren */
@@ -116,7 +123,6 @@
 .participants-table td:nth-child(6) {
   width: 38%;
   text-align: right;
-  padding-right: 20px;
 }
 
 .participants-table tbody tr {
@@ -171,37 +177,51 @@
   text-align: center;
 }
 
-/* Verbessertes Verhalten für die Aktionsspalte */
-.action-buttons {
+/* Aktionsspalte speziell stylen */
+.actions-header {
+  text-align: right;
+  width: 35%;
+}
+
+.actions-cell {
+  padding-right: 0 !important;
+  position: relative;
+  text-align: right;
+}
+
+.actions-container {
   display: flex;
   justify-content: flex-end;
   align-items: center;
+  padding-right: 0;
   width: 100%;
 }
 
 .button-group {
-  display: flex;
+  display: inline-flex;
   gap: 4px;
   flex-wrap: nowrap;
   justify-content: flex-end;
 }
 
-/* Buttons kleiner und kompakter machen */
+/* Buttons noch kompakter machen */
 .edit-button,
 .save-button,
 .cancel-button,
 .verify-button,
 .delete-button {
-  padding: 4px 6px;
+  padding: 3px 6px;
   border: none;
   border-radius: 3px;
   cursor: pointer;
   transition: all 0.2s ease;
   font-weight: 500;
-  font-size: 0.75rem;
-  height: 24px;
+  font-size: 0.7rem;
+  height: 22px;
   white-space: nowrap;
-  min-width: 65px;
+  min-width: 58px;
+  margin: 0;
+  display: inline-block;
 }
 
 .edit-button {

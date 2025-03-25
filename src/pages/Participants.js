@@ -233,7 +233,7 @@ const Participants = () => {
                 </div>
               </th>
               <th>Status</th>
-              <th>Aktionen</th>
+              <th className="actions-header">Aktionen</th>
             </tr>
           </thead>
           <tbody>
@@ -270,52 +270,54 @@ const Participants = () => {
                     </span>
                   )}
                 </td>
-                <td className="action-buttons">
-                  {editingPoints[participant.id] !== undefined ? (
-                    <div className="button-group">
-                      <button
-                        className="save-button"
-                        onClick={() => handlePointsChange(participant.id, editingPoints[participant.id])}
-                      >
-                        Speichern
-                      </button>
-                      <button
-                        className="cancel-button"
-                        onClick={() => setEditingPoints(prev => ({
-                          ...prev,
-                          [participant.id]: undefined
-                        }))}
-                      >
-                        Abbrechen
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="button-group">
-                      <button
-                        className="edit-button"
-                        onClick={() => setEditingPoints(prev => ({
-                          ...prev,
-                          [participant.id]: participant.points || 0
-                        }))}
-                      >
-                        Bearbeiten
-                      </button>
-                      {participant.is_verified !== true && (
+                <td className="actions-cell">
+                  <div className="actions-container">
+                    {editingPoints[participant.id] !== undefined ? (
+                      <div className="button-group">
                         <button
-                          className="verify-button"
-                          onClick={() => handleVerifyUser(participant.id)}
+                          className="save-button"
+                          onClick={() => handlePointsChange(participant.id, editingPoints[participant.id])}
                         >
-                          Verifizieren
+                          Speichern
                         </button>
-                      )}
-                      <button
-                        className="delete-button"
-                        onClick={() => handleDeleteUser(participant.id, participant.name)}
-                      >
-                        Löschen
-                      </button>
-                    </div>
-                  )}
+                        <button
+                          className="cancel-button"
+                          onClick={() => setEditingPoints(prev => ({
+                            ...prev,
+                            [participant.id]: undefined
+                          }))}
+                        >
+                          Abbrechen
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="button-group">
+                        <button
+                          className="edit-button"
+                          onClick={() => setEditingPoints(prev => ({
+                            ...prev,
+                            [participant.id]: participant.points || 0
+                          }))}
+                        >
+                          Bearbeiten
+                        </button>
+                        {participant.is_verified !== true && (
+                          <button
+                            className="verify-button"
+                            onClick={() => handleVerifyUser(participant.id)}
+                          >
+                            Verifizieren
+                          </button>
+                        )}
+                        <button
+                          className="delete-button"
+                          onClick={() => handleDeleteUser(participant.id, participant.name)}
+                        >
+                          Löschen
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </td>
               </tr>
             ))}
