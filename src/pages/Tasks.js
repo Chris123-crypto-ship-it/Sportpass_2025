@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useTasks } from '../context/TaskContext';
 import { FaRunning, FaHeartbeat, FaDumbbell, FaMedal, FaFire, FaStar, 
-         FaUpload, FaFileImage, FaVideo, FaTrash, FaClock, FaCheck, FaTimes, FaFile, FaImage, FaCheckCircle, FaTimesCircle, FaUser, FaTag } from 'react-icons/fa';
+         FaUpload, FaFileImage, FaVideo, FaTrash, FaClock, FaCheck, FaTimes, FaFile, FaImage, FaCheckCircle, FaTimesCircle, FaUser, FaTag, FaFilter } from 'react-icons/fa';
 import { toast } from 'react-toastify';
 import '../styles/Tasks.css';
 
@@ -16,11 +16,21 @@ const Tasks = () => {
   const [message, setMessage] = useState('');
   const [adminComment, setAdminComment] = useState('');
   const [filter, setFilter] = useState('all');
+  const [categoryFilter, setCategoryFilter] = useState('all');
   const [filteredTasks, setFilteredTasks] = useState([]);
   const [activeSubmissionId, setActiveSubmissionId] = useState(null);
   const [fileUploads, setFileUploads] = useState({});
   const fileInputRefs = useRef({});
   const [loading, setLoading] = useState(false);
+
+  const categories = [
+    { value: 'all', label: 'Alle Kategorien' },
+    { value: 'kraft', label: 'Kraft' },
+    { value: 'flexibilität', label: 'Flexibilität' },
+    { value: 'cardio', label: 'Cardio' },
+    { value: 'ausdauer', label: 'Ausdauer' },
+    { value: 'team', label: 'Team' }
+  ];
 
   useEffect(() => {
     fetchTasks();
@@ -33,11 +43,28 @@ const Tasks = () => {
     let filtered = [...tasks];
     
     if (filter !== 'all') {
-      filtered = tasks.filter(task => task.category.toLowerCase() === filter.toLowerCase());
+      filtered = filtered.filter(task => {
+        const userSubmission = submissions.find(s => s.task_id === task.id && s.user_email === user?.email);
+        
+        if (filter === 'completed') {
+          return userSubmission && userSubmission.status === 'approved';
+        } else if (filter === 'pending') {
+          return userSubmission && userSubmission.status === 'pending';
+        } else if (filter === 'active') {
+          return !userSubmission || (userSubmission && userSubmission.status === 'rejected');
+        }
+        return true;
+      });
+    }
+    
+    if (categoryFilter !== 'all') {
+      filtered = filtered.filter(task => 
+        task.category && task.category.toLowerCase() === categoryFilter.toLowerCase()
+      );
     }
 
     setFilteredTasks(filtered);
-  }, [tasks, filter]);
+  }, [tasks, filter, categoryFilter, submissions, user]);
 
   const getCategoryIcon = (category) => {
     switch (category.toLowerCase()) {
@@ -382,7 +409,6 @@ const Tasks = () => {
       }
     };
 
-    // Formatierung des Ablaufdatums
     const formatExpirationDate = (dateString) => {
       if (!dateString) return null;
       try {
@@ -400,7 +426,6 @@ const Tasks = () => {
       }
     };
 
-    // Schwierigkeitsanzeige
     const renderDifficultyStars = (difficulty) => {
       const level = parseInt(difficulty) || 0;
       return (
@@ -441,13 +466,11 @@ const Tasks = () => {
           </div>
 
           <div className="meta-info">
-            {/* Schwierigkeitsanzeige */}
             <div className="difficulty">
               <span>Schwierigkeit: </span>
               {renderDifficultyStars(task.difficulty)}
             </div>
 
-            {/* Ablaufdatum */}
             {task.expiration_date && (
               <div className="expiration">
                 <span>
@@ -543,30 +566,52 @@ const Tasks = () => {
       <div className="tasks-header">
         <h1 className="tasks-title">Verfügbare Aufgaben</h1>
         <div className="filter-section">
-          <button 
-            className={`filter-button ${filter === 'all' ? 'active' : ''}`}
-            onClick={() => setFilter('all')}
-          >
-            Alle
-          </button>
-          <button 
-            className={`filter-button ${filter === 'running' ? 'active' : ''}`}
-            onClick={() => setFilter('running')}
-          >
-            Laufen
-          </button>
-          <button 
-            className={`filter-button ${filter === 'cardio' ? 'active' : ''}`}
-            onClick={() => setFilter('cardio')}
-          >
-            Cardio
-          </button>
-          <button 
-            className={`filter-button ${filter === 'strength' ? 'active' : ''}`}
-            onClick={() => setFilter('strength')}
-          >
-            Kraft
-          </button>
+          <div className="filter-container">
+            <div className="filter-group">
+              <label><FaFilter /> Status:</label>
+              <div className="filter-buttons">
+                <button 
+                  className={filter === 'all' ? 'active' : ''} 
+                  onClick={() => setFilter('all')}
+                >
+                  Alle
+                </button>
+                <button 
+                  className={filter === 'active' ? 'active' : ''} 
+                  onClick={() => setFilter('active')}
+                >
+                  Aktiv
+                </button>
+                <button 
+                  className={filter === 'pending' ? 'active' : ''} 
+                  onClick={() => setFilter('pending')}
+                >
+                  Ausstehend
+                </button>
+                <button 
+                  className={filter === 'completed' ? 'active' : ''} 
+                  onClick={() => setFilter('completed')}
+                >
+                  Abgeschlossen
+                </button>
+              </div>
+            </div>
+            
+            <div className="filter-group">
+              <label><FaTag /> Kategorie:</label>
+              <select 
+                className="category-filter"
+                value={categoryFilter}
+                onChange={(e) => setCategoryFilter(e.target.value)}
+              >
+                {categories.map(category => (
+                  <option key={category.value} value={category.value}>
+                    {category.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -621,7 +666,6 @@ const Tasks = () => {
             )}
       </div>
 
-      {/* Admin section with updated styling */}
       {user?.role === 'admin' && (
         <div className="admin-section">
           <h1 className="admin-title">Aufgabenüberprüfung</h1>
