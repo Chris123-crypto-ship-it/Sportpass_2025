@@ -39,6 +39,7 @@ const Participants = () => {
       });
 
       const data = response.data;
+      console.log('Geladene Teilnehmer:', data); // Debug-Ausgabe
       setParticipants(data);
 
       const classes = [...new Set(data.map(p => p.class).filter(Boolean))];
@@ -90,11 +91,13 @@ const Participants = () => {
 
   const handleVerifyUser = async (userId) => {
     try {
-      await axios.put(
+      const response = await axios.put(
         `${config.API_URL}/verify-user/${userId}`,
         {},
         { headers: getHeaders() }
       );
+
+      console.log('Verifizierungsantwort:', response.data); // Debug-Ausgabe
 
       setParticipants(prevParticipants =>
         prevParticipants.map(p =>
@@ -241,7 +244,7 @@ const Participants = () => {
                     </span>
                   )}
                 </td>
-                <td>
+                <td className="action-buttons">
                   {editingPoints[participant.id] !== undefined ? (
                     <div className="button-group">
                       <button

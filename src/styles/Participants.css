@@ -91,9 +91,14 @@
   width: 15%;
 }
 
-.participants-table th:nth-child(5), /* Aktionen */
+.participants-table th:nth-child(5), /* Status */
 .participants-table td:nth-child(5) {
-  width: 20%;
+  width: 15%;
+}
+
+.participants-table th:nth-child(6), /* Aktionen */
+.participants-table td:nth-child(6) {
+  width: 25%;
 }
 
 .participants-table th {
@@ -211,6 +216,7 @@
   align-items: center;
   gap: 8px;
   color: #28a745;
+  font-weight: 500;
 }
 
 .unverified-status {
@@ -218,6 +224,7 @@
   align-items: center;
   gap: 8px;
   color: #dc3545;
+  font-weight: 500;
 }
 
 .verified-icon {
@@ -228,6 +235,12 @@
   font-size: 1.2rem;
 }
 
+.action-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
 .verify-button {
   background-color: #28a745;
   color: white;
@@ -236,6 +249,8 @@
   border-radius: 4px;
   cursor: pointer;
   transition: background-color 0.3s;
+  min-width: 100px;
+  font-weight: 500;
 }
 
 .verify-button:hover {
