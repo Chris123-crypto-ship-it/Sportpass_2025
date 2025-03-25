@@ -98,46 +98,46 @@
 /* Spaltenbreiten definieren */
 .participants-table th:nth-child(1), /* Name */
 .participants-table td:nth-child(1) {
-  width: 16%;
+  width: 15%;
 }
 
 .participants-table th:nth-child(2), /* Email */
 .participants-table td:nth-child(2) {
-  width: 25%;
+  width: 22%;
 }
 
 .participants-table th:nth-child(3), /* Klasse */
 .participants-table td:nth-child(3) {
-  width: 10%;
+  width: 8%;
 }
 
 .participants-table th:nth-child(4), /* Punkte */
 .participants-table td:nth-child(4) {
-  width: 10%;
+  width: 8%;
   text-align: center;
 }
 
 .participants-table th:nth-child(5), /* Status */
 .participants-table td:nth-child(5) {
-  width: 15%;
+  width: 12%;
 }
 
 .participants-table th:nth-child(6), /* Aktionen */
 .participants-table td:nth-child(6) {
-  width: 30%;
+  width: 35%;
 }
 
 @media (min-width: 1200px) {
   .participants-table th:nth-child(6), /* Aktionen */
   .participants-table td:nth-child(6) {
-    width: 30%;
+    width: 35%;
   }
 }
 
 @media (max-width: 1199px) {
   .participants-table th:nth-child(6), /* Aktionen */
   .participants-table td:nth-child(6) {
-    width: 35%;
+    width: 38%;
   }
 }
 
@@ -195,16 +195,17 @@
 
 .action-buttons {
   display: flex;
-  justify-content: center;
+  justify-content: flex-end;
   align-items: center;
   height: 100%;
+  padding-right: 10px;
 }
 
 .button-group {
   display: flex;
-  gap: 6px;
+  gap: 8px;
   flex-wrap: nowrap;
-  justify-content: center;
+  justify-content: flex-end;
 }
 
 .edit-button,
