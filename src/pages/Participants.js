@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
 import '../styles/Participants.css';
 import { toast } from 'react-toastify';
-import { FaSort, FaSortUp, FaSortDown } from 'react-icons/fa';
+import { FaSort, FaSortUp, FaSortDown, FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
 import config from '../config';
 
 const Participants = () => {
@@ -86,6 +86,27 @@ const Participants = () => {
   const getSortIcon = (field) => {
     if (sortField !== field) return <FaSort />;
     return sortDirection === 'asc' ? <FaSortUp /> : <FaSortDown />;
+  };
+
+  const handleVerifyUser = async (userId) => {
+    try {
+      await axios.put(
+        `${config.API_URL}/verify-user/${userId}`,
+        {},
+        { headers: getHeaders() }
+      );
+
+      setParticipants(prevParticipants =>
+        prevParticipants.map(p =>
+          p.id === userId ? { ...p, is_verified: true } : p
+        )
+      );
+
+      toast.success('Benutzer erfolgreich verifiziert');
+    } catch (error) {
+      console.error('Error verifying user:', error);
+      toast.error('Fehler beim Verifizieren des Benutzers');
+    }
   };
 
   useEffect(() => {
@@ -182,6 +203,7 @@ const Participants = () => {
                   Punkte {getSortIcon('points')}
                 </div>
               </th>
+              <th>Status</th>
               <th>Aktionen</th>
             </tr>
           </thead>
@@ -204,6 +226,19 @@ const Participants = () => {
                     />
                   ) : (
                     <span>{participant.points || 0}</span>
+                  )}
+                </td>
+                <td>
+                  {participant.is_verified ? (
+                    <span className="verified-status">
+                      <FaCheckCircle className="verified-icon" />
+                      Verifiziert
+                    </span>
+                  ) : (
+                    <span className="unverified-status">
+                      <FaTimesCircle className="unverified-icon" />
+                      Nicht verifiziert
+                    </span>
                   )}
                 </td>
                 <td>
@@ -234,6 +269,14 @@ const Participants = () => {
                       }))}
                     >
                       Bearbeiten
+                    </button>
+                  )}
+                  {!participant.is_verified && (
+                    <button
+                      className="verify-button"
+                      onClick={() => handleVerifyUser(participant.id)}
+                    >
+                      Verifizieren
                     </button>
                   )}
                 </td>

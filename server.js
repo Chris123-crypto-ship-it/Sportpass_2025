@@ -1567,6 +1567,25 @@ app.get('/api/update-schema', authenticateToken, isAdmin, async (req, res) => {
   }
 });
 
+// Benutzer verifizieren (nur für Admins)
+app.put('/verify-user/:id', authenticateToken, isAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { data, error } = await supabase
+      .from('users')
+      .update({ is_verified: true })
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    res.json(data);
+  } catch (error) {
+    console.error('Fehler beim Verifizieren des Benutzers:', error);
+    res.status(500).json({ message: 'Fehler beim Verifizieren des Benutzers' });
+  }
+});
+
 // 🔹 Server starten
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, async () => {
