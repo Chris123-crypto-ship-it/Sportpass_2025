@@ -25,6 +25,7 @@ const Profile = () => {
   const [editingGoal, setEditingGoal] = useState(null);
   const [isEditingName, setIsEditingName] = useState(false);
   const [userName, setUserName] = useState(localStorage.getItem('userName') || user?.name || 'Sportpass Nutzer');
+  const [age, setAge] = useState('');
 
   useEffect(() => {
     // Lade gespeicherte Daten
@@ -153,14 +154,51 @@ const Profile = () => {
       setBmi(bmiValue);
       localStorage.setItem('weight', weight);
       localStorage.setItem('height', height);
+      localStorage.setItem('age', age);
     }
   };
 
   const getBMICategory = (bmiValue) => {
-    if (bmiValue < 18.5) return 'Untergewicht';
-    if (bmiValue < 25) return 'Normalgewicht';
-    if (bmiValue < 30) return 'Übergewicht';
-    return 'Adipositas';
+    const bmi = parseFloat(bmiValue);
+    if (bmi < 18.5) return { text: 'Untergewicht', color: '#3498db', description: 'BMI liegt unter dem empfohlenen Bereich.' };
+    if (bmi < 25) return { text: 'Normalgewicht', color: '#2ecc71', description: 'BMI liegt im gesunden Bereich.' };
+    if (bmi < 30) return { text: 'Übergewicht', color: '#f39c12', description: 'BMI liegt leicht über dem empfohlenen Bereich.' };
+    if (bmi < 35) return { text: 'Adipositas Grad I', color: '#e67e22', description: 'BMI liegt deutlich über dem empfohlenen Bereich.' };
+    if (bmi < 40) return { text: 'Adipositas Grad II', color: '#e74c3c', description: 'BMI liegt stark über dem empfohlenen Bereich.' };
+    return { text: 'Adipositas Grad III', color: '#c0392b', description: 'BMI liegt sehr stark über dem empfohlenen Bereich.' };
+  };
+
+  const getBMIRecommendation = (bmiValue, ageValue) => {
+    const bmi = parseFloat(bmiValue);
+    const age = parseInt(ageValue);
+    
+    let recommendation = '';
+    
+    if (!age) {
+      return 'Gib dein Alter ein, um eine genauere Bewertung zu erhalten.';
+    }
+    
+    if (age < 18) {
+      return 'Der BMI allein ist für Personen unter 18 Jahren nicht zuverlässig. Bitte konsultiere einen Arzt für eine genauere Bewertung.';
+    }
+    
+    if (age > 65) {
+      if (bmi < 22) {
+        recommendation = 'Bei älteren Erwachsenen ist ein etwas höherer BMI-Wert oft empfohlen. Dein BMI könnte zu niedrig sein.';
+      } else if (bmi > 27 && bmi < 30) {
+        recommendation = 'Für Personen über 65 ist ein leicht erhöhter BMI oft unbedenklich.';
+      }
+    }
+    
+    if (bmi < 18.5) {
+      recommendation += 'Versuche deine Kalorienzufuhr zu erhöhen und spreche mit einem Ernährungsberater.';
+    } else if (bmi >= 25) {
+      recommendation += 'Eine ausgewogene Ernährung und regelmäßige Bewegung können helfen, einen gesünderen BMI zu erreichen.';
+    } else {
+      recommendation += 'Dein BMI liegt im gesunden Bereich. Halte deine ausgewogene Ernährung und deinen aktiven Lebensstil bei.';
+    }
+    
+    return recommendation;
   };
 
   const renderGoals = () => {
@@ -404,6 +442,16 @@ const Profile = () => {
                     placeholder="z.B. 175"
                   />
                 </div>
+                <div className="input-group">
+                  <label htmlFor="age">Alter</label>
+                  <input
+                    id="age"
+                    type="number"
+                    value={age}
+                    onChange={(e) => setAge(e.target.value)}
+                    placeholder="z.B. 30"
+                  />
+                </div>
               </div>
 
               <button className="calculate-button" onClick={calculateBMI}>
@@ -412,8 +460,38 @@ const Profile = () => {
 
               {bmi && (
                 <div className="bmi-result">
-                  <div className="bmi-value">{bmi}</div>
-                  <div className="bmi-category">{getBMICategory(bmi)}</div>
+                  <div className="bmi-value" style={{ color: getBMICategory(bmi).color }}>
+                    {bmi}
+                  </div>
+                  <div className="bmi-category" style={{ color: getBMICategory(bmi).color, fontWeight: 'bold' }}>
+                    {getBMICategory(bmi).text}
+                  </div>
+                  <div className="bmi-description">
+                    {getBMICategory(bmi).description}
+                  </div>
+                  <div className="bmi-scale">
+                    <div className="bmi-scale-bar">
+                      <div className="bmi-marker" style={{ left: `${Math.min(Math.max(parseFloat(bmi) - 10, 0) * 100 / 30, 100)}%` }}></div>
+                      <div className="bmi-zones">
+                        <div className="bmi-zone" style={{ backgroundColor: '#3498db' }}></div>
+                        <div className="bmi-zone" style={{ backgroundColor: '#2ecc71' }}></div>
+                        <div className="bmi-zone" style={{ backgroundColor: '#f39c12' }}></div>
+                        <div className="bmi-zone" style={{ backgroundColor: '#e67e22' }}></div>
+                        <div className="bmi-zone" style={{ backgroundColor: '#c0392b' }}></div>
+                      </div>
+                    </div>
+                    <div className="bmi-scale-labels">
+                      <span>15</span>
+                      <span>18.5</span>
+                      <span>25</span>
+                      <span>30</span>
+                      <span>35</span>
+                      <span>40+</span>
+                    </div>
+                  </div>
+                  <div className="bmi-recommendation">
+                    {getBMIRecommendation(bmi, age)}
+                  </div>
                 </div>
               )}
             </div>
