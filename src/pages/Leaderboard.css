@@ -278,12 +278,20 @@
 
 .table-container {
   width: 100%;
-  overflow-x: auto;
+  max-height: 600px;
+  overflow-y: auto;
 }
 
 .leaderboard-table table {
   width: 100%;
   border-collapse: collapse;
+}
+
+.leaderboard-table th {
+  position: sticky;
+  top: 0;
+  background: #f8f9fa;
+  z-index: 1;
 }
 
 .leaderboard-table th,
@@ -297,7 +305,6 @@
 .leaderboard-table th {
   font-weight: 600;
   color: #333;
-  background-color: #f8f9fa;
 }
 
 /* Erste Spalte (Rang) */
