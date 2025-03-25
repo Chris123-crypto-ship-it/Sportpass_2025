@@ -60,6 +60,7 @@
   background: white;
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  margin-bottom: 30px;
 }
 
 .participants-table {
@@ -67,6 +68,7 @@
   border-collapse: separate;
   border-spacing: 0;
   min-width: 800px;
+  table-layout: fixed;
 }
 
 .participants-table td {
@@ -95,36 +97,40 @@
   height: 50px;
 }
 
-/* Spaltenbreiten definieren */
+/* Spaltenbreiten neu definieren */
 .participants-table th:nth-child(1), /* Name */
 .participants-table td:nth-child(1) {
-  width: 15%;
+  width: 10%;
 }
 
 .participants-table th:nth-child(2), /* Email */
 .participants-table td:nth-child(2) {
-  width: 22%;
+  width: 18%;
 }
 
 .participants-table th:nth-child(3), /* Klasse */
 .participants-table td:nth-child(3) {
-  width: 8%;
+  width: 5%;
 }
 
 .participants-table th:nth-child(4), /* Punkte */
 .participants-table td:nth-child(4) {
-  width: 8%;
+  width: 7%;
   text-align: center;
 }
 
 .participants-table th:nth-child(5), /* Status */
 .participants-table td:nth-child(5) {
-  width: 12%;
+  width: 10%;
+  white-space: nowrap;
 }
 
 .participants-table th:nth-child(6), /* Aktionen */
 .participants-table td:nth-child(6) {
-  width: 35%;
+  width: 50%;
+  min-width: 320px;
+  text-align: right;
+  padding-right: 20px;
 }
 
 @media (min-width: 1200px) {
@@ -193,19 +199,21 @@
   text-align: center;
 }
 
+/* Buttons in der Aktionsspalte */
 .action-buttons {
   display: flex;
   justify-content: flex-end;
   align-items: center;
-  height: 100%;
-  padding-right: 10px;
+  width: 100%;
+  min-width: 300px;
 }
 
 .button-group {
   display: flex;
-  gap: 8px;
+  gap: 12px;
   flex-wrap: nowrap;
   justify-content: flex-end;
+  width: 100%;
 }
 
 .edit-button,
@@ -213,6 +221,7 @@
 .cancel-button,
 .verify-button,
 .delete-button {
+  flex: 0 0 auto;
   padding: 6px 10px;
   border: none;
   border-radius: 4px;
@@ -222,8 +231,8 @@
   font-size: 0.85rem;
   height: 32px;
   white-space: nowrap;
-  min-width: 80px;
-  display: flex;
+  min-width: 90px;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
 }
@@ -288,15 +297,16 @@
   margin: 2rem;
 }
 
+/* Status-Anzeigen */
 .verified-status,
 .unverified-status {
   display: flex;
   align-items: center;
   font-weight: 500;
   white-space: nowrap;
-  height: 100%;
-  padding: 0 12px;
+  padding: 0 10px;
   box-sizing: border-box;
+  justify-content: flex-start;
 }
 
 .verified-status {
@@ -342,4 +352,31 @@
   .participants-table td {
     padding: 10px 12px;
   }
+}
+
+/* Support-Link am Ende der Seite */
+.support-link-container {
+  text-align: center;
+  margin-top: 2rem;
+  padding: 1rem;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.support-text {
+  font-size: 1rem;
+  color: #555;
+}
+
+.support-link {
+  color: #007bff;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.support-link:hover {
+  color: #0056b3;
+  text-decoration: underline;
 } 

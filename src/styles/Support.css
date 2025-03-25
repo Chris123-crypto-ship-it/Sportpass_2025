@@ -1,0 +1,112 @@
+.support-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 2rem;
+  background-color: #f9f9f9;
+  border-radius: 12px;
+  box-shadow: 0 2px 15px rgba(0,0,0,0.05);
+}
+
+.support-container h1 {
+  color: #333;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  font-size: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.support-content {
+  margin-top: 2rem;
+}
+
+.support-content > p {
+  font-size: 1.1rem;
+  line-height: 1.6;
+  margin-bottom: 2rem;
+  color: #444;
+}
+
+.support-contact,
+.support-info,
+.support-faq {
+  background-color: white;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.support-contact h2,
+.support-info h2,
+.support-faq h2 {
+  color: #333;
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #eee;
+}
+
+.support-contact p,
+.support-info p {
+  font-size: 1.05rem;
+  line-height: 1.6;
+  margin-bottom: 1rem;
+}
+
+.support-contact a {
+  color: #007bff;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.support-contact a:hover {
+  color: #0056b3;
+  text-decoration: underline;
+}
+
+.support-info ul {
+  padding-left: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.support-info li {
+  margin-bottom: 0.5rem;
+  line-height: 1.5;
+}
+
+.faq-item {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid #eee;
+}
+
+.faq-item:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.faq-item h3 {
+  font-size: 1.2rem;
+  margin-bottom: 0.5rem;
+  color: #333;
+}
+
+.faq-item p {
+  line-height: 1.5;
+  color: #555;
+}
+
+@media (max-width: 768px) {
+  .support-container {
+    padding: 1rem;
+  }
+  
+  .support-contact,
+  .support-info,
+  .support-faq {
+    padding: 1rem;
+  }
+} 

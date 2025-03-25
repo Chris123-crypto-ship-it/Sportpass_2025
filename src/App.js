@@ -22,6 +22,7 @@ import Participants from './pages/Participants';
 import VerifyEmail from './pages/VerifyEmail';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
+import Support from './pages/Support';
 
 function App() {
   return (
@@ -45,6 +46,7 @@ function App() {
               <Route path="/verify-email" element={<VerifyEmail />} />
               <Route path="/forgot-password" element={<ForgotPassword />} />
               <Route path="/reset-password" element={<ResetPassword />} />
+              <Route path="/support" element={<Support />} />
             </Routes>
           </div>
           <Footer />
