@@ -1640,6 +1640,24 @@ app.get('/api/users', authenticateToken, async (req, res) => {
   }
 });
 
+// Aktuellen Benutzer abrufen
+app.get('/api/me', authenticateToken, async (req, res) => {
+  try {
+    const { data: user, error } = await supabase
+      .from('users')
+      .select('id, name, email, role, class, is_verified')
+      .eq('id', req.user.userId)
+      .single();
+
+    if (error) throw error;
+
+    res.json(user);
+  } catch (error) {
+    console.error('Fehler beim Abrufen des Benutzerprofils:', error);
+    res.status(500).json({ error: 'Fehler beim Abrufen des Benutzerprofils' });
+  }
+});
+
 // 🔹 Server starten
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, async () => {
