@@ -248,16 +248,16 @@ app.get('/api/participants', authenticateToken, isAdmin, async (req, res) => {
   res.json(users);
 });
 
-// Benutzer abrufen (nur für Admins)
+// Alle Benutzer abrufen (nur für Admins)
 app.get('/users', authenticateToken, isAdmin, async (req, res) => {
   try {
     const { data: users, error } = await supabase
       .from('users')
-      .select('id, name, email, role, points, class')
+      .select('id, name, email, points, class, role, is_verified')
       .order('name');
 
     if (error) throw error;
-    res.json(users);
+    res.json(users || []);
   } catch (error) {
     console.error('Fehler beim Abrufen der Benutzer:', error);
     res.status(500).json({ message: 'Fehler beim Abrufen der Benutzer' });

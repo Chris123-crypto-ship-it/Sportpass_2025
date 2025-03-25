@@ -39,7 +39,13 @@ const Participants = () => {
       });
 
       const data = response.data;
-      console.log('Geladene Teilnehmer:', data); // Debug-Ausgabe
+      console.log('Geladene Teilnehmer:', data); // Debug für Teilnehmer
+      
+      // Prüfen, ob is_verified in den Daten vorhanden ist
+      if (data.length > 0) {
+        console.log('is_verified in erstem Eintrag:', data[0].is_verified);
+      }
+      
       setParticipants(data);
 
       const classes = [...new Set(data.map(p => p.class).filter(Boolean))];
@@ -232,7 +238,7 @@ const Participants = () => {
                   )}
                 </td>
                 <td>
-                  {participant.is_verified ? (
+                  {participant.is_verified === true ? (
                     <span className="verified-status">
                       <FaCheckCircle className="verified-icon" />
                       Verifiziert
@@ -274,7 +280,7 @@ const Participants = () => {
                       Bearbeiten
                     </button>
                   )}
-                  {!participant.is_verified && (
+                  {participant.is_verified !== true && (
                     <button
                       className="verify-button"
                       onClick={() => handleVerifyUser(participant.id)}

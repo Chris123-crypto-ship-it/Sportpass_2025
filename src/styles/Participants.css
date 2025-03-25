@@ -217,6 +217,7 @@
   gap: 8px;
   color: #28a745;
   font-weight: 500;
+  white-space: nowrap;
 }
 
 .unverified-status {
@@ -225,14 +226,19 @@
   gap: 8px;
   color: #dc3545;
   font-weight: 500;
+  white-space: nowrap;
 }
 
 .verified-icon {
   font-size: 1.2rem;
+  color: #28a745;
+  margin-right: 4px;
 }
 
 .unverified-icon {
   font-size: 1.2rem;
+  color: #dc3545;
+  margin-right: 4px;
 }
 
 .action-buttons {
@@ -251,6 +257,8 @@
   transition: background-color 0.3s;
   min-width: 100px;
   font-weight: 500;
+  display: inline-block;
+  text-align: center;
 }
 
 .verify-button:hover {
