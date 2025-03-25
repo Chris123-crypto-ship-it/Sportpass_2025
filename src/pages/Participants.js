@@ -103,7 +103,7 @@ const Participants = () => {
         { headers: getHeaders() }
       );
 
-      console.log('Verifizierungsantwort:', response.data); // Debug-Ausgabe
+      console.log('Verifizierungsantwort:', response.data);
 
       setParticipants(prevParticipants =>
         prevParticipants.map(p =>
@@ -115,6 +115,26 @@ const Participants = () => {
     } catch (error) {
       console.error('Error verifying user:', error);
       toast.error('Fehler beim Verifizieren des Benutzers');
+    }
+  };
+
+  const handleDeleteUser = async (userId, userName) => {
+    if (window.confirm(`Möchten Sie den Benutzer "${userName}" wirklich löschen?`)) {
+      try {
+        await axios.delete(
+          `${config.API_URL}/users/${userId}`,
+          { headers: getHeaders() }
+        );
+
+        setParticipants(prevParticipants =>
+          prevParticipants.filter(p => p.id !== userId)
+        );
+
+        toast.success('Benutzer erfolgreich gelöscht');
+      } catch (error) {
+        console.error('Error deleting user:', error);
+        toast.error('Fehler beim Löschen des Benutzers');
+      }
     }
   };
 
@@ -270,23 +290,31 @@ const Participants = () => {
                       </button>
                     </div>
                   ) : (
-                    <button
-                      className="edit-button"
-                      onClick={() => setEditingPoints(prev => ({
-                        ...prev,
-                        [participant.id]: participant.points || 0
-                      }))}
-                    >
-                      Bearbeiten
-                    </button>
-                  )}
-                  {participant.is_verified !== true && (
-                    <button
-                      className="verify-button"
-                      onClick={() => handleVerifyUser(participant.id)}
-                    >
-                      Verifizieren
-                    </button>
+                    <div className="button-group">
+                      <button
+                        className="edit-button"
+                        onClick={() => setEditingPoints(prev => ({
+                          ...prev,
+                          [participant.id]: participant.points || 0
+                        }))}
+                      >
+                        Bearbeiten
+                      </button>
+                      {participant.is_verified !== true && (
+                        <button
+                          className="verify-button"
+                          onClick={() => handleVerifyUser(participant.id)}
+                        >
+                          Verifizieren
+                        </button>
+                      )}
+                      <button
+                        className="delete-button"
+                        onClick={() => handleDeleteUser(participant.id, participant.name)}
+                      >
+                        Löschen
+                      </button>
+                    </div>
                   )}
                 </td>
               </tr>
