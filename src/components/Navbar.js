@@ -3,7 +3,11 @@ import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { 
+<<<<<<< HEAD
   FaTachometerAlt, FaMedal, FaTasks, FaChartBar, FaArchive, FaSignInAlt, FaUserPlus, FaSignOutAlt, FaClipboardCheck
+=======
+  FaTachometerAlt, FaMedal, FaTasks, FaChartBar, FaArchive, FaSignInAlt, FaUserPlus, FaSignOutAlt
+>>>>>>> dcb46b5 (neustart)
 } from 'react-icons/fa';
 import logo from '../assets/logo.png';
 
@@ -31,10 +35,13 @@ const Navbar = () => {
             <li><Link to="/tasks"><FaTasks /> Aufgaben</Link></li>
             <li><Link to="/stats"><FaChartBar /> Statistiken</Link></li>
             <li><Link to="/archive"><FaArchive /> Archiv</Link></li>
+<<<<<<< HEAD
             {/* Nur Admins sehen den Aufgabenprüfungs-Link */}
             {user.role === 'admin' && (
               <li><Link to="/task-approval"><FaClipboardCheck /> Aufgabenprüfung</Link></li>
             )}
+=======
+>>>>>>> dcb46b5 (neustart)
             <li><Link to="/profile">Profil</Link></li>
             {/* Nur Admins sehen den Admin-Dashboard-Link und den zusätzlichen Teilnehmer-Link */}
             {user.role === 'admin' && (

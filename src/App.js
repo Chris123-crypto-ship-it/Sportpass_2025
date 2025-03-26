@@ -23,7 +23,10 @@ import VerifyEmail from './pages/VerifyEmail';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 import Support from './pages/Support';
+<<<<<<< HEAD
 import TaskApproval from './pages/TaskApproval';
+=======
+>>>>>>> dcb46b5 (neustart)
 
 function App() {
   return (
@@ -48,7 +51,10 @@ function App() {
               <Route path="/forgot-password" element={<ForgotPassword />} />
               <Route path="/reset-password" element={<ResetPassword />} />
               <Route path="/support" element={<Support />} />
+<<<<<<< HEAD
               <Route path="/task-approval" element={<TaskApproval />} />
+=======
+>>>>>>> dcb46b5 (neustart)
             </Routes>
           </div>
           <Footer />

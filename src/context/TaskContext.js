@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 import React, { createContext, useState, useContext, useCallback, useEffect } from 'react';
+=======
+import React, { createContext, useState, useContext, useCallback } from 'react';
+>>>>>>> dcb46b5 (neustart)
 import { useAuth } from './AuthContext';
 import axios from 'axios';
 import { toast } from 'react-toastify';
@@ -6,6 +10,7 @@ import config from '../config';
 
 const TaskContext = createContext();
 
+<<<<<<< HEAD
 export const useCache = () => {
   const [cache, setCache] = useState({});
 
@@ -58,6 +63,10 @@ export const useCache = () => {
 
 export const TaskProvider = ({ children }) => {
   const { user, token } = useAuth();
+=======
+export const TaskProvider = ({ children }) => {
+  const { user } = useAuth();
+>>>>>>> dcb46b5 (neustart)
   const [tasks, setTasks] = useState([]);
   const [submissions, setSubmissions] = useState([]);
   const [archive, setArchive] = useState([]);
@@ -65,9 +74,12 @@ export const TaskProvider = ({ children }) => {
   const [error, setError] = useState(null);
   const [selectedFile, setSelectedFile] = useState(null);
   const [submissionDetails, setSubmissionDetails] = useState('');
+<<<<<<< HEAD
   const { fetchWithCache, invalidateCache, clearCache } = useCache();
 
   const BASE_URL = config.API_URL;
+=======
+>>>>>>> dcb46b5 (neustart)
 
   const getHeaders = useCallback(() => {
     const token = localStorage.getItem('token');
@@ -88,6 +100,7 @@ export const TaskProvider = ({ children }) => {
     return token;
   }, []);
 
+<<<<<<< HEAD
   const fetchTasks = async () => {
     try {
       setLoading(true);
@@ -129,6 +142,43 @@ export const TaskProvider = ({ children }) => {
     } catch (error) {
       console.error('Fehler beim Abrufen der Einsendungen:', error);
       setError('Fehler beim Abrufen der Einsendungen: ' + (error.message || JSON.stringify(error)));
+=======
+  const fetchTasks = useCallback(async (view) => {
+    try {
+      checkToken();
+      setLoading(true);
+      setError(null);
+
+      const response = await axios.get(`${config.API_URL}/tasks${view ? `?view=${view}` : ''}`, {
+        headers: getHeaders()
+      });
+
+      setTasks(response.data);
+    } catch (error) {
+      console.error('Fehler beim Abrufen der Aufgaben:', error);
+      setError('Fehler beim Laden der Aufgaben');
+      setTasks([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [checkToken, getHeaders]);
+
+  const fetchSubmissions = async () => {
+    try {
+      checkToken();
+      setLoading(true);
+      setError(null);
+
+      const response = await axios.get(`${config.API_URL}/submissions`, {
+        headers: getHeaders()
+      });
+      
+      setSubmissions(response.data);
+    } catch (error) {
+      console.error('Fehler beim Abrufen der Einsendungen:', error);
+      setError('Fehler beim Laden der Einsendungen');
+      setSubmissions([]);
+>>>>>>> dcb46b5 (neustart)
     } finally {
       setLoading(false);
     }
@@ -158,6 +208,7 @@ export const TaskProvider = ({ children }) => {
     }
   }, [checkToken, getHeaders]);
 
+<<<<<<< HEAD
   const addTask = async (taskData) => {
     try {
       setLoading(true);
@@ -286,6 +337,50 @@ export const TaskProvider = ({ children }) => {
     } catch (error) {
       console.error('Fehler beim Löschen der Einsendung:', error);
       setError('Fehler beim Löschen der Einsendung: ' + error.message);
+=======
+  const submitTask = async (taskId, userEmail, file, details) => {
+    try {
+      checkToken();
+      setLoading(true);
+      let file_url = null;
+
+      if (file) {
+        const reader = new FileReader();
+        file_url = await new Promise((resolve) => {
+          reader.onloadend = () => resolve(reader.result);
+          reader.readAsDataURL(file);
+        });
+      }
+
+      const task = tasks.find(t => t.id === taskId);
+      
+      let calculatedPoints = task?.points || 0;
+      let dynamicValue = null;
+      
+      if (task?.dynamic && details?.dynamic_value) {
+        dynamicValue = parseFloat(details.dynamic_value);
+        calculatedPoints = Math.round(dynamicValue * (task.multiplier || 1));
+      }
+
+      const response = await axios.post(`${config.API_URL}/submit-task`, {
+        taskId,
+        userEmail,
+        details: {
+          ...details,
+          dynamic_value: dynamicValue,
+          calculated_points: calculatedPoints
+        },
+        file_url,
+        fileName: file?.name
+      }, {
+        headers: getHeaders()
+      });
+
+      await fetchSubmissions();
+      return true;
+    } catch (error) {
+      console.error('Fehler beim Einreichen der Aufgabe:', error);
+>>>>>>> dcb46b5 (neustart)
       throw error;
     } finally {
       setLoading(false);
@@ -294,6 +389,7 @@ export const TaskProvider = ({ children }) => {
 
   const handleApproveSubmission = async (submissionId, adminComment = '') => {
     try {
+<<<<<<< HEAD
       setLoading(true);
       
       const response = await fetch(`${BASE_URL}/api/submissions/${submissionId}/approve`, {
@@ -322,12 +418,73 @@ export const TaskProvider = ({ children }) => {
     } catch (error) {
       console.error('Fehler beim Genehmigen der Einsendung:', error);
       setError('Fehler beim Genehmigen der Einsendung: ' + error.message);
+=======
+      checkToken();
+      const response = await axios.post(`${config.API_URL}/approve-submission`, 
+        { 
+          submissionId, 
+          adminComment
+        },
+        {
+          headers: getHeaders()
+        }
+      );
+
+      await fetchSubmissions();
+      await fetchArchive();
+      return response.data;
+    } catch (error) {
+      console.error('Fehler bei der Genehmigung:', error);
+      throw error;
+    }
+  };
+
+  const handleRejectSubmission = async (submissionId, adminComment = '') => {
+    try {
+      checkToken();
+      const response = await axios.post(`${config.API_URL}/reject-submission`,
+        { 
+          submissionId, 
+          adminComment
+        },
+        {
+          headers: getHeaders()
+        }
+      );
+
+      await fetchSubmissions();
+      await fetchArchive();
+      return response.data;
+    } catch (error) {
+      console.error('Fehler bei der Ablehnung:', error);
+      setError(error.message || 'Fehler bei der Ablehnung');
+      throw error;
+    }
+  };
+
+  const deleteSubmission = async (submissionId) => {
+    try {
+      checkToken();
+      setLoading(true);
+      setError(null);
+
+      const response = await axios.delete(`${config.API_URL}/delete-submission/${submissionId}`, {
+        headers: getHeaders()
+      });
+
+      console.log('Einsendung erfolgreich gelöscht');
+      await fetchSubmissions();
+    } catch (error) {
+      console.error('Fehler beim Löschen der Einsendung:', error);
+      setError('Fehler beim Löschen der Einsendung');
+>>>>>>> dcb46b5 (neustart)
       throw error;
     } finally {
       setLoading(false);
     }
   };
 
+<<<<<<< HEAD
   const handleRejectSubmission = async (submissionId, adminComment = '') => {
     try {
       setLoading(true);
@@ -358,6 +515,21 @@ export const TaskProvider = ({ children }) => {
     } catch (error) {
       console.error('Fehler beim Ablehnen der Einsendung:', error);
       setError('Fehler beim Ablehnen der Einsendung: ' + error.message);
+=======
+  const deleteTask = async (taskId) => {
+    try {
+      checkToken();
+      setLoading(true);
+      
+      const response = await axios.delete(`${config.API_URL}/delete-task/${taskId}`, {
+        headers: getHeaders()
+      });
+
+      await fetchTasks();
+    } catch (error) {
+      console.error('Fehler beim Löschen der Aufgabe:', error);
+      setError(error.message);
+>>>>>>> dcb46b5 (neustart)
       throw error;
     } finally {
       setLoading(false);
@@ -412,6 +584,7 @@ export const TaskProvider = ({ children }) => {
     fetchTasks,
     fetchSubmissions,
     fetchArchive,
+<<<<<<< HEAD
     addTask,
     deleteTask,
     submitTask,
@@ -422,6 +595,16 @@ export const TaskProvider = ({ children }) => {
     sendConfirmationEmail,
     toggleTaskVisibility,
     clearCache
+=======
+    submitTask,
+    handleApproveSubmission,
+    handleRejectSubmission,
+    deleteSubmission,
+    deleteTask,
+    handlePointChange,
+    sendConfirmationEmail,
+    toggleTaskVisibility,
+>>>>>>> dcb46b5 (neustart)
   };
 
   return (

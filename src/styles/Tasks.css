@@ -534,6 +534,7 @@
 .admin-submissions-grid {
   display: grid;
   gap: 1rem;
+<<<<<<< HEAD
 }
 
 /* Pagination Styles */
@@ -626,4 +627,6 @@
   .pagination {
     flex-wrap: wrap;
   }
+=======
+>>>>>>> dcb46b5 (neustart)
 } 

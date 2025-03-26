@@ -1,4 +1,5 @@
 // API-Konfiguration für verschiedene Umgebungen
+<<<<<<< HEAD
 const config = {
   // API-URL je nach Umgebung
   API_URL: process.env.NODE_ENV === 'production' 
@@ -46,3 +47,12 @@ const config = {
 };
 
 export default config; 
+=======
+const API_URL = process.env.NODE_ENV === 'production'
+  ? 'https://sportpass-2025.onrender.com' // Aktualisierte URL für den gehosteten Backend
+  : 'http://localhost:3001';
+
+export default {
+  API_URL
+}; 
+>>>>>>> dcb46b5 (neustart)

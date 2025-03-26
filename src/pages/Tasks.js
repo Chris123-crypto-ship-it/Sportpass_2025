@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 import React, { useState, useEffect, Suspense, lazy, useRef } from 'react';
+=======
+import React, { useState, useEffect, useRef } from 'react';
+>>>>>>> dcb46b5 (neustart)
 import { useAuth } from '../context/AuthContext';
 import { useTasks } from '../context/TaskContext';
 import { FaRunning, FaHeartbeat, FaDumbbell, FaMedal, FaFire, FaStar, 
@@ -6,9 +10,12 @@ import { FaRunning, FaHeartbeat, FaDumbbell, FaMedal, FaFire, FaStar,
 import { toast } from 'react-toastify';
 import '../styles/Tasks.css';
 
+<<<<<<< HEAD
 // Lazy Load der TaskCard Komponente
 const TaskCard = lazy(() => import('../components/TaskCard'));
 
+=======
+>>>>>>> dcb46b5 (neustart)
 const Tasks = () => {
   const { user } = useAuth();
   const { tasks, submissions, fetchTasks, fetchSubmissions, submitTask, handleApproveSubmission, handleRejectSubmission, deleteTask, deleteSubmission } = useTasks();
@@ -24,6 +31,7 @@ const Tasks = () => {
   const [activeSubmissionId, setActiveSubmissionId] = useState(null);
   const [fileUploads, setFileUploads] = useState({});
   const fileInputRefs = useRef({});
+<<<<<<< HEAD
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -53,6 +61,23 @@ const Tasks = () => {
 
     loadData();
   }, [fetchTasks, fetchSubmissions]);
+=======
+  const [loading, setLoading] = useState(false);
+
+  const categories = [
+    { value: 'all', label: 'Alle Kategorien' },
+    { value: 'kraft', label: 'Kraft' },
+    { value: 'flexibilität', label: 'Flexibilität' },
+    { value: 'cardio', label: 'Cardio' },
+    { value: 'ausdauer', label: 'Ausdauer' },
+    { value: 'team', label: 'Team' }
+  ];
+
+  useEffect(() => {
+    fetchTasks();
+    fetchSubmissions();
+  }, []);
+>>>>>>> dcb46b5 (neustart)
 
   useEffect(() => {
     if (!tasks) return;
@@ -249,28 +274,47 @@ const Tasks = () => {
     
     if (submission.file_url.match(/\.(jpg|jpeg|png|gif)$/i) || submission.file_url.startsWith('data:image')) {
       return (
+<<<<<<< HEAD
         <div className="submission-file-preview">
           <img 
             src={submission.file_url} 
             alt="Eingereichte Datei"
             className="submission-preview-image"
           />
+=======
+        <div className="submission-attachment">
+          <img src={submission.file_url} alt="Eingereichte Datei" />
+>>>>>>> dcb46b5 (neustart)
         </div>
       );
     }
     
     if (submission.file_url.match(/\.(mp4|webm|ogg)$/i) || submission.file_url.startsWith('data:video')) {
       return (
+<<<<<<< HEAD
         <div className="submission-file-preview">
           <video controls className="submission-preview-video">
+=======
+        <div className="submission-attachment">
+          <video controls>
+>>>>>>> dcb46b5 (neustart)
             <source src={submission.file_url} type="video/mp4" />
             Ihr Browser unterstützt keine Videowiedergabe.
           </video>
         </div>
       );
     }
+<<<<<<< HEAD
     
     return null;
+=======
+
+    return (
+      <div className="submission-file">
+        <FaFile /> Datei angehängt
+      </div>
+    );
+>>>>>>> dcb46b5 (neustart)
   };
 
   const userSubmissions = submissions.filter(sub => 
@@ -303,12 +347,25 @@ const Tasks = () => {
   };
 
   const handleDeleteSubmission = async (submissionId) => {
+<<<<<<< HEAD
     if (window.confirm('Möchtest du diese Einsendung wirklich löschen?')) {
       try {
         await deleteSubmission(submissionId);
       } catch (error) {
         console.error("Fehler beim Löschen der Einsendung:", error);
       }
+=======
+    if (!window.confirm('Möchtest du diese Einsendung wirklich löschen?')) {
+      return;
+    }
+
+    try {
+      await deleteSubmission(submissionId);
+      await fetchSubmissions();
+    } catch (error) {
+      console.error('Fehler beim Löschen der Einsendung:', error);
+      alert('Fehler beim Löschen der Einsendung');
+>>>>>>> dcb46b5 (neustart)
     }
   };
 
@@ -363,12 +420,225 @@ const Tasks = () => {
     );
   };
 
+<<<<<<< HEAD
   // Pagination für Tasks
   const indexOfLastTask = currentPage * tasksPerPage;
   const indexOfFirstTask = indexOfLastTask - tasksPerPage;
   const currentTasks = filteredTasks.slice(indexOfFirstTask, indexOfLastTask);
   const paginate = pageNumber => setCurrentPage(pageNumber);
   const totalPages = Math.ceil(filteredTasks.length / tasksPerPage);
+=======
+  const TaskCard = ({ task }) => {
+    console.log('Task Data:', {
+      expiration_date: task.expiration_date,
+      difficulty: task.difficulty,
+      task: task
+    });
+
+    const [selectedFile, setSelectedFile] = useState(null);
+    const [dynamicValue, setDynamicValue] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const { user } = useAuth();
+    const { submitTask } = useTasks();
+    const isExpired = task.expiration_date && new Date(task.expiration_date) < new Date();
+
+    const handleSubmit = async () => {
+      if (!user) {
+        alert('Bitte melde dich an, um eine Aufgabe einzureichen.');
+        return;
+      }
+
+      if (isExpired) {
+        alert('Diese Aufgabe ist bereits abgelaufen.');
+        return;
+      }
+
+      if (!selectedFile) {
+        alert('Bitte wähle eine Datei aus.');
+        return;
+      }
+
+      if (task.dynamic && (!dynamicValue || parseFloat(dynamicValue) <= 0)) {
+        alert(`Bitte gib einen Wert für ${task.dynamic_type === 'minutes' ? 'Minuten' : 'Kilometer'} ein.`);
+        return;
+      }
+
+      try {
+        setIsSubmitting(true);
+
+        const details = task.dynamic 
+          ? {
+              dynamic_value: dynamicValue,
+              dynamic_type: task.dynamic_type,
+              calculated_points: Math.round(parseFloat(dynamicValue) * task.multiplier)
+            }
+          : {};
+
+        await submitTask(task.id, user.email, selectedFile, details);
+
+        setSelectedFile(null);
+        setDynamicValue('');
+        alert('Aufgabe erfolgreich eingereicht!');
+      } catch (error) {
+        console.error('Fehler beim Einreichen:', error);
+        alert('Fehler beim Einreichen der Aufgabe. Bitte versuche es erneut.');
+      } finally {
+        setIsSubmitting(false);
+      }
+    };
+
+    const formatExpirationDate = (dateString) => {
+      if (!dateString) return null;
+      try {
+        const date = new Date(dateString);
+        return date.toLocaleString('de-DE', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+      } catch (error) {
+        console.error('Fehler beim Formatieren des Datums:', error);
+        return null;
+      }
+    };
+
+    const renderDifficultyStars = (difficulty) => {
+      const level = parseInt(difficulty) || 0;
+      return (
+        <div className="difficulty-stars">
+          {[1, 2, 3].map((star) => (
+            <span 
+              key={star} 
+              className={`star ${star <= level ? 'active' : ''}`}
+            >
+              ★
+            </span>
+          ))}
+        </div>
+      );
+    };
+
+    return (
+      <div className="task-card">
+        <div className="task-header">
+          <h3 className="task-title">{task.title}</h3>
+          <div className="task-meta-info">
+            <span className={`task-category ${task.category.toLowerCase()}`}>
+              {task.category}
+            </span>
+            <div className="task-points">
+              {task.dynamic ? (
+                <span>{task.multiplier} Punkte pro {task.dynamic_type === 'minutes' ? 'Minute' : 'Kilometer'}</span>
+              ) : (
+                <span>{task.points} Punkte</span>
+              )}
+            </div>
+          </div>
+        </div>
+
+        <div className="task-details">
+          <div className="task-description">
+            {task.description}
+          </div>
+
+          <div className="meta-info">
+            <div className="difficulty">
+              <span>Schwierigkeit: </span>
+              {renderDifficultyStars(task.difficulty)}
+            </div>
+
+            {task.expiration_date && (
+              <div className="expiration">
+                <span>
+                  {new Date(task.expiration_date) < new Date() 
+                    ? 'Abgelaufen am: ' 
+                    : 'Läuft ab am: '
+                  }
+                  {formatExpirationDate(task.expiration_date)}
+                </span>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="task-submission">
+          {task.dynamic && (
+            <div className="dynamic-input-wrapper">
+              <label>
+                {task.dynamic_type === 'minutes' ? 'Minuten' : 'Kilometer'}:
+                <input
+                  type="number"
+                  min="0"
+                  step={task.dynamic_type === 'minutes' ? '1' : '0.1'}
+                  value={dynamicValue}
+                  onChange={(e) => setDynamicValue(e.target.value)}
+                  className="dynamic-input"
+                />
+              </label>
+              {dynamicValue > 0 && (
+                <div className="calculated-points">
+                  = {Math.round(parseFloat(dynamicValue) * task.multiplier)} Punkte
+                </div>
+              )}
+            </div>
+          )}
+
+          <div className="file-upload-section">
+            <label className="file-upload-label">
+              <input
+                type="file"
+                accept="image/*,video/*"
+                onChange={(e) => {
+                  const file = e.target.files[0];
+                  if (file && (file.type.startsWith('image/') || file.type.startsWith('video/'))) {
+                    setSelectedFile(file);
+                  } else {
+                    alert('Bitte nur Bilder oder Videos hochladen');
+                  }
+                }}
+                style={{ display: 'none' }}
+              />
+              {!selectedFile ? (
+                <div className="upload-placeholder">
+                  <FaUpload />
+                  <span>Nachweis hochladen (Bild/Video)</span>
+                </div>
+              ) : (
+                <div className="file-preview">
+                  {selectedFile.type.startsWith('image/') ? (
+                    <img src={URL.createObjectURL(selectedFile)} alt="Vorschau" />
+                  ) : (
+                    <div className="video-preview">
+                      <FaVideo />
+                      <span>{selectedFile.name}</span>
+                    </div>
+                  )}
+                  <button
+                    type="button"
+                    className="remove-file"
+                    onClick={() => setSelectedFile(null)}
+                  >
+                    <FaTrash />
+                  </button>
+                </div>
+              )}
+            </label>
+          </div>
+
+          <button
+            className="submit-button"
+            onClick={handleSubmit}
+            disabled={!selectedFile || (task.dynamic && !dynamicValue)}
+          >
+            Aufgabe einreichen
+          </button>
+        </div>
+      </div>
+    );
+  };
+>>>>>>> dcb46b5 (neustart)
 
   return (
     <div className="tasks-container">
@@ -381,25 +651,41 @@ const Tasks = () => {
               <div className="filter-buttons">
                 <button 
                   className={filter === 'all' ? 'active' : ''} 
+<<<<<<< HEAD
                   onClick={() => {setFilter('all'); setCurrentPage(1);}}
+=======
+                  onClick={() => setFilter('all')}
+>>>>>>> dcb46b5 (neustart)
                 >
                   Alle
                 </button>
                 <button 
                   className={filter === 'active' ? 'active' : ''} 
+<<<<<<< HEAD
                   onClick={() => {setFilter('active'); setCurrentPage(1);}}
+=======
+                  onClick={() => setFilter('active')}
+>>>>>>> dcb46b5 (neustart)
                 >
                   Aktiv
                 </button>
                 <button 
                   className={filter === 'pending' ? 'active' : ''} 
+<<<<<<< HEAD
                   onClick={() => {setFilter('pending'); setCurrentPage(1);}}
+=======
+                  onClick={() => setFilter('pending')}
+>>>>>>> dcb46b5 (neustart)
                 >
                   Ausstehend
                 </button>
                 <button 
                   className={filter === 'completed' ? 'active' : ''} 
+<<<<<<< HEAD
                   onClick={() => {setFilter('completed'); setCurrentPage(1);}}
+=======
+                  onClick={() => setFilter('completed')}
+>>>>>>> dcb46b5 (neustart)
                 >
                   Abgeschlossen
                 </button>
@@ -411,10 +697,14 @@ const Tasks = () => {
               <select 
                 className="category-filter"
                 value={categoryFilter}
+<<<<<<< HEAD
                 onChange={(e) => {
                   setCategoryFilter(e.target.value);
                   setCurrentPage(1);
                 }}
+=======
+                onChange={(e) => setCategoryFilter(e.target.value)}
+>>>>>>> dcb46b5 (neustart)
               >
                 {categories.map(category => (
                   <option key={category.value} value={category.value}>
@@ -433,6 +723,7 @@ const Tasks = () => {
         ) : filteredTasks.length === 0 ? (
           <div className="no-tasks">Keine Aufgaben gefunden</div>
         ) : (
+<<<<<<< HEAD
           <>
             <Suspense fallback={<div className="loading">Laden der Aufgaben...</div>}>
               {currentTasks.map(task => (
@@ -459,6 +750,11 @@ const Tasks = () => {
               </div>
             )}
           </>
+=======
+          filteredTasks.map(task => (
+            <TaskCard key={task.id} task={task} />
+          ))
+>>>>>>> dcb46b5 (neustart)
         )}
       </div>
 
@@ -501,6 +797,87 @@ const Tasks = () => {
             )}
       </div>
 
+<<<<<<< HEAD
+=======
+      {user?.role === 'admin' && (
+        <div className="admin-section">
+          <h1 className="admin-title">Aufgabenüberprüfung</h1>
+          <div className="admin-submissions-grid">
+              {submissions
+                .filter(s => s.status === 'pending')
+              .map(submission => {
+                const task = tasks.find(t => t.id === submission.task_id);
+                return (
+                  <div key={submission.id} className="admin-submission-card">
+                    <div className="admin-submission-header">
+                      <h3>{task?.title}</h3>
+                      <div className="admin-submission-info">
+                        <span className="admin-user">
+                          <FaUser /> {submission.user_email}
+                        </span>
+                        <span className="admin-points">
+                          {task?.dynamic ? (
+                            `${submission.submission_details?.task_points || 0} Punkte (${task.multiplier} pro ${task.dynamic_type})`
+                          ) : (
+                            `${task?.points || 0} Punkte`
+                          )}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="admin-submission-content">
+                      {submission.file_url && (
+                        <div className="admin-file-preview">
+                          {submission.file_url.match(/\.(jpg|jpeg|png|gif)$/i) || 
+                           submission.file_url.startsWith('data:image') ? (
+                            <img 
+                              src={submission.file_url} 
+                              alt="Eingereichte Datei"
+                              className="admin-preview-image"
+                            />
+                          ) : (
+                            <video controls className="admin-preview-video">
+                              <source src={submission.file_url} type="video/mp4" />
+                              Ihr Browser unterstützt keine Videowiedergabe.
+                            </video>
+                          )}
+                        </div>
+                      )}
+
+                      <div className="admin-submission-details">
+                        <textarea
+                          className="admin-comment"
+                          placeholder="Admin-Kommentar..."
+                          value={submission.id === activeSubmissionId ? adminComment : ''}
+                          onChange={(e) => {
+                            setAdminComment(e.target.value);
+                            setActiveSubmissionId(submission.id);
+                          }}
+                        />
+
+                        <div className="admin-actions">
+                          <button 
+                            className="approve-button"
+                            onClick={() => handleApproveSubmission(submission.id, adminComment)}
+                          >
+                            Genehmigen
+                          </button>
+                          <button 
+                            className="reject-button"
+                            onClick={() => handleRejectSubmission(submission.id, adminComment)}
+                          >
+                            Ablehnen
+                          </button>
+                        </div>
+                        </div>
+                      </div>
+                    </div>
+                );
+              })}
+            </div>
+        </div>
+      )}
+>>>>>>> dcb46b5 (neustart)
     </div>
   );
 };

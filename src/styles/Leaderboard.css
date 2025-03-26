@@ -28,6 +28,7 @@
 .rank-3 {
   background: #cd7f32; /* Bronze */
 }
+<<<<<<< HEAD
 
 .achievements-cell {
   display: flex;
@@ -140,3 +141,5 @@
     margin-top: 20px;
   }
 }
+=======
+>>>>>>> dcb46b5 (neustart)
