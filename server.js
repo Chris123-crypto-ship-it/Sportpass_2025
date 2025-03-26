@@ -613,6 +613,37 @@ app.get('/tasks', async (req, res) => {
   }
 });
 
+// Benutzer löschen (nur für Admins)
+app.delete('/users/:id', authenticateToken, isAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    // Prüfen, ob der Benutzer existiert
+    const { data: userExists, error: checkError } = await supabase
+      .from('users')
+      .select('id')
+      .eq('id', id)
+      .single();
+
+    if (checkError || !userExists) {
+      return res.status(404).json({ message: 'Benutzer nicht gefunden' });
+    }
+
+    // Benutzer löschen
+    const { error } = await supabase
+      .from('users')
+      .delete()
+      .eq('id', id);
+
+    if (error) throw error;
+    
+    res.json({ message: 'Benutzer erfolgreich gelöscht' });
+  } catch (error) {
+    console.error('Fehler beim Löschen des Benutzers:', error);
+    res.status(500).json({ message: 'Fehler beim Löschen des Benutzers' });
+  }
+});
+
 // Port
 const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => {

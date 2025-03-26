@@ -3,8 +3,7 @@ import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { 
-  FaTachometerAlt, FaMedal, FaTasks, FaChartBar, FaArchive, FaSignInAlt, FaUserPlus, FaSignOutAlt, FaClipboardCheck,
-  FaUserCog, FaUsers
+  FaTachometerAlt, FaMedal, FaTasks, FaChartBar, FaArchive, FaSignInAlt, FaUserPlus, FaSignOutAlt, FaClipboardCheck
 } from 'react-icons/fa';
 import logo from '../assets/logo.png';
 
@@ -32,13 +31,16 @@ const Navbar = () => {
             <li><Link to="/tasks"><FaTasks /> Aufgaben</Link></li>
             <li><Link to="/stats"><FaChartBar /> Statistiken</Link></li>
             <li><Link to="/archive"><FaArchive /> Archiv</Link></li>
+            {/* Nur Admins sehen den Aufgabenprüfungs-Link */}
+            {user.role === 'admin' && (
+              <li><Link to="/task-approval"><FaClipboardCheck /> Aufgabenprüfung</Link></li>
+            )}
             <li><Link to="/profile">Profil</Link></li>
             {/* Nur Admins sehen den Admin-Dashboard-Link und den zusätzlichen Teilnehmer-Link */}
             {user.role === 'admin' && (
               <>
-                <li><Link to="/admin-dashboard"><FaUserCog /> Admin Dashboard</Link></li>
-                <li><Link to="/participants"><FaUsers /> Teilnehmer</Link></li>
-                <li><Link to="/task-approval"><FaClipboardCheck /> Aufgabenprüfung</Link></li>
+                <li><Link to="/admin-dashboard">Admin Dashboard</Link></li>
+                <li><Link to="/participants">Teilnehmer</Link></li>
               </>
             )}
             <li>{user.name}</li>
