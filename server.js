@@ -58,12 +58,12 @@ const SECRET_KEY = process.env.SECRET_KEY || 'geheimes_token';
 // Authentifizierungs-Middleware
 const authenticateToken = (req, res, next) => {
   try {
-    const authHeader = req.headers['authorization'];
+  const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
 
-    if (!token) {
+  if (!token) {
       return res.status(401).json({ message: 'Kein Token vorhanden' });
-    }
+  }
 
     const decoded = jwt.verify(token, SECRET_KEY);
     req.user = decoded;
@@ -210,18 +210,18 @@ app.post("/register", authLimiter, async (req, res) => {
     }
 
     if (existingUsers) {
-      return res.status(400).json({ error: "Diese E-Mail-Adresse wird bereits verwendet" });
-    }
-
-    // Passwort hashen
+        return res.status(400).json({ error: "Diese E-Mail-Adresse wird bereits verwendet" });
+      }
+      
+      // Passwort hashen
     const hashedPassword = await bcrypt.hash(password, 10);
     
     // Benutzer in Supabase einfügen
     const { data: newUser, error: insertError } = await supabase
       .from('users')
       .insert([{
-        name,
-        email,
+          name,
+          email,
         password: hashedPassword,
         class: userClass || '',
         role: 'user',
@@ -235,21 +235,21 @@ app.post("/register", authLimiter, async (req, res) => {
 
     if (insertError) {
       console.error("Fehler beim Einfügen des Benutzers:", insertError);
-      return res.status(500).json({ 
-        error: "Fehler beim Erstellen des Benutzers", 
+            return res.status(500).json({ 
+              error: "Fehler beim Erstellen des Benutzers", 
         details: insertError.message 
-      });
-    }
-
+            });
+          }
+          
     // Verifizierungs-E-Mail senden
     await sendVerificationEmail(email, verificationCode);
     
     console.log("Benutzer erfolgreich registriert und Verifizierungs-E-Mail gesendet");
-    return res.status(201).json({ 
+          return res.status(201).json({ 
       message: "Benutzer erfolgreich registriert. Bitte überprüfen Sie Ihre E-Mails.",
-      success: true
+            success: true
     });
-
+    
   } catch (error) {
     console.error("Fehler bei der Registrierung:", error);
     return res.status(500).json({ error: "Interner Serverfehler" });
@@ -259,7 +259,7 @@ app.post("/register", authLimiter, async (req, res) => {
 // 🔹 Login (mit Rate-Limiting)
 app.post('/login', authLimiter, async (req, res) => {
   try {
-    const { email, password } = req.body;
+  const { email, password } = req.body;
 
     // Benutzer in der Datenbank suchen
     const { data: user, error } = await supabase
@@ -292,28 +292,28 @@ app.post('/login', authLimiter, async (req, res) => {
     }
 
     // JWT Token generieren
-    const token = jwt.sign(
+  const token = jwt.sign(
       { 
         userId: user.id,
-        email: user.email,
+        email: user.email, 
         role: user.role 
       },
-      SECRET_KEY,
+    SECRET_KEY,
       { expiresIn: '24h' }
-    );
-
+  );
+  
     // Erfolgreiche Anmeldung
-    res.json({
+  res.json({
       message: "Erfolgreich eingeloggt",
       token,
-      user: {
-        id: user.id,
-        name: user.name,
+    user: {
+      id: user.id,
+      name: user.name,
         email: user.email,
-        role: user.role,
+      role: user.role,
         class: user.class
-      }
-    });
+    }
+  });
 
   } catch (error) {
     console.error("Fehler beim Login:", error);
@@ -369,12 +369,12 @@ app.get('/api/tasks', cacheMiddleware(60 * 5), async (req, res) => {
       .from('tasks')
       .select('*')
       .order('created_at', { ascending: false });
-      
+
     if (error) {
       console.error("Fehler beim Abrufen der Aufgaben:", error);
       return res.status(500).json({ error: "Fehler beim Abrufen der Aufgaben" });
-    }
-    
+}
+
     res.json(tasks);
   } catch (error) {
     console.error("Serverfehler bei Aufgaben:", error);
@@ -396,12 +396,12 @@ app.get('/api/submissions', authenticateToken, async (req, res) => {
     query = query.order('created_at', { ascending: false }).limit(100);
     
     const { data, error } = await query;
-    
+
     if (error) {
       console.error("Fehler beim Abrufen der Einsendungen:", error);
       return res.status(500).json({ error: "Fehler beim Abrufen der Einsendungen" });
     }
-    
+
     res.json(data);
   } catch (error) {
     console.error("Serverfehler bei Einsendungen:", error);
@@ -412,7 +412,7 @@ app.get('/api/submissions', authenticateToken, async (req, res) => {
 // 🔹 Einsendung genehmigen
 app.post('/api/submissions/:id/approve', authenticateToken, isAdmin, async (req, res) => {
   try {
-    const { id } = req.params;
+  const { id } = req.params;
     const { admin_comment } = req.body;
     
     // Bestehende Einsendung abrufen
@@ -421,12 +421,12 @@ app.post('/api/submissions/:id/approve', authenticateToken, isAdmin, async (req,
       .select('*')
       .eq('id', id)
       .single();
-      
+
     if (fetchError) {
       console.error("Fehler beim Abrufen der Einsendung:", fetchError);
       return res.status(500).json({ error: "Fehler beim Abrufen der Einsendung" });
     }
-    
+
     if (!submission) {
       return res.status(404).json({ error: "Einsendung nicht gefunden" });
     }
@@ -476,7 +476,7 @@ app.post('/api/submissions/:id/reject', authenticateToken, isAdmin, async (req, 
       .eq('id', id)
       .select()
       .single();
-      
+
     if (error) {
       console.error("Fehler beim Ablehnen der Einsendung:", error);
       return res.status(500).json({ error: "Fehler beim Ablehnen der Einsendung" });
@@ -593,14 +593,14 @@ app.get('/tasks', async (req, res) => {
     }
 
     const { data: tasks, error } = await withTimeout(query, 8000);
-      
+
     if (error) {
       console.error('Fehler beim Abrufen der Aufgaben:', error);
       return res.status(500).json({ 
         message: 'Fehler beim Abrufen der Aufgaben',
-        error: error.message
-      });
-    }
+      error: error.message 
+    });
+  }
     
     // Aufgaben direkt zurückgeben, ohne Modifikationen
     res.json(tasks);
