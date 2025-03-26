@@ -534,4 +534,96 @@
 .admin-submissions-grid {
   display: grid;
   gap: 1rem;
+}
+
+/* Pagination Styles */
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 30px;
+  gap: 15px;
+  grid-column: 1 / -1;
+  padding: 15px 0;
+}
+
+.page-button {
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.page-button:hover:not(:disabled) {
+  background-color: #2563eb;
+}
+
+.page-button:disabled {
+  background-color: #93c5fd;
+  cursor: not-allowed;
+}
+
+.page-info {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #4b5563;
+}
+
+/* Submission Preview Styles */
+.submission-file-preview {
+  margin: 10px 0;
+  text-align: center;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  overflow: hidden;
+  padding: 10px;
+}
+
+.submission-preview-image, .submission-preview-video {
+  max-width: 100%;
+  max-height: 200px;
+  object-fit: contain;
+  border-radius: 4px;
+}
+
+/* Loading Styles */
+.loading {
+  text-align: center;
+  padding: 30px;
+  font-size: 1.2rem;
+  color: #4b5563;
+  grid-column: 1 / -1;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+  .filter-section {
+    flex-direction: column;
+  }
+  
+  .filter-container {
+    width: 100%;
+  }
+  
+  .filter-group {
+    width: 100%;
+  }
+  
+  .filter-buttons {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 5px;
+  }
+  
+  .tasks-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .pagination {
+    flex-wrap: wrap;
+  }
 } 

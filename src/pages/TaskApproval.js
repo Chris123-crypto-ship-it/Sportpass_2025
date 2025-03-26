@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useTasks } from '../context/TaskContext';
-import { FaUser, FaMedal, FaCheckCircle, FaTimesCircle, FaTag } from 'react-icons/fa';
+import { FaUser, FaMedal, FaCheckCircle, FaTimesCircle, FaTag, FaAngleLeft, FaAngleRight } from 'react-icons/fa';
 import { toast } from 'react-toastify';
 import '../styles/TaskApproval.css';
 
@@ -11,17 +11,49 @@ const TaskApproval = () => {
   const [adminComment, setAdminComment] = useState('');
   const [activeSubmissionId, setActiveSubmissionId] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(5);
+  const [filteredSubmissions, setFilteredSubmissions] = useState([]);
   
   useEffect(() => {
-    fetchTasks();
-    fetchSubmissions();
+    const loadData = async () => {
+      try {
+        setLoading(true);
+        await fetchTasks();
+        await fetchSubmissions();
+      } catch (error) {
+        console.error('Fehler beim Laden der Daten:', error);
+        toast.error('Daten konnten nicht geladen werden. Bitte versuche es später erneut.');
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    loadData();
   }, []);
+
+  useEffect(() => {
+    if (submissions && submissions.length > 0) {
+      const pending = submissions.filter(s => s.status === 'pending');
+      setFilteredSubmissions(pending);
+    }
+  }, [submissions]);
 
   if (!user || user.role !== 'admin') {
     return <p>Sie haben keine Berechtigung, auf diese Seite zuzugreifen.</p>;
   }
 
-  const pendingSubmissions = submissions.filter(s => s.status === 'pending');
+  // Paginierungslogik
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentSubmissions = filteredSubmissions.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(filteredSubmissions.length / itemsPerPage);
+
+  const paginate = (pageNumber) => {
+    if (pageNumber > 0 && pageNumber <= totalPages) {
+      setCurrentPage(pageNumber);
+    }
+  };
 
   const renderAdminSubmissionPreview = (submission) => {
     if (!submission.file_url) return null;
@@ -59,6 +91,16 @@ const TaskApproval = () => {
       toast.success('Aufgabe erfolgreich genehmigt!');
       setAdminComment('');
       setActiveSubmissionId(null);
+      
+      // Aktualisiere die gefilterten Submissions nach dem Genehmigen
+      setFilteredSubmissions(prevSubmissions => 
+        prevSubmissions.filter(s => s.id !== submissionId)
+      );
+      
+      // Überprüfe, ob die aktuelle Seite noch Elemente hat
+      if (currentSubmissions.length === 1 && currentPage > 1) {
+        setCurrentPage(currentPage - 1);
+      }
     } catch (error) {
       console.error('Fehler bei der Genehmigung:', error);
       toast.error('Fehler bei der Genehmigung der Aufgabe');
@@ -74,6 +116,16 @@ const TaskApproval = () => {
       toast.success('Aufgabe erfolgreich abgelehnt!');
       setAdminComment('');
       setActiveSubmissionId(null);
+      
+      // Aktualisiere die gefilterten Submissions nach der Ablehnung
+      setFilteredSubmissions(prevSubmissions => 
+        prevSubmissions.filter(s => s.id !== submissionId)
+      );
+      
+      // Überprüfe, ob die aktuelle Seite noch Elemente hat
+      if (currentSubmissions.length === 1 && currentPage > 1) {
+        setCurrentPage(currentPage - 1);
+      }
     } catch (error) {
       console.error('Fehler bei der Ablehnung:', error);
       toast.error('Fehler bei der Ablehnung der Aufgabe');
@@ -88,73 +140,95 @@ const TaskApproval = () => {
       
       {loading ? (
         <div className="loading">Laden...</div>
-      ) : pendingSubmissions.length === 0 ? (
+      ) : filteredSubmissions.length === 0 ? (
         <div className="no-submissions">
           Keine ausstehenden Einsendungen zur Überprüfung vorhanden.
         </div>
       ) : (
-        <div className="admin-submissions-grid">
-          {pendingSubmissions.map(submission => {
-            const task = tasks.find(t => t.id === submission.task_id);
-            return (
-              <div key={submission.id} className="admin-submission-card">
-                <div className="admin-submission-header">
-                  <h3>{task?.title || 'Unbekannte Aufgabe'}</h3>
-                  <div className="admin-submission-info">
-                    <span className="admin-user">
-                      <FaUser /> {submission.user_email}
-                    </span>
-                    <span className="admin-category">
-                      <FaTag /> {task?.category || 'Keine Kategorie'}
-                    </span>
-                    <span className="admin-points">
-                      <FaMedal />
-                      {task?.dynamic ? (
-                        `${submission.submission_details?.calculated_points || 0} Punkte (${task.multiplier} pro ${task.dynamic_type === 'minutes' ? 'Minute' : 'Kilometer'})`
-                      ) : (
-                        `${task?.points || 0} Punkte`
-                      )}
-                    </span>
+        <>
+          <div className="admin-submissions-grid">
+            {currentSubmissions.map(submission => {
+              const task = tasks.find(t => t.id === submission.task_id);
+              return (
+                <div key={submission.id} className="admin-submission-card">
+                  <div className="admin-submission-header">
+                    <h3>{task?.title || 'Unbekannte Aufgabe'}</h3>
+                    <div className="admin-submission-info">
+                      <span className="admin-user">
+                        <FaUser /> {submission.user_email}
+                      </span>
+                      <span className="admin-category">
+                        <FaTag /> {task?.category || 'Keine Kategorie'}
+                      </span>
+                      <span className="admin-points">
+                        <FaMedal />
+                        {task?.dynamic ? (
+                          `${submission.submission_details?.calculated_points || 0} Punkte (${task.multiplier} pro ${task.dynamic_type === 'minutes' ? 'Minute' : 'Kilometer'})`
+                        ) : (
+                          `${task?.points || 0} Punkte`
+                        )}
+                      </span>
+                    </div>
                   </div>
-                </div>
 
-                <div className="admin-submission-content">
-                  {renderAdminSubmissionPreview(submission)}
+                  <div className="admin-submission-content">
+                    {renderAdminSubmissionPreview(submission)}
 
-                  <div className="admin-submission-details">
-                    <textarea
-                      className="admin-comment"
-                      placeholder="Admin-Kommentar..."
-                      value={submission.id === activeSubmissionId ? adminComment : ''}
-                      onChange={(e) => {
-                        setAdminComment(e.target.value);
-                        setActiveSubmissionId(submission.id);
-                      }}
-                      onClick={() => setActiveSubmissionId(submission.id)}
-                    />
+                    <div className="admin-submission-details">
+                      <textarea
+                        className="admin-comment"
+                        placeholder="Admin-Kommentar..."
+                        value={submission.id === activeSubmissionId ? adminComment : ''}
+                        onChange={(e) => {
+                          setAdminComment(e.target.value);
+                          setActiveSubmissionId(submission.id);
+                        }}
+                        onClick={() => setActiveSubmissionId(submission.id)}
+                      />
 
-                    <div className="admin-actions">
-                      <button 
-                        className="approve-button"
-                        onClick={() => handleApprove(submission.id)}
-                        disabled={loading}
-                      >
-                        <FaCheckCircle /> Genehmigen
-                      </button>
-                      <button 
-                        className="reject-button"
-                        onClick={() => handleReject(submission.id)}
-                        disabled={loading}
-                      >
-                        <FaTimesCircle /> Ablehnen
-                      </button>
+                      <div className="admin-actions">
+                        <button 
+                          className="approve-button"
+                          onClick={() => handleApprove(submission.id)}
+                          disabled={loading}
+                        >
+                          <FaCheckCircle /> Genehmigen
+                        </button>
+                        <button 
+                          className="reject-button"
+                          onClick={() => handleReject(submission.id)}
+                          disabled={loading}
+                        >
+                          <FaTimesCircle /> Ablehnen
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+
+          {totalPages > 1 && (
+            <div className="pagination">
+              <button 
+                onClick={() => paginate(currentPage - 1)} 
+                disabled={currentPage === 1}
+                className="pagination-button"
+              >
+                <FaAngleLeft />
+              </button>
+              <span className="page-info">{currentPage} / {totalPages}</span>
+              <button 
+                onClick={() => paginate(currentPage + 1)} 
+                disabled={currentPage === totalPages}
+                className="pagination-button"
+              >
+                <FaAngleRight />
+              </button>
+            </div>
+          )}
+        </>
       )}
     </div>
   );

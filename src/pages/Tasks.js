@@ -1,10 +1,13 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, Suspense, lazy } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useTasks } from '../context/TaskContext';
 import { FaRunning, FaHeartbeat, FaDumbbell, FaMedal, FaFire, FaStar, 
          FaUpload, FaFileImage, FaVideo, FaTrash, FaClock, FaCheck, FaTimes, FaFile, FaImage, FaCheckCircle, FaTimesCircle, FaUser, FaTag, FaFilter } from 'react-icons/fa';
 import { toast } from 'react-toastify';
 import '../styles/Tasks.css';
+
+// Lazy Load der TaskCard Komponente
+const TaskCard = lazy(() => import('../components/TaskCard'));
 
 const Tasks = () => {
   const { user } = useAuth();
@@ -21,21 +24,35 @@ const Tasks = () => {
   const [activeSubmissionId, setActiveSubmissionId] = useState(null);
   const [fileUploads, setFileUploads] = useState({});
   const fileInputRefs = useRef({});
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [tasksPerPage] = useState(6); // 6 Aufgaben pro Seite
 
   const categories = [
     { value: 'all', label: 'Alle Kategorien' },
-    { value: 'kraft', label: 'Kraft' },
-    { value: 'flexibilität', label: 'Flexibilität' },
-    { value: 'cardio', label: 'Cardio' },
-    { value: 'ausdauer', label: 'Ausdauer' },
-    { value: 'team', label: 'Team' }
+    ...Array.from(new Set(tasks.map(task => task.category)))
+      .filter(Boolean)
+      .sort()
+      .map(category => ({ value: category, label: category }))
   ];
 
   useEffect(() => {
-    fetchTasks();
-    fetchSubmissions();
-  }, []);
+    const loadData = async () => {
+      try {
+        setLoading(true);
+        await fetchTasks();
+        await fetchSubmissions();
+      } catch (error) {
+        console.error("Fehler beim Laden der Daten:", error);
+        setError("Daten konnten nicht geladen werden. Bitte versuche es später erneut.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
+  }, [fetchTasks, fetchSubmissions]);
 
   useEffect(() => {
     if (!tasks) return;
@@ -232,28 +249,28 @@ const Tasks = () => {
     
     if (submission.file_url.match(/\.(jpg|jpeg|png|gif)$/i) || submission.file_url.startsWith('data:image')) {
       return (
-        <div className="submission-attachment">
-          <img src={submission.file_url} alt="Eingereichte Datei" />
+        <div className="submission-file-preview">
+          <img 
+            src={submission.file_url} 
+            alt="Eingereichte Datei"
+            className="submission-preview-image"
+          />
         </div>
       );
     }
     
     if (submission.file_url.match(/\.(mp4|webm|ogg)$/i) || submission.file_url.startsWith('data:video')) {
       return (
-        <div className="submission-attachment">
-          <video controls>
+        <div className="submission-file-preview">
+          <video controls className="submission-preview-video">
             <source src={submission.file_url} type="video/mp4" />
             Ihr Browser unterstützt keine Videowiedergabe.
           </video>
         </div>
       );
     }
-
-    return (
-      <div className="submission-file">
-        <FaFile /> Datei angehängt
-      </div>
-    );
+    
+    return null;
   };
 
   const userSubmissions = submissions.filter(sub => 
@@ -286,16 +303,12 @@ const Tasks = () => {
   };
 
   const handleDeleteSubmission = async (submissionId) => {
-    if (!window.confirm('Möchtest du diese Einsendung wirklich löschen?')) {
-      return;
-    }
-
-    try {
-      await deleteSubmission(submissionId);
-      await fetchSubmissions();
-    } catch (error) {
-      console.error('Fehler beim Löschen der Einsendung:', error);
-      alert('Fehler beim Löschen der Einsendung');
+    if (window.confirm('Möchtest du diese Einsendung wirklich löschen?')) {
+      try {
+        await deleteSubmission(submissionId);
+      } catch (error) {
+        console.error("Fehler beim Löschen der Einsendung:", error);
+      }
     }
   };
 
@@ -350,216 +363,12 @@ const Tasks = () => {
     );
   };
 
-  const TaskCard = ({ task }) => {
-    console.log('Task Data:', {
-      expiration_date: task.expiration_date,
-      difficulty: task.difficulty,
-      task: task
-    });
-
-    const [selectedFile, setSelectedFile] = useState(null);
-    const [dynamicValue, setDynamicValue] = useState('');
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    const { user } = useAuth();
-    const { submitTask } = useTasks();
-    const isExpired = task.expiration_date && new Date(task.expiration_date) < new Date();
-
-    const handleSubmit = async () => {
-      if (!user) {
-        alert('Bitte melde dich an, um eine Aufgabe einzureichen.');
-        return;
-      }
-
-      if (isExpired) {
-        alert('Diese Aufgabe ist bereits abgelaufen.');
-        return;
-      }
-
-      if (!selectedFile) {
-        alert('Bitte wähle eine Datei aus.');
-        return;
-      }
-
-      if (task.dynamic && (!dynamicValue || parseFloat(dynamicValue) <= 0)) {
-        alert(`Bitte gib einen Wert für ${task.dynamic_type === 'minutes' ? 'Minuten' : 'Kilometer'} ein.`);
-        return;
-      }
-
-      try {
-        setIsSubmitting(true);
-
-        const details = task.dynamic 
-          ? {
-              dynamic_value: dynamicValue,
-              dynamic_type: task.dynamic_type,
-              calculated_points: Math.round(parseFloat(dynamicValue) * task.multiplier)
-            }
-          : {};
-
-        await submitTask(task.id, user.email, selectedFile, details);
-
-        setSelectedFile(null);
-        setDynamicValue('');
-        alert('Aufgabe erfolgreich eingereicht!');
-      } catch (error) {
-        console.error('Fehler beim Einreichen:', error);
-        alert('Fehler beim Einreichen der Aufgabe. Bitte versuche es erneut.');
-      } finally {
-        setIsSubmitting(false);
-      }
-    };
-
-    const formatExpirationDate = (dateString) => {
-      if (!dateString) return null;
-      try {
-        const date = new Date(dateString);
-        return date.toLocaleString('de-DE', {
-          day: '2-digit',
-          month: '2-digit',
-          year: 'numeric',
-          hour: '2-digit',
-          minute: '2-digit'
-        });
-      } catch (error) {
-        console.error('Fehler beim Formatieren des Datums:', error);
-        return null;
-      }
-    };
-
-    const renderDifficultyStars = (difficulty) => {
-      const level = parseInt(difficulty) || 0;
-      return (
-        <div className="difficulty-stars">
-          {[1, 2, 3].map((star) => (
-            <span 
-              key={star} 
-              className={`star ${star <= level ? 'active' : ''}`}
-            >
-              ★
-            </span>
-          ))}
-        </div>
-      );
-    };
-
-    return (
-      <div className="task-card">
-        <div className="task-header">
-          <h3 className="task-title">{task.title}</h3>
-          <div className="task-meta-info">
-            <span className={`task-category ${task.category.toLowerCase()}`}>
-              {task.category}
-            </span>
-            <div className="task-points">
-              {task.dynamic ? (
-                <span>{task.multiplier} Punkte pro {task.dynamic_type === 'minutes' ? 'Minute' : 'Kilometer'}</span>
-              ) : (
-                <span>{task.points} Punkte</span>
-              )}
-            </div>
-          </div>
-        </div>
-
-        <div className="task-details">
-          <div className="task-description">
-            {task.description}
-          </div>
-
-          <div className="meta-info">
-            <div className="difficulty">
-              <span>Schwierigkeit: </span>
-              {renderDifficultyStars(task.difficulty)}
-            </div>
-
-            {task.expiration_date && (
-              <div className="expiration">
-                <span>
-                  {new Date(task.expiration_date) < new Date() 
-                    ? 'Abgelaufen am: ' 
-                    : 'Läuft ab am: '
-                  }
-                  {formatExpirationDate(task.expiration_date)}
-                </span>
-              </div>
-            )}
-          </div>
-        </div>
-
-        <div className="task-submission">
-          {task.dynamic && (
-            <div className="dynamic-input-wrapper">
-              <label>
-                {task.dynamic_type === 'minutes' ? 'Minuten' : 'Kilometer'}:
-                <input
-                  type="number"
-                  min="0"
-                  step={task.dynamic_type === 'minutes' ? '1' : '0.1'}
-                  value={dynamicValue}
-                  onChange={(e) => setDynamicValue(e.target.value)}
-                  className="dynamic-input"
-                />
-              </label>
-              {dynamicValue > 0 && (
-                <div className="calculated-points">
-                  = {Math.round(parseFloat(dynamicValue) * task.multiplier)} Punkte
-                </div>
-              )}
-            </div>
-          )}
-
-          <div className="file-upload-section">
-            <label className="file-upload-label">
-              <input
-                type="file"
-                accept="image/*,video/*"
-                onChange={(e) => {
-                  const file = e.target.files[0];
-                  if (file && (file.type.startsWith('image/') || file.type.startsWith('video/'))) {
-                    setSelectedFile(file);
-                  } else {
-                    alert('Bitte nur Bilder oder Videos hochladen');
-                  }
-                }}
-                style={{ display: 'none' }}
-              />
-              {!selectedFile ? (
-                <div className="upload-placeholder">
-                  <FaUpload />
-                  <span>Nachweis hochladen (Bild/Video)</span>
-                </div>
-              ) : (
-                <div className="file-preview">
-                  {selectedFile.type.startsWith('image/') ? (
-                    <img src={URL.createObjectURL(selectedFile)} alt="Vorschau" />
-                  ) : (
-                    <div className="video-preview">
-                      <FaVideo />
-                      <span>{selectedFile.name}</span>
-                    </div>
-                  )}
-                  <button
-                    type="button"
-                    className="remove-file"
-                    onClick={() => setSelectedFile(null)}
-                  >
-                    <FaTrash />
-                  </button>
-                </div>
-              )}
-            </label>
-          </div>
-
-          <button
-            className="submit-button"
-            onClick={handleSubmit}
-            disabled={!selectedFile || (task.dynamic && !dynamicValue)}
-          >
-            Aufgabe einreichen
-          </button>
-        </div>
-      </div>
-    );
-  };
+  // Pagination für Tasks
+  const indexOfLastTask = currentPage * tasksPerPage;
+  const indexOfFirstTask = indexOfLastTask - tasksPerPage;
+  const currentTasks = filteredTasks.slice(indexOfFirstTask, indexOfLastTask);
+  const paginate = pageNumber => setCurrentPage(pageNumber);
+  const totalPages = Math.ceil(filteredTasks.length / tasksPerPage);
 
   return (
     <div className="tasks-container">
@@ -572,25 +381,25 @@ const Tasks = () => {
               <div className="filter-buttons">
                 <button 
                   className={filter === 'all' ? 'active' : ''} 
-                  onClick={() => setFilter('all')}
+                  onClick={() => {setFilter('all'); setCurrentPage(1);}}
                 >
                   Alle
                 </button>
                 <button 
                   className={filter === 'active' ? 'active' : ''} 
-                  onClick={() => setFilter('active')}
+                  onClick={() => {setFilter('active'); setCurrentPage(1);}}
                 >
                   Aktiv
                 </button>
                 <button 
                   className={filter === 'pending' ? 'active' : ''} 
-                  onClick={() => setFilter('pending')}
+                  onClick={() => {setFilter('pending'); setCurrentPage(1);}}
                 >
                   Ausstehend
                 </button>
                 <button 
                   className={filter === 'completed' ? 'active' : ''} 
-                  onClick={() => setFilter('completed')}
+                  onClick={() => {setFilter('completed'); setCurrentPage(1);}}
                 >
                   Abgeschlossen
                 </button>
@@ -602,7 +411,10 @@ const Tasks = () => {
               <select 
                 className="category-filter"
                 value={categoryFilter}
-                onChange={(e) => setCategoryFilter(e.target.value)}
+                onChange={(e) => {
+                  setCategoryFilter(e.target.value);
+                  setCurrentPage(1);
+                }}
               >
                 {categories.map(category => (
                   <option key={category.value} value={category.value}>
@@ -621,9 +433,32 @@ const Tasks = () => {
         ) : filteredTasks.length === 0 ? (
           <div className="no-tasks">Keine Aufgaben gefunden</div>
         ) : (
-          filteredTasks.map(task => (
-            <TaskCard key={task.id} task={task} />
-          ))
+          <>
+            <Suspense fallback={<div className="loading">Laden der Aufgaben...</div>}>
+              {currentTasks.map(task => (
+                <TaskCard key={task.id} task={task} />
+              ))}
+            </Suspense>
+            {totalPages > 1 && (
+              <div className="pagination">
+                <button
+                  onClick={() => paginate(currentPage - 1)}
+                  disabled={currentPage === 1}
+                  className="page-button"
+                >
+                  Zurück
+                </button>
+                <span className="page-info">Seite {currentPage} von {totalPages}</span>
+                <button
+                  onClick={() => paginate(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                  className="page-button"
+                >
+                  Weiter
+                </button>
+              </div>
+            )}
+          </>
         )}
       </div>
 
