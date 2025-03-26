@@ -1,0 +1,189 @@
+/* TaskApproval.css */
+.task-approval-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.task-approval-title {
+  color: #2c3e50;
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+.no-submissions {
+  background-color: #f8f9fa;
+  border-radius: 10px;
+  padding: 30px;
+  text-align: center;
+  font-size: 1.2rem;
+  color: #6c757d;
+  margin-top: 20px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.loading {
+  text-align: center;
+  font-size: 1.2rem;
+  padding: 40px;
+  color: #3498db;
+}
+
+.admin-submissions-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 30px;
+}
+
+.admin-submission-card {
+  background-color: #fff;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.admin-submission-card:hover {
+  transform: translateY(-5px);
+}
+
+.admin-submission-header {
+  background-color: #f3f4f6;
+  padding: 20px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.admin-submission-header h3 {
+  margin: 0 0 15px 0;
+  color: #2c3e50;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.admin-submission-info {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  font-size: 0.95rem;
+}
+
+.admin-user, .admin-points, .admin-category {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #e5e7eb;
+  padding: 8px 12px;
+  border-radius: 20px;
+  color: #4b5563;
+}
+
+.admin-user svg, .admin-points svg, .admin-category svg {
+  color: #3b82f6;
+}
+
+.admin-submission-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  padding: 20px;
+}
+
+.admin-submission-preview {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: #f3f4f6;
+}
+
+.admin-preview-image, .admin-preview-video {
+  max-width: 100%;
+  max-height: 400px;
+  object-fit: contain;
+}
+
+.admin-submission-details {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.admin-comment {
+  width: 100%;
+  min-height: 150px;
+  padding: 15px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  resize: vertical;
+  font-family: inherit;
+  font-size: 1rem;
+  color: #2c3e50;
+}
+
+.admin-comment:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+.admin-actions {
+  display: flex;
+  gap: 15px;
+}
+
+.approve-button, .reject-button {
+  flex: 1;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.approve-button {
+  background-color: #10b981;
+  color: white;
+}
+
+.approve-button:hover {
+  background-color: #059669;
+}
+
+.reject-button {
+  background-color: #ef4444;
+  color: white;
+}
+
+.reject-button:hover {
+  background-color: #dc2626;
+}
+
+.approve-button:disabled, .reject-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+  .admin-submission-content {
+    grid-template-columns: 1fr;
+  }
+  
+  .admin-submission-info {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .admin-user, .admin-points, .admin-category {
+    width: 100%;
+  }
+} 

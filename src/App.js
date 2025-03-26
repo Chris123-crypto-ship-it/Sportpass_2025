@@ -23,6 +23,7 @@ import VerifyEmail from './pages/VerifyEmail';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 import Support from './pages/Support';
+import TaskApproval from './pages/TaskApproval';
 
 function App() {
   return (
@@ -47,6 +48,7 @@ function App() {
               <Route path="/forgot-password" element={<ForgotPassword />} />
               <Route path="/reset-password" element={<ResetPassword />} />
               <Route path="/support" element={<Support />} />
+              <Route path="/task-approval" element={<TaskApproval />} />
             </Routes>
           </div>
           <Footer />

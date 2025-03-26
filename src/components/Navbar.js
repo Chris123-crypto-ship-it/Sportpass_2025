@@ -3,7 +3,7 @@ import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { 
-  FaTachometerAlt, FaMedal, FaTasks, FaChartBar, FaArchive, FaSignInAlt, FaUserPlus, FaSignOutAlt
+  FaTachometerAlt, FaMedal, FaTasks, FaChartBar, FaArchive, FaSignInAlt, FaUserPlus, FaSignOutAlt, FaClipboardCheck
 } from 'react-icons/fa';
 import logo from '../assets/logo.png';
 
@@ -37,6 +37,7 @@ const Navbar = () => {
               <>
                 <li><Link to="/admin-dashboard">Admin Dashboard</Link></li>
                 <li><Link to="/participants">Teilnehmer</Link></li>
+                <li><Link to="/task-approval"><FaClipboardCheck /> Aufgabenprüfung</Link></li>
               </>
             )}
             <li>{user.name}</li>
