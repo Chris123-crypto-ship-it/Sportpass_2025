@@ -1,10 +1,20 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
-export default function TaskFilter({ onFilterChange }) {
+export default function TaskFilter({ onFilterChange, initialFilters = {} }) {
   const [filters, setFilters] = useState({
-    status: '',
-    category: ''
+    status: initialFilters.status || '',
+    category: initialFilters.category || ''
   })
+
+  useEffect(() => {
+    // Aktualisiere Filter, wenn sich initialFilters ändert
+    if (initialFilters) {
+      setFilters(prev => ({
+        ...prev,
+        ...initialFilters
+      }))
+    }
+  }, [initialFilters])
 
   // Statusoptionen auf "ausstehend" und "abgeschlossen" beschränken
   const statusOptions = [
@@ -70,8 +80,9 @@ export default function TaskFilter({ onFilterChange }) {
 
       <button 
         onClick={() => {
-          setFilters({ status: '', category: '' })
-          onFilterChange({ status: '', category: '' })
+          const resetFilters = { status: '', category: '' }
+          setFilters(resetFilters)
+          onFilterChange(resetFilters)
         }}
         className="reset-filter-btn"
       >

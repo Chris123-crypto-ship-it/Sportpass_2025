@@ -20,11 +20,9 @@ export default async function handler(req, res) {
   
   // Status-Filter anwenden
   if (status === 'ausstehend') {
-    // Nur Aufgaben mit is_hidden=false und Aufgaben, die noch nicht abgelaufen sind
     query = query.eq('is_hidden', false)
     query = query.gt('expiration_date', new Date().toISOString())
   } else if (status === 'abgeschlossen') {
-    // Abgeschlossene oder abgelaufene Aufgaben
     query = query.or(`is_hidden.eq.true,expiration_date.lt.${new Date().toISOString()}`)
   }
   
