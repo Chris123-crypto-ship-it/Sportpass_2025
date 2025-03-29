@@ -5,17 +5,27 @@ export default async function handler(req, res) {
   // Cache-Header setzen für CDN-Caching
   res.setHeader('Cache-Control', 'public, max-age=60, s-maxage=300, stale-while-revalidate=600')
   
-  const { page = 0, limit = 10, category, search } = req.query
+  const { page = 0, limit = 10, category, status, search } = req.query
   
   // Basisabfrage mit ausgewählten Feldern
   let query = supabase
     .from('tasks')
-    .select('id, title, points, category, difficulty, multiplier, dynamic, description')
+    .select('id, title, points, category, difficulty, multiplier, dynamic, description, expiration_date, is_hidden')
     .order('created_at', { ascending: false })
   
   // Filter hinzufügen, wenn sie vorhanden sind
   if (category) {
     query = query.eq('category', category)
+  }
+  
+  // Status-Filter anwenden
+  if (status === 'ausstehend') {
+    // Nur Aufgaben mit is_hidden=false und Aufgaben, die noch nicht abgelaufen sind
+    query = query.eq('is_hidden', false)
+    query = query.gt('expiration_date', new Date().toISOString())
+  } else if (status === 'abgeschlossen') {
+    // Abgeschlossene oder abgelaufene Aufgaben
+    query = query.or(`is_hidden.eq.true,expiration_date.lt.${new Date().toISOString()}`)
   }
   
   if (search) {
@@ -32,10 +42,27 @@ export default async function handler(req, res) {
     
     if (error) throw error
     
-    // Gesamtanzahl der Tasks abrufen (für Paginierung im Frontend)
-    const { count: totalCount } = await supabase
+    // Filter-Parameter für das Zählen anwenden
+    let countQuery = supabase
       .from('tasks')
       .select('id', { count: 'exact', head: true })
+    
+    if (category) {
+      countQuery = countQuery.eq('category', category)
+    }
+    
+    if (status === 'ausstehend') {
+      countQuery = countQuery.eq('is_hidden', false)
+      countQuery = countQuery.gt('expiration_date', new Date().toISOString())
+    } else if (status === 'abgeschlossen') {
+      countQuery = countQuery.or(`is_hidden.eq.true,expiration_date.lt.${new Date().toISOString()}`)
+    }
+    
+    if (search) {
+      countQuery = countQuery.ilike('title', `%${search}%`)
+    }
+    
+    const { count: totalCount } = await countQuery
     
     return res.status(200).json({
       data,

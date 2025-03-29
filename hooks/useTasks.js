@@ -2,7 +2,12 @@ import { useState, useEffect, useCallback } from 'react'
 import { fetchWithCache } from '../utils/cacheUtils'
 import { supabase } from '../utils/supabaseClient'
 
-export function useTasks({ initialPage = 0, limit = 10, category = null }) {
+export function useTasks({ 
+  initialPage = 0, 
+  limit = 10, 
+  category = null,
+  status = null 
+}) {
   const [tasks, setTasks] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -18,7 +23,7 @@ export function useTasks({ initialPage = 0, limit = 10, category = null }) {
     
     try {
       // Cache-Key basierend auf Parametern
-      const cacheKey = `tasks-${page}-${limit}-${category || 'all'}`
+      const cacheKey = `tasks-${page}-${limit}-${category || 'all'}-${status || 'all'}`
       
       const response = await fetchWithCache(
         cacheKey,
@@ -26,12 +31,23 @@ export function useTasks({ initialPage = 0, limit = 10, category = null }) {
           // Optimierte Abfrage
           let query = supabase
             .from('tasks')
-            .select('id, title, points, category, difficulty, description', { count: 'exact' })
+            .select('id, title, points, category, difficulty, description, dynamic', { count: 'exact' })
             .order('created_at', { ascending: false })
             .range(page * limit, (page + 1) * limit - 1)
           
+          // Kategorie-Filter anwenden, wenn vorhanden
           if (category) {
             query = query.eq('category', category)
+          }
+          
+          // Status-Filter anwenden, wenn vorhanden
+          if (status === 'ausstehend') {
+            // Nur Aufgaben mit is_hidden=false und Aufgaben, die noch nicht abgelaufen sind
+            query = query.eq('is_hidden', false)
+            query = query.gt('expiration_date', new Date().toISOString())
+          } else if (status === 'abgeschlossen') {
+            // Abgeschlossene oder abgelaufene Aufgaben
+            query = query.or(`is_hidden.eq.true,expiration_date.lt.${new Date().toISOString()}`)
           }
           
           const { data, error, count } = await query
@@ -40,7 +56,7 @@ export function useTasks({ initialPage = 0, limit = 10, category = null }) {
           
           return { data, count }
         },
-        5 * 60 * 1000 // 5 Minuten Cache
+        3 * 60 * 1000 // 3 Minuten Cache
       )
       
       const { data, count } = response
@@ -59,12 +75,12 @@ export function useTasks({ initialPage = 0, limit = 10, category = null }) {
     } finally {
       setLoading(false)
     }
-  }, [pagination.page, limit, category])
+  }, [pagination.page, limit, category, status])
 
   // Initialer Abruf
   useEffect(() => {
     fetchTasks(initialPage)
-  }, [initialPage, category])
+  }, [initialPage, category, status])
 
   // Mehr Daten laden
   const loadMore = useCallback(() => {
