@@ -25,19 +25,12 @@ const Tasks = () => {
 
   const categories = [
     { value: 'all', label: 'Alle Kategorien' },
-    { value: 'kraft', label: 'Kraft' },
-    { value: 'flexibilität', label: 'Flexibilität' },
+    { value: 'strength', label: 'Kraft' },
+    { value: 'flexibility', label: 'Flexibilität' },
     { value: 'cardio', label: 'Cardio' },
-    { value: 'ausdauer', label: 'Ausdauer' },
+    { value: 'endurance', label: 'Ausdauer' },
     { value: 'team', label: 'Team' },
-    { value: 'programmierung', label: 'Programmierung' },
-    { value: 'webentwicklung', label: 'Webentwicklung' },
-    { value: 'datenbank', label: 'Datenbank' },
-    { value: 'frontend', label: 'Frontend' },
-    { value: 'backend', label: 'Backend' },
-    { value: 'devops', label: 'DevOps' },
-    { value: 'testing', label: 'Testing' },
-    { value: 'security', label: 'Sicherheit' }
+
   ];
 
   useEffect(() => {
