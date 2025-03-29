@@ -68,14 +68,14 @@
 .footer-link-button {
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 8px;
   color: #ffffff;
   background: none;
   border: none;
   cursor: pointer;
   font-size: 0.9rem;
-  font-weight: 500;
   padding: 0;
+  text-align: left;
   transition: color 0.2s;
 }
 
@@ -341,43 +341,56 @@
   padding-top: 15px;
 }
 
-.newsletter-signup {
-  margin-top: 15px;
-}
-
-.newsletter-signup p {
-  color: #ffffff;
-  margin-bottom: 8px;
+/* Motivationszitat */
+.quote-box {
+  background: rgba(255, 255, 255, 0.05);
+  border-left: 3px solid #ffc107;
+  padding: 10px 15px;
+  margin: 15px 0;
+  font-style: italic;
+  color: #e0e0e0;
   font-size: 0.9rem;
+  line-height: 1.5;
 }
 
-.newsletter-form {
+/* Wichtige Info Box */
+.important-info-box {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  padding: 15px;
+}
+
+.info-item {
   display: flex;
-  gap: 5px;
+  gap: 10px;
+  margin-bottom: 15px;
+  align-items: flex-start;
 }
 
-.newsletter-form input {
-  flex: 1;
-  padding: 8px 12px;
-  border: none;
-  border-radius: 4px;
+.info-item svg {
+  color: #ffc107;
+  font-size: 1.2rem;
+  margin-top: 2px;
+}
+
+.info-item h5 {
+  margin: 0 0 5px 0;
+  color: #ffffff;
+  font-size: 0.95rem;
+}
+
+.info-item p {
+  margin: 0;
+  color: #cccccc;
   font-size: 0.85rem;
-  background: rgba(255, 255, 255, 0.9);
+  line-height: 1.4;
 }
 
-.newsletter-form button {
-  background: #ffc107;
-  color: #333333;
-  border: none;
-  border-radius: 4px;
-  padding: 8px 12px;
-  font-size: 0.85rem;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.newsletter-form button:hover {
-  background: #ffb000;
+.contact-info {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 /* Scroll-to-top Button */
@@ -492,6 +505,49 @@
   margin-bottom: 5px;
 }
 
+/* FAQ Sektion */
+.faq-section {
+  margin: 20px 0;
+}
+
+.faq-item {
+  margin-bottom: 20px;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 20px;
+}
+
+.faq-item:last-child {
+  border-bottom: none;
+}
+
+.faq-item h3 {
+  margin: 0 0 10px 0;
+  color: #333;
+  font-size: 1.1rem;
+}
+
+.faq-item p {
+  margin: 0;
+  color: #555;
+  line-height: 1.6;
+}
+
+.faq-more-help {
+  margin-top: 30px;
+  text-align: center;
+  font-weight: 500;
+  color: #555;
+}
+
+.faq-more-help a {
+  color: #007bff;
+  text-decoration: none;
+}
+
+.faq-more-help a:hover {
+  text-decoration: underline;
+}
+
 /* Anpassungen für Mobilgeräte */
 @media (max-width: 768px) {
   .footer-content {
@@ -501,15 +557,6 @@
   .footer-column {
     width: 100%;
     padding: 0;
-  }
-  
-  .newsletter-form {
-    flex-direction: column;
-  }
-  
-  .newsletter-form input,
-  .newsletter-form button {
-    width: 100%;
   }
   
   .scroll-to-top {
