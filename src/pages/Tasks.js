@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useTasks } from '../context/TaskContext';
 import { FaRunning, FaHeartbeat, FaDumbbell, FaMedal, FaFire, FaStar, 
-         FaUpload, FaFileImage, FaVideo, FaTrash, FaClock, FaCheck, FaTimes, FaFile, FaImage, FaCheckCircle, FaTimesCircle, FaUser, FaTag, FaFilter } from 'react-icons/fa';
+         FaUpload, FaFileImage, FaVideo, FaTrash, FaClock, FaCheck, FaTimes, FaFile, FaImage, FaCheckCircle, FaTimesCircle, FaUser, FaTag, FaFilter, FaInfoCircle } from 'react-icons/fa';
 import { toast } from 'react-toastify';
 import '../styles/Tasks.css';
 
@@ -22,6 +22,7 @@ const Tasks = () => {
   const [fileUploads, setFileUploads] = useState({});
   const fileInputRefs = useRef({});
   const [loading, setLoading] = useState(false);
+  const [showInfoModal, setShowInfoModal] = useState(false);
 
   const categories = [
     { value: 'all', label: 'Alle Kategorien' },
@@ -587,6 +588,9 @@ const Tasks = () => {
     <div className="tasks-container">
       <div className="tasks-header">
         <h1 className="tasks-title">Verfügbare Aufgaben</h1>
+        <button className="tasks-info-button" onClick={() => setShowInfoModal(true)}>
+          <FaInfoCircle /> Info
+        </button>
         <div className="filter-section">
           <div className="filter-container">
             <div className="filter-group">
@@ -758,6 +762,34 @@ const Tasks = () => {
                 );
               })}
             </div>
+        </div>
+      )}
+
+      {/* Info Modal */}
+      {showInfoModal && (
+        <div className="modal-overlay" onClick={() => setShowInfoModal(false)}>
+          <div className="modal-content task-info-modal" onClick={e => e.stopPropagation()}>
+            <h2>Informationen zu den Aufgaben</h2>
+            
+            <div className="info-section">
+              <h3>Punktevergabe</h3>
+              <p>Die Vergabe von Punkten für eingereichte Aufgaben erfolgt nach manueller Überprüfung durch unser Team und kann daher etwas Zeit in Anspruch nehmen. Bitte habe etwas Geduld, nachdem du eine Aufgabe eingereicht hast.</p>
+            </div>
+            
+            <div className="info-section">
+              <h3>Neue Aufgaben</h3>
+              <p>Jeden Sonntag werden neue Aufgaben freigeschaltet. Schau regelmäßig vorbei, um keine Chance auf Punkte zu verpassen!</p>
+            </div>
+            
+            <div className="info-section">
+              <h3>Kategorien</h3>
+              <p>Die Aufgaben sind in verschiedene Kategorien unterteilt, damit du dich in unterschiedlichen Bereichen verbessern kannst.</p>
+            </div>
+            
+            <button className="modal-close" onClick={() => setShowInfoModal(false)}>
+              Verstanden
+            </button>
+          </div>
         </div>
       )}
     </div>
