@@ -6,44 +6,8 @@ const jwt = require('jsonwebtoken');
 const cors = require('cors');
 const crypto = require('crypto');
 const nodemailer = require('nodemailer');
-const compression = require('compression');
-const rateLimit = require('express-rate-limit');
-const NodeCache = require('node-cache');
 
 const app = express();
-
-// Kompression für alle Anfragen aktivieren
-app.use(compression());
-
-// Cache mit einer Standard-TTL von 5 Minuten initialisieren
-const cache = new NodeCache({ stdTTL: 300 });
-
-// Funktion zum Invalidieren bestimmter Cache-Einträge
-const invalidateCache = (keys) => {
-  if (Array.isArray(keys)) {
-    keys.forEach(key => {
-      if (cache.has(key)) {
-        console.log(`Invalidating cache key: ${key}`);
-        cache.del(key);
-      }
-    });
-  } else if (typeof keys === 'string') {
-    if (cache.has(keys)) {
-      console.log(`Invalidating cache key: ${keys}`);
-      cache.del(keys);
-    }
-  }
-};
-
-// Rate Limiting für alle Anfragen
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 Minuten
-  max: 100, // Limit jede IP auf 100 Anfragen pro Fenster
-  standardHeaders: true,
-  legacyHeaders: false,
-});
-
-app.use(limiter);
 
 // Erhöhe das Limit für JSON-Payloads
 app.use(express.json({ limit: '10mb' }));
@@ -284,86 +248,98 @@ app.get('/api/participants', authenticateToken, isAdmin, async (req, res) => {
   res.json(users);
 });
 
-// 🔹 Alle Benutzer abrufen (nur Admin)
+// Alle Benutzer abrufen (nur für Admins)
 app.get('/users', authenticateToken, isAdmin, async (req, res) => {
   try {
-    // Cache-Key erstellen
-    const cacheKey = 'all_users';
-    
-    // Prüfen, ob Daten im Cache sind
-    const cachedData = cache.get(cacheKey);
-    if (cachedData) {
-      console.log('Serving users from cache');
-      return res.json(cachedData);
-    }
-    
-    const { data, error } = await supabase
+    const { data: users, error } = await supabase
       .from('users')
-      .select('*')
+      .select('id, name, email, points, class, role, is_verified')
       .order('name');
 
-    if (error) {
-      console.error('Fehler beim Abrufen der Benutzer:', error);
-      return res.status(500).json({ message: 'Datenbankfehler', error: error.message });
-    }
-
-    // Im Cache speichern (TTL: 2 Minuten)
-    cache.set(cacheKey, data, 120);
-    
-    res.json(data);
+    if (error) throw error;
+    res.json(users || []);
   } catch (error) {
-    console.error('Server-Fehler:', error);
-    res.status(500).json({ message: 'Interner Serverfehler' });
+    console.error('Fehler beim Abrufen der Benutzer:', error);
+    res.status(500).json({ message: 'Fehler beim Abrufen der Benutzer' });
   }
 });
 
-// 🔹 Neue Aufgabe erstellen
-app.post('/create-task', authenticateToken, async (req, res) => {
+// Aufgabe erstellen (nur für Admins)
+app.post('/add-task', authenticateToken, async (req, res) => {
   try {
-    if (req.user.role !== 'admin') {
-      return res.status(403).json({ message: 'Keine Admin-Rechte' });
+  if (req.user.role !== 'admin') {
+    return res.status(403).json({ message: 'Keine Admin-Rechte' });
+  }
+
+    const {
+      title,
+      description,
+      category,
+      dynamic_type,
+      points_per_unit,
+      static_points,
+      difficulty,
+      expiration_date
+    } = req.body;
+
+    // Debug-Log
+    console.log('Received task data:', req.body);
+
+    // Validierung
+    if (!title) {
+      return res.status(400).json({ message: 'Titel ist erforderlich' });
     }
 
-    const { title, description, points, expiration_date, dynamic, dynamic_type, multiplier, image_url } = req.body;
-
-    const { data, error } = await supabase
-      .from('tasks')
-      .insert([
-        { 
-          title, 
-          description, 
-          points: parseInt(points) || 0,
-          expiration_date,
-          dynamic: !!dynamic,
-          dynamic_type: dynamic_type || '',
-          multiplier: parseFloat(multiplier) || 1.0,
-          is_hidden: false,
-          image_url: image_url || ''
-        }
-      ])
-      .select()
-      .single();
-
-    if (error) {
-      console.error('Fehler beim Erstellen der Aufgabe:', error);
-      return res.status(500).json({ 
-        message: 'Fehler beim Erstellen der Aufgabe', 
-        error: error.message 
+    // Validierung für dynamische vs. statische Aufgaben
+    const isDynamic = dynamic_type !== 'none';
+    
+    if (!isDynamic && (!static_points || static_points < 0)) {
+      return res.status(400).json({ 
+        message: 'Punkte müssen für statische Aufgaben definiert und nicht negativ sein' 
+      });
+    }
+    
+    if (isDynamic && (!points_per_unit || points_per_unit < 0)) {
+      return res.status(400).json({ 
+        message: 'Punkte pro Einheit müssen für dynamische Aufgaben definiert und nicht negativ sein' 
       });
     }
 
-    // Invalidiere den Tasks-Cache
-    invalidateCache(['tasks_default', 'tasks_admin']);
+    // Aufgabendaten vorbereiten
+    const taskData = {
+      title: title.trim(),
+      description: description?.trim() || '',
+      category,
+      dynamic: isDynamic,
+      dynamic_type: isDynamic ? dynamic_type : null,
+      multiplier: isDynamic ? parseFloat(points_per_unit) || 1 : null,
+      points: !isDynamic ? parseInt(static_points) : 0, // 0 für dynamische Aufgaben
+      difficulty: parseInt(difficulty) || 1,
+      expiration_date: expiration_date ? new Date(expiration_date).toISOString() : null
+    };
 
-    res.status(201).json({ 
-      message: 'Aufgabe erfolgreich erstellt',
-      task: data
-    });
+    // Debug-Log
+    console.log('Prepared task data:', taskData);
+
+    const { data, error } = await supabase
+      .from('tasks')
+      .insert([taskData])
+      .select();
+
+    if (error) {
+      console.error('Supabase error:', error);
+      throw error;
+}
+
+    // Debug-Log
+    console.log('Task created successfully:', data);
+
+    res.status(201).json(data[0]);
   } catch (error) {
-    console.error('Server-Fehler:', error);
+    console.error('Server error:', error);
     res.status(500).json({ 
-      message: 'Interner Serverfehler',
-      error: error.message
+      message: 'Fehler beim Erstellen der Aufgabe',
+      error: error.message 
     });
   }
 });
@@ -373,16 +349,6 @@ app.get('/tasks', authenticateToken, async (req, res) => {
   try {
     const currentDate = new Date().toISOString();
     const { view } = req.query;
-    
-    // Cache-Key erstellen, der vom view-Parameter abhängt
-    const cacheKey = `tasks_${view || 'default'}`;
-    
-    // Prüfen, ob Daten im Cache sind
-    const cachedData = cache.get(cacheKey);
-    if (cachedData) {
-      console.log(`Serving tasks (view: ${view || 'default'}) from cache`);
-      return res.json(cachedData);
-    }
     
     // Basis-Query erstellen
     let query = supabase
@@ -405,10 +371,7 @@ app.get('/tasks', authenticateToken, async (req, res) => {
       });
     }
 
-    // Im Cache speichern (TTL: 2 Minuten)
-    cache.set(cacheKey, tasks, 120);
-    
-    // Aufgaben zurückgeben
+    // Aufgaben direkt zurückgeben, ohne Modifikationen
     res.json(tasks);
   } catch (error) {
     console.error('Server-Fehler:', error);
@@ -582,16 +545,6 @@ app.post('/submit-task', authenticateToken, async (req, res) => {
 // 🔹 Einsendungen abrufen
 app.get('/submissions', async (req, res) => {
   try {
-    // Cache-Key erstellen
-    const cacheKey = 'all_submissions';
-    
-    // Prüfen, ob Daten im Cache sind
-    const cachedData = cache.get(cacheKey);
-    if (cachedData) {
-      console.log('Serving submissions from cache');
-      return res.json(cachedData);
-    }
-    
     const { data: submissions, error } = await supabase
       .from('submissions')
       .select(`
@@ -644,9 +597,6 @@ app.get('/submissions', async (req, res) => {
       };
     });
 
-    // Im Cache speichern (TTL: 2 Minuten)
-    cache.set(cacheKey, submissionsWithInfo, 120);
-    
     res.json(submissionsWithInfo);
   } catch (error) {
     console.error('Server-Fehler:', error);
@@ -704,76 +654,101 @@ app.post('/approve-submission', authenticateToken, isAdmin, async (req, res) => 
 
     if (taskError) {
       console.error('Task Error:', taskError);
-      return res.status(500).json({ message: 'Datenbankfehler bei der Suche nach der Aufgabe' });
+      return res.status(500).json({ message: 'Fehler beim Abrufen der Aufgabe' });
     }
 
-    // 1. Submission auf "approved" setzen
-    const { error: updateError } = await supabase
-      .from('submissions')
-      .update({ 
-        status: 'approved',
-        admin_comment: adminComment || 'Genehmigt',
-        approved_at: new Date().toISOString()
-      })
-      .eq('id', submissionId);
-
-    if (updateError) {
-      console.error('Update Error:', updateError);
-      return res.status(500).json({ message: 'Fehler beim Aktualisieren der Einsendung' });
+    if (!task) {
+      return res.status(404).json({ message: 'Zugehörige Aufgabe nicht gefunden' });
     }
 
-    // 2. Punkte zum Benutzer hinzufügen
-    let submissionDetails;
-    try {
-      submissionDetails = typeof submission.details === 'string' 
-        ? JSON.parse(submission.details) 
-        : submission.details;
-    } catch (e) {
-      console.error('Error parsing submission details:', e);
-      submissionDetails = {};
+    if (submission.status === 'approved') {
+      return res.status(400).json({ message: 'Einsendung wurde bereits genehmigt' });
     }
 
-    const pointsToAdd = submissionDetails.task_points || task.points || 0;
-
-    // Benutzer aus der Datenbank holen
     const { data: user, error: userError } = await supabase
       .from('users')
-      .select('*')
+      .select('points')
       .eq('email', submission.user_email)
       .single();
 
-    if (userError) {
+    if (userError || !user) {
       console.error('User Error:', userError);
-      return res.status(500).json({ message: 'Fehler beim Laden des Benutzers' });
-    }
-
-    if (!user) {
       return res.status(404).json({ message: 'Benutzer nicht gefunden' });
     }
 
-    // Punkte aktualisieren
-    const newPoints = (user.points || 0) + pointsToAdd;
-    const { error: pointsError } = await supabase
+    // Parsen der details mit Fallback
+    let submissionDetails = {};
+    try {
+      submissionDetails = typeof submission.details === 'string' 
+        ? JSON.parse(submission.details) 
+        : (submission.details || {});
+    } catch (e) {
+      console.error('Fehler beim Parsen der Submission-Details:', e);
+      submissionDetails = {};
+    }
+
+    // Punkte berechnen basierend auf den gespeicherten Details oder dem Task selbst
+    let earnedPoints = task.points; // Standardwert für statische Aufgaben
+    
+    if (task.dynamic) {
+      if (submissionDetails.calculated_points) {
+        // Verwende vorberechnete Punkte, wenn verfügbar
+        earnedPoints = parseInt(submissionDetails.calculated_points);
+      } else if (submissionDetails.dynamic_value) {
+        // Berechne die Punkte basierend auf dem dynamischen Wert
+        earnedPoints = Math.round(parseFloat(submissionDetails.dynamic_value) * task.multiplier);
+      }
+    }
+    
+    console.log('Berechnete Punkte:', {
+      earnedPoints,
+      isDynamic: task.dynamic,
+      details: submissionDetails
+    });
+
+    const newPoints = user.points + earnedPoints;
+
+    const { error: updateUserError } = await supabase
       .from('users')
       .update({ points: newPoints })
       .eq('email', submission.user_email);
 
-    if (pointsError) {
-      console.error('Points Update Error:', pointsError);
+    if (updateUserError) {
+      console.error('Update User Error:', updateUserError);
       return res.status(500).json({ message: 'Fehler beim Aktualisieren der Punkte' });
     }
 
-    // Invalidiere Caches für Submissions und Users
-    invalidateCache(['all_submissions', 'all_users', 'leaderboard']);
+    const { error: updateSubmissionError } = await supabase
+      .from('submissions')
+      .update({ 
+        status: 'approved',
+        admin_comment: adminComment
+      })
+      .eq('id', submissionId);
 
-    res.json({
-      message: 'Einsendung erfolgreich genehmigt',
-      pointsAdded: pointsToAdd,
-      newTotalPoints: newPoints
+    if (updateSubmissionError) {
+      console.error('Update Submission Error:', updateSubmissionError);
+      await supabase
+        .from('users')
+        .update({ points: user.points })
+        .eq('email', submission.user_email);
+      return res.status(500).json({ message: 'Fehler beim Aktualisieren des Status' });
+    }
+
+    res.json({ 
+      message: 'Einsendung genehmigt, Punkte vergeben',
+      earnedPoints,
+      newTotalPoints: newPoints,
+      submission: {
+        ...submission,
+        status: 'approved',
+        admin_comment: adminComment,
+        task: task
+      }
     });
   } catch (error) {
-    console.error('Server Error:', error);
-    res.status(500).json({ message: 'Interner Serverfehler' });
+    console.error('Fehler bei der Genehmigung:', error);
+    res.status(500).json({ message: 'Fehler bei der Genehmigung der Einsendung' });
   }
 });
 
@@ -834,9 +809,6 @@ app.post('/reject-submission', authenticateToken, isAdmin, async (req, res) => {
       return res.status(500).json({ message: 'Fehler beim Ablehnen der Einsendung' });
     }
 
-    // Invalidiere den Submissions Cache
-    invalidateCache('all_submissions');
-
     res.json({ 
       message: 'Einsendung abgelehnt',
       submission: {
@@ -855,16 +827,6 @@ app.post('/reject-submission', authenticateToken, isAdmin, async (req, res) => {
 // 🔹 Leaderboard abrufen
 app.get('/leaderboard', async (req, res) => {
   try {
-    // Cache-Key für Leaderboard
-    const cacheKey = 'leaderboard';
-    
-    // Prüfen, ob Daten im Cache sind
-    const cachedData = cache.get(cacheKey);
-    if (cachedData) {
-      console.log('Serving leaderboard from cache');
-      return res.json(cachedData);
-    }
-    
     const { data: users, error } = await supabase
       .from('users')
       .select('name, points')
@@ -872,10 +834,6 @@ app.get('/leaderboard', async (req, res) => {
       .order('points', { ascending: false });
 
     if (error) throw error;
-    
-    // Im Cache speichern (TTL: 5 Minuten)
-    cache.set(cacheKey, users || [], 300);
-    
     res.json(users || []);
   } catch (error) {
     console.error('Fehler beim Abrufen des Leaderboards:', error);
@@ -883,7 +841,7 @@ app.get('/leaderboard', async (req, res) => {
   }
 });
 
-// 🔹 Aufgabe löschen (nur für Admins)
+// Aufgabe löschen (nur für Admins)
 app.delete('/delete-task/:id', authenticateToken, isAdmin, async (req, res) => {
   const { id } = req.params;
 
@@ -912,9 +870,6 @@ app.delete('/delete-task/:id', authenticateToken, isAdmin, async (req, res) => {
       .eq('id', id);
 
     if (deleteError) throw deleteError;
-
-    // Invalidiere relevante Caches
-    invalidateCache(['tasks_default', 'tasks_admin', 'all_submissions']);
 
     res.json({ message: 'Aufgabe erfolgreich gelöscht' });
   } catch (error) {
@@ -1664,8 +1619,6 @@ app.delete('/users/:id', authenticateToken, isAdmin, async (req, res) => {
 
 // 🔹 Server starten
 const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
   console.log(`Server läuft auf Port ${PORT}`);
-  console.log(`Umgebung: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`Supabase URL: ${process.env.SUPABASE_URL || 'nicht gesetzt'}`);
 });
