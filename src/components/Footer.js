@@ -1,7 +1,7 @@
 // src/components/Footer.js
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FaShoppingCart, FaHandshakeAlt, FaInfoCircle } from 'react-icons/fa';
+import { FaShoppingCart, FaHandshake, FaInfoCircle } from 'react-icons/fa';
 import '../styles/Footer.css';
 
 const Footer = () => {
@@ -39,7 +39,7 @@ const Footer = () => {
             className="footer-link-button" 
             onClick={() => setShowSponsorsModal(true)}
           >
-            <FaHandshakeAlt /> Sponsoren
+            <FaHandshake /> Sponsoren
           </button>
         </div>
       </div>
