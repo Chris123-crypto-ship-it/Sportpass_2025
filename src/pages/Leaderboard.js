@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { FaTrophy, FaMedal, FaStar, FaChartLine } from 'react-icons/fa';
 import './Leaderboard.css';
@@ -9,6 +9,9 @@ const Leaderboard = () => {
   const [leaderboard, setLeaderboard] = useState([]);
   const [timeRange, setTimeRange] = useState('all'); // 'all', 'month', 'week'
   const [loading, setLoading] = useState(true);
+  const [visibleUsers, setVisibleUsers] = useState(10);
+  const [hasMore, setHasMore] = useState(true);
+  const tableContainerRef = useRef(null);
 
   useEffect(() => {
     const fetchLeaderboard = async () => {
@@ -25,6 +28,32 @@ const Leaderboard = () => {
 
     fetchLeaderboard();
   }, [timeRange]); // Neu laden wenn sich der Zeitraum ändert
+
+  const loadMoreUsers = () => {
+    if (leaderboard.length > visibleUsers) {
+      setVisibleUsers(prev => prev + 10);
+    } else {
+      setHasMore(false);
+    }
+  };
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (!tableContainerRef.current) return;
+      
+      const { scrollTop, scrollHeight, clientHeight } = tableContainerRef.current;
+      
+      if (scrollTop + clientHeight >= scrollHeight - 50 && leaderboard.length > visibleUsers) {
+        loadMoreUsers();
+      }
+    };
+    
+    const tableContainer = tableContainerRef.current;
+    if (tableContainer) {
+      tableContainer.addEventListener('scroll', handleScroll);
+      return () => tableContainer.removeEventListener('scroll', handleScroll);
+    }
+  }, [visibleUsers, leaderboard]);
 
   if (loading) {
     return (
@@ -124,7 +153,11 @@ const Leaderboard = () => {
 
       <div className="leaderboard-table">
         <h2>Gesamtrangliste</h2>
-        <div className="table-container">
+        <div 
+          className="table-container" 
+          ref={tableContainerRef}
+          style={{ maxHeight: '500px', overflowY: 'auto' }}
+        >
           <table>
             <thead>
               <tr>
@@ -135,7 +168,7 @@ const Leaderboard = () => {
               </tr>
             </thead>
             <tbody>
-              {leaderboard.map((entry, index) => (
+              {leaderboard.slice(0, visibleUsers).map((entry, index) => (
                 <tr 
                   key={index}
                   className={entry.name === user?.name ? 'current-user' : ''}
@@ -151,6 +184,9 @@ const Leaderboard = () => {
               ))}
             </tbody>
           </table>
+          {leaderboard.length > visibleUsers && (
+            <div className="load-more-indicator">Scrolle für mehr Benutzer...</div>
+          )}
         </div>
       </div>
 

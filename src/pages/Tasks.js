@@ -29,7 +29,15 @@ const Tasks = () => {
     { value: 'flexibilität', label: 'Flexibilität' },
     { value: 'cardio', label: 'Cardio' },
     { value: 'ausdauer', label: 'Ausdauer' },
-    { value: 'team', label: 'Team' }
+    { value: 'team', label: 'Team' },
+    { value: 'programmierung', label: 'Programmierung' },
+    { value: 'webentwicklung', label: 'Webentwicklung' },
+    { value: 'datenbank', label: 'Datenbank' },
+    { value: 'frontend', label: 'Frontend' },
+    { value: 'backend', label: 'Backend' },
+    { value: 'devops', label: 'DevOps' },
+    { value: 'testing', label: 'Testing' },
+    { value: 'security', label: 'Sicherheit' }
   ];
 
   useEffect(() => {
@@ -42,18 +50,15 @@ const Tasks = () => {
 
     let filtered = [...tasks];
     
-    if (filter !== 'all') {
+    if (filter === 'ausstehend') {
       filtered = filtered.filter(task => {
         const userSubmission = submissions.find(s => s.task_id === task.id && s.user_email === user?.email);
-        
-        if (filter === 'completed') {
-          return userSubmission && userSubmission.status === 'approved';
-        } else if (filter === 'pending') {
-          return userSubmission && userSubmission.status === 'pending';
-        } else if (filter === 'active') {
-          return !userSubmission || (userSubmission && userSubmission.status === 'rejected');
-        }
-        return true;
+        return !userSubmission || userSubmission.status === 'rejected';
+      });
+    } else if (filter === 'abgeschlossen') {
+      filtered = filtered.filter(task => {
+        const userSubmission = submissions.find(s => s.task_id === task.id && s.user_email === user?.email);
+        return userSubmission && userSubmission.status === 'approved';
       });
     }
     
@@ -601,20 +606,14 @@ const Tasks = () => {
                   Alle
                 </button>
                 <button 
-                  className={filter === 'active' ? 'active' : ''} 
-                  onClick={() => setFilter('active')}
-                >
-                  Aktiv
-                </button>
-                <button 
-                  className={filter === 'pending' ? 'active' : ''} 
-                  onClick={() => setFilter('pending')}
+                  className={filter === 'ausstehend' ? 'active' : ''} 
+                  onClick={() => setFilter('ausstehend')}
                 >
                   Ausstehend
                 </button>
                 <button 
-                  className={filter === 'completed' ? 'active' : ''} 
-                  onClick={() => setFilter('completed')}
+                  className={filter === 'abgeschlossen' ? 'active' : ''} 
+                  onClick={() => setFilter('abgeschlossen')}
                 >
                   Abgeschlossen
                 </button>
