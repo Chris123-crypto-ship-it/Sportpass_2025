@@ -330,31 +330,6 @@
   font-size: 1.1rem;
 }
 
-/* Mobile Menu Button */
-.mobile-menu-button {
-  display: none;
-  background: none;
-  border: none;
-  color: white;
-  font-size: 1.5rem;
-  cursor: pointer;
-  padding: 0.5rem;
-  transition: color 0.3s ease;
-}
-
-.mobile-menu-button:hover {
-  color: #ffc107;
-}
-
-/* Mobile Navigation Content */
-.nav-content {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex: 1;
-  margin-left: 2rem;
-}
-
 /* Responsive Design */
 @media (max-width: 1024px) {
   .navbar {
@@ -367,94 +342,29 @@
 }
 
 @media (max-width: 900px) {
-  .mobile-menu-button {
-    display: block;
-  }
-
-  .nav-content {
-    display: none;
-    position: fixed;
-    top: 72px;
-    left: 0;
-    right: 0;
-    background: #333333;
-    flex-direction: column;
-    align-items: stretch;
-    padding: 1rem;
-    margin: 0;
-    height: calc(100vh - 72px);
-    overflow-y: auto;
-  }
-
-  .nav-content.show {
-    display: flex;
-  }
-
-  .nav-links {
-    flex-direction: column;
-    width: 100%;
-    margin: 0;
-    padding: 0;
-  }
-
-  .nav-links li {
-    width: 100%;
-  }
-
-  .nav-links li a {
-    padding: 1rem;
-    width: 100%;
-    justify-content: flex-start;
-    gap: 1rem;
-    border-radius: 8px;
-  }
-
   .nav-links li a span {
-    display: inline;
+    display: none;
   }
-
-  .navbar-right {
-    flex-direction: column;
-    width: 100%;
-    gap: 1rem;
-    margin-top: 1rem;
-    padding-top: 1rem;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-  }
-
-  .auth-buttons {
-    flex-direction: column;
-    width: 100%;
-  }
-
-  .login-button,
-  .register-button,
-  .logout-button {
-    width: 100%;
+  
+  .nav-links li a {
+    padding: 0.5rem;
     justify-content: center;
-    padding: 1rem;
   }
-
-  .login-button span,
-  .register-button span,
+  
+  .nav-links li a svg {
+    font-size: 1.3rem;
+  }
+  
   .logout-button span {
-    display: inline;
+    display: none;
   }
-
-  .profile-wrapper {
-    width: 100%;
+  
+  .logout-button {
+    padding: 8px;
   }
-
-  .profile-button {
-    width: 100%;
-    justify-content: center;
-  }
-
-  .profile-dropdown {
-    position: static;
-    width: 100%;
-    margin-top: 1rem;
-    animation: none;
+  
+  .logout-button svg {
+    font-size: 1.3rem;
   }
 }
 
