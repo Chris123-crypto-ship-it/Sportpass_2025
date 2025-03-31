@@ -1,23 +1,45 @@
-/* Container für die gesamte Statistik-Seite */
-.stats-container {
-  padding: 2rem;
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
 /* Überschrift-Styling */
 .stats-title {
-  color: #333333;
+  color: #2c3e50; /* Dunkle Textfarbe für gute Lesbarkeit */
   font-size: 2.5rem;
   font-weight: 700;
   margin-bottom: 2rem;
-  background: none;
-  -webkit-background-clip: initial;
-  -webkit-text-fill-color: initial;
-  background-clip: initial;
+  background: none; /* Entfernt den farbigen Hintergrund */
 }
 
-/* Filter-Buttons Container */
+/* Statistik-Zahlen Styling */
+.stat-number {
+  color: #2c3e50; /* Dunkle Textfarbe */
+  font-size: 2rem;
+  font-weight: 600;
+  background: none; /* Entfernt den farbigen Hintergrund */
+  margin: 0.5rem 0;
+}
+
+/* Kategorie-Text */
+.stat-category {
+  color: #666; /* Dunkelgrauer Text für die Kategorie */
+  font-size: 1rem;
+  margin-top: 0.5rem;
+}
+
+/* Statistik-Karten */
+.stat-card {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: transform 0.2s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-3px);
+}
+
+/* Filter-Buttons */
 .stats-filter {
   display: flex;
   gap: 1rem;
@@ -26,7 +48,7 @@
 }
 
 .filter-button {
-  padding: 0.8rem 1.5rem;
+  padding: 0.5rem 1.5rem;
   border: none;
   border-radius: 20px;
   background: #f8f9fa;
@@ -36,123 +58,7 @@
   transition: all 0.2s ease;
 }
 
-.filter-button:hover {
-  background: #e9ecef;
-}
-
 .filter-button.active {
-  background: #333333;
+  background: #2c3e50;
   color: white;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-/* Statistik-Karten Grid */
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 2rem;
-  margin-bottom: 3rem;
-}
-
-/* Einzelne Statistik-Karte */
-.stat-card {
-  background: white;
-  border-radius: 16px;
-  padding: 2rem;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.stat-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
-}
-
-/* Icon-Container */
-.stat-icon {
-  width: 60px;
-  height: 60px;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 1rem;
-}
-
-.stat-icon svg {
-  font-size: 1.8rem;
-  color: white;
-}
-
-/* Statistik-Zahlen */
-.stat-number {
-  color: #333333;
-  font-size: 2.2rem;
-  font-weight: 700;
-  margin: 0.5rem 0;
-  background: none;
-  -webkit-background-clip: initial;
-  -webkit-text-fill-color: initial;
-  background-clip: initial;
-}
-
-/* Kategorie-Text */
-.stat-category {
-  color: #666;
-  font-size: 1.1rem;
-  font-weight: 500;
-  margin-top: 0.5rem;
-  text-align: center;
-}
-
-/* "in Folge" Text */
-.stat-streak {
-  color: #666;
-  font-size: 0.9rem;
-  margin-top: 0.25rem;
-}
-
-/* Aktivitäten nach Kategorie Sektion */
-.activities-section {
-  margin-top: 3rem;
-}
-
-.activities-title {
-  color: #333333;
-  font-size: 1.8rem;
-  font-weight: 600;
-  margin-bottom: 1.5rem;
-}
-
-/* Responsive Design */
-@media (max-width: 768px) {
-  .stats-container {
-    padding: 1rem;
-  }
-
-  .stats-title {
-    font-size: 2rem;
-    text-align: center;
-  }
-
-  .stats-filter {
-    justify-content: center;
-    flex-wrap: wrap;
-  }
-
-  .filter-button {
-    padding: 0.6rem 1.2rem;
-    font-size: 0.9rem;
-  }
-
-  .stat-number {
-    font-size: 1.8rem;
-  }
-
-  .stat-category {
-    font-size: 1rem;
-  }
 } 

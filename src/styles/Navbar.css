@@ -1,18 +1,14 @@
 .navbar {
-  background: #333333;
-  padding: 0.8rem 2rem;
+  background: white;
+  padding: 0.5rem 2rem;
   position: sticky;
   top: 0;
   z-index: 1000;
   transition: all 0.3s ease;
-  color: white;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
 }
 
 .navbar.scrolled {
-  padding: 0.5rem 2rem;
-  background: rgba(51, 51, 51, 0.95);
-  backdrop-filter: blur(10px);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 .navbar-content {
@@ -27,29 +23,28 @@
 .logo {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   text-decoration: none;
-  color: white;
+  color: #333;
 }
 
 .logo img {
   height: 40px;
   width: auto;
-  filter: brightness(1.2);
 }
 
 .logo span {
-  font-size: 1.6rem;
+  font-size: 1.5rem;
   font-weight: 700;
-  background: linear-gradient(135deg, #ffc107, #ff9800);
-  background-clip: text;
+  background: linear-gradient(135deg, #2193b0, #6dd5ed);
+  
   -webkit-text-fill-color: transparent;
 }
 
 /* Navigation Links */
 .nav-links {
   display: flex;
-  gap: 0.5rem;
+  gap: 1rem;
   list-style: none;
   margin: 0;
   padding: 0;
@@ -58,29 +53,24 @@
 .nav-links li a {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 0.6rem 1rem;
+  gap: 5px;
+  padding: 0.5rem 1rem;
   text-decoration: none;
-  color: #e0e0e0;
+  color: #666;
   font-weight: 500;
-  border-radius: 8px;
+  border-radius: 6px;
   transition: all 0.2s;
   position: relative;
 }
 
 .nav-links li a:hover {
-  color: #ffc107;
-  background: rgba(255, 193, 7, 0.1);
+  color: #2193b0;
+  background: rgba(33, 147, 176, 0.1);
 }
 
 .nav-links li a.active {
-  color: #ffc107;
-  background: rgba(255, 193, 7, 0.15);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-}
-
-.nav-links li a svg {
-  font-size: 1.1rem;
+  color: #2193b0;
+  background: rgba(33, 147, 176, 0.1);
 }
 
 /* Task Info Tooltip */
@@ -89,41 +79,93 @@
   top: 100%;
   left: 50%;
   transform: translateX(-50%);
-  background: #ffc107;
-  color: #333;
-  padding: 6px 12px;
+  background: #333;
+  color: white;
+  padding: 5px 10px;
   border-radius: 4px;
   font-size: 0.8rem;
   white-space: nowrap;
   opacity: 0;
   visibility: hidden;
   transition: all 0.2s;
-  margin-top: 5px;
-  font-weight: 600;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
-}
-
-.task-info::before {
-  content: '';
-  position: absolute;
-  top: -5px;
-  left: 50%;
-  transform: translateX(-50%);
-  border-width: 0 5px 5px 5px;
-  border-style: solid;
-  border-color: transparent transparent #ffc107 transparent;
 }
 
 .nav-links li a:hover .task-info {
   opacity: 1;
   visibility: visible;
-  transform: translateX(-50%) translateY(5px);
 }
 
-/* Navbar rechte Seite */
-.navbar-right {
+/* Benachrichtigungen */
+.notifications-wrapper {
+  position: relative;
+}
+
+.nav-icon-button {
+  background: none;
+  border: none;
+  padding: 8px;
+  cursor: pointer;
+  position: relative;
+  color: #666;
+  transition: color 0.2s;
+}
+
+.nav-icon-button:hover {
+  color: #2193b0;
+}
+
+.notification-badge {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 8px;
+  height: 8px;
+  background: #ff4757;
+  border-radius: 50%;
+}
+
+.notifications-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  width: 300px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  padding: 1rem;
+  margin-top: 10px;
+}
+
+.notifications-dropdown h3 {
+  margin: 0 0 1rem;
+  color: #333;
+  font-size: 1rem;
+}
+
+.notification-item {
   display: flex;
   align-items: center;
+  gap: 10px;
+  padding: 10px;
+  border-radius: 6px;
+  margin-bottom: 5px;
+  transition: background 0.2s;
+}
+
+.notification-item:hover {
+  background: #f8f9fa;
+}
+
+.notification-item.new {
+  background: rgba(33, 147, 176, 0.1);
+}
+
+.notification-item.success .notification-icon {
+  color: #2ecc71;
+}
+
+.notification-item.info .notification-icon {
+  color: #3498db;
 }
 
 /* Profilmenü */
@@ -135,49 +177,31 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  background: rgba(255, 255, 255, 0.1);
+  background: none;
   border: none;
-  padding: 8px 16px;
-  border-radius: 8px;
+  padding: 8px 12px;
   cursor: pointer;
-  color: white;
+  color: #666;
   font-weight: 500;
+  border-radius: 6px;
   transition: all 0.2s;
 }
 
 .profile-button:hover {
-  background: rgba(255, 193, 7, 0.2);
-}
-
-.profile-icon {
-  font-size: 1.1rem;
-  color: #ffc107;
-}
-
-.dropdown-arrow {
-  transition: transform 0.2s;
-}
-
-.dropdown-arrow.open {
-  transform: rotate(180deg);
+  background: rgba(33, 147, 176, 0.1);
+  color: #2193b0;
 }
 
 .profile-dropdown {
   position: absolute;
-  top: calc(100% + 10px);
+  top: 100%;
   right: 0;
   width: 250px;
-  background: #fff;
+  background: white;
   border-radius: 8px;
-  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  margin-top: 10px;
   overflow: hidden;
-  z-index: 1000;
-  animation: dropdownFadeIn 0.2s ease;
-}
-
-@keyframes dropdownFadeIn {
-  from { opacity: 0; transform: translateY(-10px); }
-  to { opacity: 1; transform: translateY(0); }
 }
 
 .profile-header {
@@ -185,20 +209,12 @@
   background: #f8f9fa;
   display: flex;
   align-items: center;
-  gap: 12px;
-  border-bottom: 1px solid #eaeaea;
+  gap: 10px;
 }
 
 .profile-avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: #e9ecef;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  font-size: 2.5rem;
   color: #666;
-  font-size: 1.2rem;
 }
 
 .profile-info {
@@ -208,13 +224,10 @@
 
 .profile-info strong {
   color: #333;
-  font-size: 0.95rem;
 }
 
 .profile-info small {
   color: #666;
-  font-size: 0.8rem;
-  margin-top: 2px;
 }
 
 .profile-dropdown ul {
@@ -228,8 +241,8 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 0.7rem 1rem;
-  color: #555;
+  padding: 0.5rem 1rem;
+  color: #666;
   text-decoration: none;
   width: 100%;
   border: none;
@@ -238,24 +251,12 @@
   font-size: 0.9rem;
   text-align: left;
   transition: background 0.2s;
-  font-weight: 500;
 }
 
 .profile-dropdown li a:hover,
 .profile-dropdown li button:hover {
   background: #f8f9fa;
-  color: #ffc107;
-}
-
-.profile-dropdown li a svg,
-.profile-dropdown li button svg {
-  color: #666;
-  font-size: 1rem;
-}
-
-.profile-dropdown li a:hover svg,
-.profile-dropdown li button:hover svg {
-  color: #ffc107;
+  color: #2193b0;
 }
 
 .profile-dropdown .divider {
@@ -267,67 +268,40 @@
 /* Auth Buttons */
 .auth-buttons {
   display: flex;
-  gap: 12px;
+  gap: 10px;
 }
 
 .login-button,
 .register-button {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 5px;
   padding: 8px 16px;
-  border-radius: 8px;
+  border-radius: 6px;
   text-decoration: none;
   font-weight: 500;
   transition: all 0.2s;
 }
 
 .login-button {
-  background: transparent;
-  color: #ffc107;
-  border: 1px solid #ffc107;
+  background: none;
+  color: #2193b0;
+  border: 1px solid #2193b0;
 }
 
 .login-button:hover {
-  background: rgba(255, 193, 7, 0.15);
-  transform: translateY(-2px);
+  background: rgba(33, 147, 176, 0.1);
 }
 
 .register-button {
-  background: #ffc107;
-  color: #333;
-  border: 1px solid #ffc107;
+  background: #2193b0;
+  color: white;
+  border: 1px solid #2193b0;
 }
 
 .register-button:hover {
-  background: #ffca2c;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 10px rgba(255, 193, 7, 0.3);
-}
-
-/* Logout-Button */
-.logout-button {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: rgba(220, 53, 69, 0.1);
-  color: #dc3545;
-  border: 1px solid #dc3545;
-  padding: 8px 16px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: 500;
-  transition: all 0.2s;
-  margin-right: 10px;
-}
-
-.logout-button:hover {
-  background: rgba(220, 53, 69, 0.2);
-  transform: translateY(-2px);
-}
-
-.logout-button svg {
-  font-size: 1.1rem;
+  background: #1a7a8e;
+  border-color: #1a7a8e;
 }
 
 /* Responsive Design */
@@ -336,81 +310,21 @@
     padding: 0.5rem 1rem;
   }
   
-  .nav-links li a {
-    padding: 0.5rem 0.8rem;
-  }
-}
-
-@media (max-width: 900px) {
   .nav-links li a span {
     display: none;
   }
   
   .nav-links li a {
     padding: 0.5rem;
-    justify-content: center;
-  }
-  
-  .nav-links li a svg {
-    font-size: 1.3rem;
-  }
-  
-  .logout-button span {
-    display: none;
-  }
-  
-  .logout-button {
-    padding: 8px;
-  }
-  
-  .logout-button svg {
-    font-size: 1.3rem;
   }
 }
 
 @media (max-width: 768px) {
-  .navbar-content {
-    position: relative;
+  .navbar-center {
+    display: none;
   }
   
   .profile-button span {
     display: none;
-  }
-  
-  .login-button span,
-  .register-button span {
-    display: none;
-  }
-  
-  .login-button,
-  .register-button {
-    padding: 8px;
-  }
-  
-  .login-button svg,
-  .register-button svg {
-    font-size: 1.2rem;
-  }
-  
-  .logo span {
-    font-size: 1.3rem;
-  }
-}
-
-@media (max-width: 520px) {
-  .navbar {
-    padding: 0.5rem;
-  }
-  
-  .logo img {
-    height: 32px;
-  }
-  
-  .nav-links {
-    gap: 0.2rem;
-  }
-  
-  .nav-links li a {
-    padding: 0.4rem;
   }
 } 
