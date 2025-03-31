@@ -324,16 +324,19 @@
   }
 }
 
-/* Entfernen der grünen Balken in der Statistik-Anzeige */
-.stat-progress-bar,
-.stat-bar {
-  display: none !important; /* Verbirgt die grünen Balken komplett */
-}
-
-/* Falls andere Selektoren die Balken betreffen könnten */
-.stat-card .progress,
-.stat-card .bar,
-.stat-info .progress,
-.stat-info .bar {
+/* Entfernen aller möglichen grünen Balken */
+.stat-bar, 
+.progress-bar, 
+.stat-progress-bar, 
+.stat-progress, 
+.category-progress,
+.progress-container,
+.progress-indicator,
+[class*="progress"],
+[class*="bar"] {
   display: none !important;
+  background-color: transparent !important;
+  height: 0 !important;
+  border: none !important;
+  overflow: hidden !important;
 } 
