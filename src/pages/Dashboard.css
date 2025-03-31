@@ -327,12 +327,13 @@
 /* Entfernen der grünen Balken in der Statistik-Anzeige */
 .stat-progress-bar,
 .stat-bar {
-  display: none; /* Verbirgt die grünen Balken komplett */
+  display: none !important; /* Verbirgt die grünen Balken komplett */
 }
 
-/* Alternative: Transparenz setzen statt komplett entfernen */
-.stat-progress-bar,
-.stat-bar {
-  background-color: transparent !important;
-  border: none !important;
+/* Falls andere Selektoren die Balken betreffen könnten */
+.stat-card .progress,
+.stat-card .bar,
+.stat-info .progress,
+.stat-info .bar {
+  display: none !important;
 } 

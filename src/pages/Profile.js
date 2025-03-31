@@ -13,7 +13,6 @@ import {
   faBicycle 
 } from '@fortawesome/free-solid-svg-icons';
 import config from '../config';
-import { toast } from 'react-hot-toast';
 
 const Profile = () => {
   const { user } = useAuth();
@@ -92,11 +91,11 @@ const Profile = () => {
         localStorage.setItem('authContext', JSON.stringify(authContext));
       }
 
-      toast.success('Name erfolgreich aktualisiert');
+      alert('Name erfolgreich aktualisiert');
       setIsEditingName(false);
     } catch (error) {
       console.error('Fehler beim Speichern des Namens:', error);
-      toast.error('Fehler beim Speichern des Namens. Bitte versuchen Sie es erneut.');
+      alert('Fehler beim Speichern des Namens. Bitte versuchen Sie es erneut.');
     }
   };
 
