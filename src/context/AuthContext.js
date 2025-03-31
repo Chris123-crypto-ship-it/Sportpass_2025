@@ -65,14 +65,22 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
 
-  const sendConfirmationEmail = (email, code) => {
-    // Logik zum Senden der E-Mail
+  // Neue Funktion zum Aktualisieren der Benutzerdaten
+  const updateUserData = (newData) => {
+    if (user) {
+      const updatedUser = { ...user, ...newData };
+      setUser(updatedUser);
+      
+      // Aktualisiere den Benutzer auch im localStorage
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+      
+      return updatedUser;
+    }
+    return null;
   };
 
-  const updateUser = (userData) => {
-    setUser(userData);
-    // Optional: Aktualisiere auch den gespeicherten Benutzer im localStorage
-    localStorage.setItem('user', JSON.stringify(userData));
+  const sendConfirmationEmail = (email, code) => {
+    // Logik zum Senden der E-Mail
   };
 
   const value = {
@@ -81,8 +89,8 @@ export const AuthProvider = ({ children }) => {
     error,
     login,
     logout,
-    isAuthenticated: !!user,
-    updateUser
+    updateUserData, // Neue Funktion zum Provider hinzufügen
+    isAuthenticated: !!user
   };
 
   return (
