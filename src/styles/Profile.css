@@ -1,0 +1,23 @@
+.goal-icon {
+  /* Entferne den blauen Hintergrund */
+  background: transparent; /* statt #f0f4ff */
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 1rem;
+}
+
+.goal-icon i,
+.goal-icon svg {
+  font-size: 1.5rem;
+  color: #4a90e2; /* Behalte die blaue Farbe für das Icon selbst */
+}
+
+/* Wenn die hover-Effekte den blauen Kreis betreffen, passe auch diese an */
+.goal-card:hover .goal-icon {
+  background: transparent;
+  color: #4a90e2;
+} 
