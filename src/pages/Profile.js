@@ -13,9 +13,10 @@ import {
   faBicycle 
 } from '@fortawesome/free-solid-svg-icons';
 import config from '../config';
+import { toast } from 'react-hot-toast';
 
 const Profile = () => {
-  const { user, updateUserData } = useAuth();
+  const { user } = useAuth();
   const [profileImage, setProfileImage] = useState(null);
   const [weight, setWeight] = useState('');
   const [height, setHeight] = useState('');
@@ -60,43 +61,38 @@ const Profile = () => {
     }
 
     try {
-      // Speichern Sie den Namen zunächst nur lokal
-      localStorage.setItem('userName', userName.trim());
+      setIsEditingName(false);
       
-      // Verwende den korrekten API-Endpunkt zur Aktualisierung des Namens im Backend
-      try {
-        const response = await fetch(`${config.API_URL}/api/users/update-profile`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${user.token}`
-          },
-          body: JSON.stringify({ 
-            name: userName.trim(),
-            userId: user.id // Stelle sicher, dass die Benutzer-ID mitgesendet wird
-          })
-        });
+      // Speichere den Namen in der Datenbank
+      const response = await fetch(`${config.API_URL}/api/users/update-profile`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({ name: userName.trim() })
+      });
 
-        if (!response.ok) {
-          const errorText = await response.text();
-          console.warn('Backend-Update fehlgeschlagen:', errorText);
-          // Wir zeigen keinen Fehler an, da der Name lokal gespeichert wurde
-        } else {
-          const data = await response.json();
-          console.log('Name erfolgreich in der Datenbank aktualisiert:', data);
-          
-          // Aktualisiere den lokalen Benutzerdaten im AuthContext
-          updateUserData({ name: userName.trim() });
-        }
-      } catch (backendError) {
-        console.warn('Backend-Fehler:', backendError);
-        // Wir zeigen keinen Fehler an, da der Name lokal gespeichert wurde
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Fehler beim Aktualisieren des Namens');
       }
 
-      setIsEditingName(false);
+      // Nach erfolgreicher Datenbankaktualisierung auch lokal speichern
+      localStorage.setItem('userName', userName.trim());
+      
+      // Aktualisiere den Benutzernamen im AuthContext, damit er überall verfügbar ist
+      if (user && typeof user.updateProfile === 'function') {
+        user.updateProfile({ displayName: userName.trim() });
+      }
+      
+      toast.success('Name erfolgreich aktualisiert!');
     } catch (error) {
       console.error('Fehler beim Speichern des Namens:', error);
-      alert('Es gab ein Problem beim Speichern des Namens. Bitte versuchen Sie es erneut.');
+      toast.error('Es gab ein Problem beim Speichern des Namens in der Datenbank.');
+      
+      // Auch bei Fehler lokal speichern, damit die Änderung nicht verloren geht
+      localStorage.setItem('userName', userName.trim());
     }
   };
 

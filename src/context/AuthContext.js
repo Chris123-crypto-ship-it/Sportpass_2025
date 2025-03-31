@@ -65,20 +65,6 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
 
-  // Neue Funktion zum Aktualisieren der Benutzerdaten
-  const updateUserData = (newData) => {
-    if (user) {
-      const updatedUser = { ...user, ...newData };
-      setUser(updatedUser);
-      
-      // Aktualisiere den Benutzer auch im localStorage
-      localStorage.setItem('user', JSON.stringify(updatedUser));
-      
-      return updatedUser;
-    }
-    return null;
-  };
-
   const sendConfirmationEmail = (email, code) => {
     // Logik zum Senden der E-Mail
   };
@@ -89,7 +75,6 @@ export const AuthProvider = ({ children }) => {
     error,
     login,
     logout,
-    updateUserData, // Neue Funktion zum Provider hinzufügen
     isAuthenticated: !!user
   };
 
