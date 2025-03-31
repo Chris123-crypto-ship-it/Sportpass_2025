@@ -37,6 +37,75 @@
   border-radius: 50%;
 }
 
+/* Punkte-Bereich */
+.points-section {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  background: linear-gradient(135deg, rgba(255, 193, 7, 0.1), rgba(255, 223, 127, 0.2));
+  padding: 15px;
+  border-radius: 15px;
+  margin-top: 10px;
+  border: 1px solid rgba(255, 193, 7, 0.2);
+}
+
+.points-icon {
+  font-size: 2rem;
+  color: #ffc107;
+}
+
+.points-value {
+  font-size: 2rem;
+  font-weight: 700;
+  background: linear-gradient(to right, #ffc107, #ffca2c);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.points-label {
+  font-size: 1rem;
+  color: #555;
+}
+
+/* Klassen-Badge */
+.class-badge {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: linear-gradient(135deg, #ffc107, #ff9800);
+  color: white;
+  padding: 8px 15px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  box-shadow: 0 4px 10px rgba(255, 193, 7, 0.3);
+  z-index: 10;
+}
+
+/* Verifizierungsstatus */
+.verification-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(72, 187, 120, 0.1);
+  padding: 5px 12px;
+  border-radius: 20px;
+  margin-left: 10px;
+  vertical-align: middle;
+}
+
+.verification-status.verified {
+  color: #48bb78;
+  border: 1px solid rgba(72, 187, 120, 0.3);
+}
+
+.verification-status.unverified {
+  color: #e53e3e;
+  background: rgba(229, 62, 62, 0.1);
+  border: 1px solid rgba(229, 62, 62, 0.3);
+}
+
 .name-display {
   display: flex;
   align-items: center;
@@ -228,6 +297,121 @@
   background: linear-gradient(135deg, rgba(255, 193, 7, 0.1), rgba(255, 223, 127, 0.1));
   border: 1px solid rgba(255, 193, 7, 0.2);
   font-weight: 600;
+}
+
+/* Fortschrittsbereich mit Zielen-Visualisierung */
+.progress-card {
+  background: white;
+  border-radius: 20px;
+  padding: 25px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+  margin-top: 30px;
+}
+
+.progress-title {
+  font-size: 1.4rem;
+  color: #2c3e50;
+  margin-bottom: 20px;
+  font-weight: 600;
+}
+
+.progress-bar-container {
+  height: 12px;
+  background: #f1f1f1;
+  border-radius: 10px;
+  margin-bottom: 8px;
+  overflow: hidden;
+}
+
+.progress-bar {
+  height: 100%;
+  background: linear-gradient(to right, #ffc107, #ffca2c);
+  border-radius: 10px;
+  transition: width 0.5s ease;
+}
+
+.progress-info {
+  display: flex;
+  justify-content: space-between;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+/* Gewichts- und Größenverlauf */
+.stat-history {
+  background: white;
+  border-radius: 15px;
+  padding: 20px;
+  margin-top: 25px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+}
+
+.history-title {
+  font-size: 1.2rem;
+  margin-bottom: 15px;
+  color: #2c3e50;
+  font-weight: 600;
+}
+
+.history-chart {
+  height: 200px;
+  margin-bottom: 20px;
+  position: relative;
+}
+
+.chart-line {
+  stroke: #ffc107;
+  stroke-width: 2;
+  fill: none;
+}
+
+.chart-area {
+  fill: rgba(255, 193, 7, 0.1);
+}
+
+.chart-point {
+  fill: #ffc107;
+  stroke: white;
+  stroke-width: 2;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.chart-point:hover {
+  transform: scale(1.3);
+}
+
+/* Klassenspezifische Informationen */
+.class-info {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-top: 15px;
+  padding: 15px;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+.class-icon {
+  font-size: 1.5rem;
+  color: #ffc107;
+}
+
+.class-details {
+  flex: 1;
+}
+
+.class-name {
+  font-weight: 600;
+  color: #2c3e50;
+  font-size: 1.1rem;
+}
+
+.class-description {
+  color: #666;
+  font-size: 0.9rem;
+  margin-top: 5px;
 }
 
 /* Hauptinhalt */
@@ -713,8 +897,14 @@
     align-items: center;
   }
   
-  .profile-email, .profile-role {
+  .profile-email, .profile-role, .points-section {
     margin: 0 auto;
+  }
+  
+  .class-badge {
+    position: static;
+    margin: 10px auto;
+    display: inline-block;
   }
   
   .main-content {
@@ -749,6 +939,12 @@
   .profile-name {
     font-size: 2em;
   }
+  
+  .progress-info {
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+  }
 }
 
 @media (max-width: 500px) {
@@ -768,5 +964,80 @@
   
   .section-title {
     font-size: 1.4em;
+  }
+  
+  .verification-status {
+    margin: 10px auto 0;
+  }
+}
+
+/* Spezifische Stile für verschiedene Klassen-Badges */
+.beginner-badge .class-icon {
+  background: linear-gradient(135deg, #4ade80, #22c55e);
+}
+
+.intermediate-badge .class-icon {
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+}
+
+.advanced-badge .class-icon {
+  background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+}
+
+.expert-badge .class-icon {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+}
+
+.beginner-badge .class-name {
+  color: #22c55e;
+}
+
+.intermediate-badge .class-name {
+  color: #2563eb;
+}
+
+.advanced-badge .class-name {
+  color: #6d28d9;
+}
+
+.expert-badge .class-name {
+  color: #d97706;
+}
+
+/* Animationen für Badges und Fortschrittsbalken */
+.class-info {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.class-info:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.progress-bar {
+  position: relative;
+  overflow: hidden;
+}
+
+.progress-bar::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.3) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  animation: shimmer 1.5s infinite;
+  transform: translateX(-100%);
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
   }
 }

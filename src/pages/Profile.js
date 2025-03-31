@@ -14,6 +14,12 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import config from '../config';
 
+// Importiere die neuen Komponenten
+import ClassBadge from '../components/ClassBadge';
+import PointsDisplay from '../components/PointsDisplay';
+import VerificationStatus from '../components/VerificationStatus';
+import StatsHistory from '../components/StatsHistory';
+
 const Profile = () => {
   const { user } = useAuth();
   const [profileImage, setProfileImage] = useState(null);
@@ -274,14 +280,14 @@ const Profile = () => {
   return (
     <div className="profile-container" style={{
       padding: '20px',
-      maxWidth: '800px',
+      maxWidth: '900px',
       margin: '0 auto'
     }}>
       <div className="profile-header">
         <div className="profile-image-section">
           <div className="profile-image-container">
             <img 
-              src={profileImage || 'default-profile.jpg'} 
+              src={user.profile_image || profileImage || 'default-profile.jpg'} 
               alt="Profilbild"
               className="profile-image"
             />
@@ -294,14 +300,14 @@ const Profile = () => {
                 style={{ display: 'none' }}
               />
             </label>
-            </div>
+          </div>
         </div>
 
         <div className="profile-info">
           {isEditingName ? (
             <form onSubmit={handleNameChange} className="name-edit-form">
-                <input
-                  type="text"
+              <input
+                type="text"
                 value={userName}
                 onChange={(e) => setUserName(e.target.value)}
                 className="name-edit-input"
@@ -333,6 +339,7 @@ const Profile = () => {
               >
                 <FaEdit />
               </button>
+              <VerificationStatus isVerified={user.is_verified} />
             </div>
           )}
           <div className="profile-email">
@@ -343,8 +350,17 @@ const Profile = () => {
             <FaUser />
             {user.role === 'admin' ? 'Administrator' : 'Mitglied'}
           </div>
+          
+          {/* Punkteanzeige mit der neuen Komponente */}
+          <PointsDisplay points={user.points} />
         </div>
       </div>
+
+      {/* Klassen-Badge mit der neuen Komponente */}
+      <ClassBadge className={user.class} />
+
+      {/* Gewichts- und Größenverlauf mit der neuen Komponente */}
+      <StatsHistory user={user} />
 
       <div className="profile-content">
         <div className="main-content">
@@ -496,6 +512,9 @@ const Profile = () => {
               )}
             </div>
           </div>
+          
+          {/* Zeige Datenbankziele an, wenn vorhanden */}
+          {user.goals && Object.keys(user.goals).length > 0 && renderGoals()}
         </div>
       </div>
     </div>
