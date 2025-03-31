@@ -210,7 +210,7 @@ const Footer = () => {
             
             <div className="about-section">
               <h3>Entstehung</h3>
-              <p>Das Projekt entstand 2023 aus der Idee heraus, die Motivation für sportliche Aktivitäten durch spielerische Elemente und Gemeinschaft zu steigern.</p>
+              <p>Das Projekt entstand 2025 aus der Idee heraus, die Motivation für sportliche Aktivitäten durch spielerische Elemente und Gemeinschaft zu steigern.</p>
             </div>
             
             <button className="modal-close" onClick={() => setShowAboutModal(false)}>

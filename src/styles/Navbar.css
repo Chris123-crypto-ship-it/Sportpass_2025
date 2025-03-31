@@ -346,12 +346,13 @@
   color: #ffc107;
 }
 
-/* Navigation Container */
-.nav-container {
+/* Mobile Navigation Content */
+.nav-content {
   display: flex;
   align-items: center;
   justify-content: space-between;
   flex: 1;
+  margin-left: 2rem;
 }
 
 /* Responsive Design */
@@ -370,95 +371,136 @@
     display: block;
   }
 
-  .nav-container {
+  .nav-content {
     display: none;
     position: fixed;
-    top: 70px;
+    top: 72px;
     left: 0;
     right: 0;
     background: #333333;
     flex-direction: column;
     align-items: stretch;
     padding: 1rem;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    margin: 0;
+    height: calc(100vh - 72px);
+    overflow-y: auto;
   }
 
-  .nav-container.mobile-open {
+  .nav-content.show {
     display: flex;
   }
 
   .nav-links {
     flex-direction: column;
-    gap: 0.5rem;
-    margin-bottom: 1rem;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+  }
+
+  .nav-links li {
+    width: 100%;
   }
 
   .nav-links li a {
-    padding: 0.8rem 1rem;
+    padding: 1rem;
+    width: 100%;
     justify-content: flex-start;
     gap: 1rem;
+    border-radius: 8px;
   }
 
   .nav-links li a span {
-    display: block;
+    display: inline;
   }
 
   .navbar-right {
     flex-direction: column;
+    width: 100%;
     gap: 1rem;
-    align-items: stretch;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
   }
 
   .auth-buttons {
     flex-direction: column;
-    gap: 0.5rem;
+    width: 100%;
   }
 
   .login-button,
   .register-button,
-  .logout-button,
-  .profile-button {
+  .logout-button {
     width: 100%;
     justify-content: center;
-    padding: 0.8rem;
+    padding: 1rem;
   }
 
-  .profile-dropdown {
-    position: static;
-    width: 100%;
-    margin-top: 0.5rem;
-    box-shadow: none;
+  .login-button span,
+  .register-button span,
+  .logout-button span {
+    display: inline;
   }
 
   .profile-wrapper {
     width: 100%;
   }
 
-  .navbar-content {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+  .profile-button {
+    width: 100%;
+    justify-content: center;
   }
 
-  .logo {
-    z-index: 2;
+  .profile-dropdown {
+    position: static;
+    width: 100%;
+    margin-top: 1rem;
+    animation: none;
   }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 768px) {
+  .navbar-content {
+    position: relative;
+  }
+  
+  .profile-button span {
+    display: none;
+  }
+  
+  .login-button span,
+  .register-button span {
+    display: none;
+  }
+  
+  .login-button,
+  .register-button {
+    padding: 8px;
+  }
+  
+  .login-button svg,
+  .register-button svg {
+    font-size: 1.2rem;
+  }
+  
+  .logo span {
+    font-size: 1.3rem;
+  }
+}
+
+@media (max-width: 520px) {
   .navbar {
     padding: 0.5rem;
   }
-
+  
   .logo img {
     height: 32px;
   }
-
-  .logo span {
-    font-size: 1.2rem;
+  
+  .nav-links {
+    gap: 0.2rem;
   }
-
+  
   .nav-links li a {
-    font-size: 1rem;
+    padding: 0.4rem;
   }
 } 

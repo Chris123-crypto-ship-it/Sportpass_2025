@@ -24,7 +24,6 @@ import VerifyEmail from './pages/VerifyEmail';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 import Support from './pages/Support';
-import './styles/common.css';
 import './App.css';
 
 function App() {

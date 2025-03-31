@@ -1,106 +1,149 @@
 // src/pages/Login.js
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import '../styles/Login.css';
-import { FaSignInAlt, FaEnvelope, FaLock } from 'react-icons/fa';
+import { FaEnvelope, FaLock } from 'react-icons/fa';
 import { useAuth } from '../context/AuthContext';
 import config from '../config';
 
 const Login = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
   const navigate = useNavigate();
+  const { login } = useAuth();
+  const [formData, setFormData] = useState({
+    email: '',
+    password: ''
+  });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [showResendVerification, setShowResendVerification] = useState(false);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleResendVerification = async () => {
     try {
-      setError('');
       setLoading(true);
-      await login(email, password);
-      navigate('/dashboard');
-    } catch (err) {
-      setError('Fehler beim Einloggen. Bitte überprüfen Sie Ihre Eingaben.');
-      console.error('Login error:', err);
+      const response = await axios.post(`${config.API_URL}/resend-verification`, {
+        email: formData.email
+      });
+
+      if (response.data.message) {
+        toast.success('Verifizierungs-E-Mail wurde erneut gesendet.');
+      }
+    } catch (error) {
+      console.error('Fehler beim erneuten Senden:', error);
+      toast.error('Fehler beim Senden der Verifizierungs-E-Mail.');
     } finally {
       setLoading(false);
     }
   };
 
-  if (loading) {
-    return (
-      <div className="page-container">
-        <div className="loading-container">
-          <div className="loading-spinner"></div>
-          <p>Anmeldung läuft...</p>
-        </div>
-      </div>
-    );
-  }
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
+    setShowResendVerification(false);
+
+    try {
+      const result = await login(formData.email, formData.password);
+
+      if (result.success) {
+        toast.success('Erfolgreich eingeloggt!');
+
+        // Weiterleitung basierend auf der Benutzerrolle
+        if (result.user.role === 'admin') {
+          window.location.href = '/admin-dashboard';
+        } else {
+          window.location.href = '/dashboard';
+        }
+      }
+    } catch (error) {
+      console.error('Login-Fehler:', error);
+      
+      if (error.response) {
+        // Prüfen, ob es sich um einen Verifizierungsfehler handelt
+        if (error.response.status === 403 && error.response.data.error === 'E-Mail-Adresse nicht verifiziert') {
+          setError('Bitte verifiziere zuerst deine E-Mail-Adresse.');
+          setShowResendVerification(true);
+        } else {
+          setError(error.response.data.error || 'Fehler beim Login');
+        }
+      } else if (error.request) {
+        setError('Der Server antwortet nicht. Bitte versuche es später erneut.');
+      } else {
+        setError('Ein unerwarteter Fehler ist aufgetreten.');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <div className="page-container">
-      <div className="page-header">
-        <h1 className="page-title">Anmelden</h1>
-      </div>
+    <div className="login-container">
+      <h2>Anmelden</h2>
+      <form onSubmit={handleSubmit} className="login-form">
+        <div className="form-group">
+          <label htmlFor="email">E-Mail</label>
+          <div className="input-with-icon">
+            <FaEnvelope className="input-icon" />
+            <input
+              type="email"
+              id="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              placeholder="deine@email.de"
+              required
+            />
+          </div>
+        </div>
 
-      <div className="form-container card">
+        <div className="form-group">
+          <label htmlFor="password">Passwort</label>
+          <div className="input-with-icon">
+            <FaLock className="input-icon" />
+            <input
+              type="password"
+              id="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              placeholder="Dein Passwort"
+              required
+            />
+          </div>
+        </div>
+
         {error && (
-          <div className="info-box" style={{ background: 'rgba(220, 53, 69, 0.1)', borderColor: 'rgba(220, 53, 69, 0.2)' }}>
-            <div className="info-text" style={{ color: '#dc3545' }}>{error}</div>
+          <div className="error-message">
+            {error}
+            {showResendVerification && (
+              <button
+                type="button"
+                onClick={handleResendVerification}
+                className="btn-link"
+                disabled={loading}
+              >
+                Verifizierungs-E-Mail erneut senden
+              </button>
+            )}
           </div>
         )}
 
-        <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label className="form-label">
-              <FaEnvelope /> E-Mail
-            </label>
-            <input
-              type="email"
-              className="form-input"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              placeholder="ihre@email.de"
-            />
-          </div>
+        <button type="submit" className="btn-primary" disabled={loading}>
+          {loading ? 'Anmeldung läuft...' : 'Anmelden'}
+        </button>
+        
+        <div className="forgot-password-link">
+          <span onClick={() => navigate('/forgot-password')}>Passwort vergessen?</span>
+        </div>
+      </form>
 
-          <div className="form-group">
-            <label className="form-label">
-              <FaLock /> Passwort
-            </label>
-            <input
-              type="password"
-              className="form-input"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              placeholder="••••••••"
-            />
-          </div>
-
-          <button type="submit" className="button button-primary" style={{ width: '100%', marginBottom: '1rem' }}>
-            <FaSignInAlt /> Anmelden
-          </button>
-
-          <div style={{ textAlign: 'center', marginTop: '1rem' }}>
-            <Link to="/forgot-password" style={{ color: '#2193b0', textDecoration: 'none' }}>
-              Passwort vergessen?
-            </Link>
-          </div>
-
-          <div style={{ textAlign: 'center', marginTop: '1rem', color: '#64748b' }}>
-            Noch kein Konto?{' '}
-            <Link to="/register" style={{ color: '#2193b0', textDecoration: 'none', fontWeight: '600' }}>
-              Jetzt registrieren
-            </Link>
-          </div>
-        </form>
+      <div className="register-link">
+        Noch kein Konto? <a href="/register">Hier registrieren</a>
       </div>
     </div>
   );

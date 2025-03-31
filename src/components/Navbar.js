@@ -34,6 +34,11 @@ const Navbar = () => {
     };
   }, []);
 
+  // Schließe Mobile-Menü bei Routenwechsel
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+  }, [location]);
+
   const handleLogout = () => {
     logout();
     navigate('/login');
@@ -47,16 +52,76 @@ const Navbar = () => {
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
-    if (showProfileDropdown) setShowProfileDropdown(false);
-  };
-
-  const handleMobileNavClick = () => {
-    setIsMobileMenuOpen(false);
     setShowProfileDropdown(false);
   };
 
+  const renderNavLinks = () => (
+    <ul className="nav-links">
+      {user ? (
+        <>
+          <li>
+            <Link to="/dashboard" className={location.pathname === '/dashboard' ? 'active' : ''}>
+              <FaTachometerAlt />
+              <span>Dashboard</span>
+            </Link>
+          </li>
+          <li>
+            <Link to="/leaderboard" className={location.pathname === '/leaderboard' ? 'active' : ''}>
+              <FaMedal />
+              <span>Leaderboard</span>
+            </Link>
+          </li>
+          <li>
+            <Link to="/tasks" className={location.pathname === '/tasks' ? 'active' : ''}>
+              <FaTasks />
+              <span>Aufgaben</span>
+              {location.pathname === '/tasks' && (
+                <span className="task-info">Neue Aufgaben jeden Sonntag!</span>
+              )}
+            </Link>
+          </li>
+          <li>
+            <Link to="/stats" className={location.pathname === '/stats' ? 'active' : ''}>
+              <FaChartBar />
+              <span>Statistiken</span>
+            </Link>
+          </li>
+          <li>
+            <Link to="/archive" className={location.pathname === '/archive' ? 'active' : ''}>
+              <FaArchive />
+              <span>Archiv</span>
+            </Link>
+          </li>
+          {user.role === 'admin' && (
+            <>
+              <li>
+                <Link to="/admin-dashboard" className={location.pathname === '/admin-dashboard' ? 'active' : ''}>
+                  <FaUserCog />
+                  <span>Admin</span>
+                </Link>
+              </li>
+              <li>
+                <Link to="/participants" className={location.pathname === '/participants' ? 'active' : ''}>
+                  <FaUserFriends />
+                  <span>Teilnehmer</span>
+                </Link>
+              </li>
+            </>
+          )}
+        </>
+      ) : (
+        <li>
+          <Link to="/leaderboard" className={location.pathname === '/leaderboard' ? 'active' : ''}>
+            <FaMedal />
+            <span>Leaderboard</span>
+          </Link>
+        </li>
+      )}
+    </ul>
+  );
+
   return (
-    <nav className={`navbar ${scrolled ? 'scrolled' : ''}`}>
+    <nav className={`navbar ${scrolled ? 'scrolled' : ''} ${isMobileMenuOpen ? 'mobile-open' : ''}`}>
       <div className="navbar-content">
         <Link to="/" className="logo">
           <img src={logo} alt="Sportpass Logo" />
@@ -67,98 +132,8 @@ const Navbar = () => {
           {isMobileMenuOpen ? <FaTimes /> : <FaBars />}
         </button>
 
-        <div className={`nav-container ${isMobileMenuOpen ? 'mobile-open' : ''}`}>
-          <ul className="nav-links">
-            {user ? (
-              <>
-                <li>
-                  <Link 
-                    to="/dashboard" 
-                    className={location.pathname === '/dashboard' ? 'active' : ''}
-                    onClick={handleMobileNavClick}
-                  >
-                    <FaTachometerAlt />
-                    <span>Dashboard</span>
-                  </Link>
-                </li>
-                <li>
-                  <Link 
-                    to="/leaderboard" 
-                    className={location.pathname === '/leaderboard' ? 'active' : ''}
-                    onClick={handleMobileNavClick}
-                  >
-                    <FaMedal />
-                    <span>Leaderboard</span>
-                  </Link>
-                </li>
-                <li>
-                  <Link 
-                    to="/tasks" 
-                    className={location.pathname === '/tasks' ? 'active' : ''}
-                    onClick={handleMobileNavClick}
-                  >
-                    <FaTasks />
-                    <span>Aufgaben</span>
-                  </Link>
-                </li>
-                <li>
-                  <Link 
-                    to="/stats" 
-                    className={location.pathname === '/stats' ? 'active' : ''}
-                    onClick={handleMobileNavClick}
-                  >
-                    <FaChartBar />
-                    <span>Statistiken</span>
-                  </Link>
-                </li>
-                <li>
-                  <Link 
-                    to="/archive" 
-                    className={location.pathname === '/archive' ? 'active' : ''}
-                    onClick={handleMobileNavClick}
-                  >
-                    <FaArchive />
-                    <span>Archiv</span>
-                  </Link>
-                </li>
-                {user.role === 'admin' && (
-                  <>
-                    <li>
-                      <Link 
-                        to="/admin-dashboard" 
-                        className={location.pathname === '/admin-dashboard' ? 'active' : ''}
-                        onClick={handleMobileNavClick}
-                      >
-                        <FaUserCog />
-                        <span>Admin</span>
-                      </Link>
-                    </li>
-                    <li>
-                      <Link 
-                        to="/participants" 
-                        className={location.pathname === '/participants' ? 'active' : ''}
-                        onClick={handleMobileNavClick}
-                      >
-                        <FaUserFriends />
-                        <span>Teilnehmer</span>
-                      </Link>
-                    </li>
-                  </>
-                )}
-              </>
-            ) : (
-              <li>
-                <Link 
-                  to="/leaderboard" 
-                  className={location.pathname === '/leaderboard' ? 'active' : ''}
-                  onClick={handleMobileNavClick}
-                >
-                  <FaMedal />
-                  <span>Leaderboard</span>
-                </Link>
-              </li>
-            )}
-          </ul>
+        <div className={`nav-content ${isMobileMenuOpen ? 'show' : ''}`}>
+          {renderNavLinks()}
 
           <div className="navbar-right">
             {user ? (
@@ -188,13 +163,10 @@ const Navbar = () => {
                       
                       <ul>
                         <li>
-                          <Link 
-                            to="/profile" 
-                            onClick={() => {
-                              setShowProfileDropdown(false);
-                              handleMobileNavClick();
-                            }}
-                          >
+                          <Link to="/profile" onClick={() => {
+                            setShowProfileDropdown(false);
+                            setIsMobileMenuOpen(false);
+                          }}>
                             <FaUser /> Profil
                           </Link>
                         </li>
@@ -205,11 +177,11 @@ const Navbar = () => {
               </>
             ) : (
               <div className="auth-buttons">
-                <Link to="/login" className="login-button" onClick={handleMobileNavClick}>
-                  <FaSignInAlt /> Login
+                <Link to="/login" className="login-button" onClick={() => setIsMobileMenuOpen(false)}>
+                  <FaSignInAlt /> <span>Login</span>
                 </Link>
-                <Link to="/register" className="register-button" onClick={handleMobileNavClick}>
-                  <FaUserPlus /> Registrieren
+                <Link to="/register" className="register-button" onClick={() => setIsMobileMenuOpen(false)}>
+                  <FaUserPlus /> <span>Registrieren</span>
                 </Link>
               </div>
             )}
