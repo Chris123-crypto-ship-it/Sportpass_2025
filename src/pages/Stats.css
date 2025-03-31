@@ -16,9 +16,9 @@
   font-size: 2.4rem;
   font-weight: 800;
   color: #2c3e50;
-  background: linear-gradient(90deg, #2193b0, #6dd5ed);
-  
-  -webkit-text-fill-color: transparent;
+  background: none;
+  -webkit-text-fill-color: initial;
+  background-clip: initial;
 }
 
 .time-filter {
@@ -124,9 +124,9 @@
   color: #2c3e50;
   margin-bottom: 5px;
   font-family: 'Inter', sans-serif;
-  background: linear-gradient(90deg, #2193b0, #6dd5ed);
-  
-  -webkit-text-fill-color: transparent;
+  background: none;
+  -webkit-text-fill-color: initial;
+  background-clip: initial;
   display: inline-block;
 }
 
