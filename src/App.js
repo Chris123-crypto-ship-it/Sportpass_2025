@@ -25,6 +25,7 @@ import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 import Support from './pages/Support';
 import './App.css';
+import './styles/Layout.css';
 
 function App() {
   useEffect(() => {
@@ -36,9 +37,9 @@ function App() {
     <AuthProvider>
       <TaskProvider>
         <Router>
-          <div className="app">
+          <div className="app page-background">
             <Navbar />
-            <main className="main-content">
+            <main className="page-container">
               <Routes>
                 {/* Startseite umleiten zum Login */}
                 <Route path="/" element={<Navigate to="/login" replace />} />

@@ -140,38 +140,40 @@ const Stats = () => {
 
   return (
     <div className="stats-container">
-      <div className="stats-info">
+      <div className="page-header">
+        <h1 className="page-title">Deine Sportpass-Statistiken</h1>
+      </div>
+
+      <div className="info-box">
         <FaInfoCircle className="info-icon" />
         <div className="info-text">
           Hier siehst du deine persönlichen Statistiken. Aufgaben und detaillierte Statistiken werden nach einer Woche automatisch aus der Übersicht entfernt. Deine gesammelten Punkte bleiben davon unberührt und werden dauerhaft in deinem Konto gespeichert. Falls keine Statistiken angezeigt werden, gehe bitte kurz zum Archiv und warte, bis die Daten dort geladen sind. Kehre dann zur Statistik-Seite zurück.
         </div>
       </div>
-      <div className="stats-header">
-        <h1 className="stats-title">Deine Sportpass-Statistiken</h1>
-        <div className="time-filter">
-          <button 
-            className={`time-filter-button ${timeFilter === 'all' ? 'active' : ''}`}
-            onClick={() => setTimeFilter('all')}
-          >
-            Gesamt
-          </button>
-          <button 
-            className={`time-filter-button ${timeFilter === 'month' ? 'active' : ''}`}
-            onClick={() => setTimeFilter('month')}
-          >
-            Dieser Monat
-          </button>
-          <button 
-            className={`time-filter-button ${timeFilter === 'week' ? 'active' : ''}`}
-            onClick={() => setTimeFilter('week')}
-          >
-            Diese Woche
-          </button>
-        </div>
+
+      <div className="time-filter">
+        <button 
+          className={`time-filter-button ${timeFilter === 'all' ? 'active' : ''}`}
+          onClick={() => setTimeFilter('all')}
+        >
+          Gesamt
+        </button>
+        <button 
+          className={`time-filter-button ${timeFilter === 'month' ? 'active' : ''}`}
+          onClick={() => setTimeFilter('month')}
+        >
+          Dieser Monat
+        </button>
+        <button 
+          className={`time-filter-button ${timeFilter === 'week' ? 'active' : ''}`}
+          onClick={() => setTimeFilter('week')}
+        >
+          Diese Woche
+        </button>
       </div>
 
-      <div className="main-stats">
-        <div className="stat-card">
+      <div className="grid-container grid-3-columns">
+        <div className="content-card">
           <div className="stat-icon-container">
             <div className="stat-icon">
               <FaMedal />
@@ -183,7 +185,7 @@ const Stats = () => {
           </div>
         </div>
 
-        <div className="stat-card">
+        <div className="content-card">
           <div className="stat-icon-container">
             <div className="stat-icon">
               <FaFire />
@@ -195,7 +197,7 @@ const Stats = () => {
           </div>
         </div>
 
-        <div className="stat-card">
+        <div className="content-card">
           <div className="stat-icon-container">
             <div className="stat-icon">
               <FaCalendarCheck />
@@ -209,11 +211,9 @@ const Stats = () => {
         </div>
       </div>
 
-      <div className="stats-details">
-        <div className="category-stats">
-          <div className="category-stats-header">
-            <h2 className="category-stats-title">Aktivitäten nach Kategorie</h2>
-          </div>
+      <div className="grid-container grid-2-columns">
+        <div className="content-card">
+          <h2 className="section-title">Aktivitäten nach Kategorie</h2>
           <div className="category-list">
             {Object.entries(stats.categories).map(([category, data]) => {
               const Icon = data.icon;
@@ -239,10 +239,8 @@ const Stats = () => {
           </div>
         </div>
 
-        <div className="achievements">
-          <div className="achievements-header">
-            <h2 className="achievements-title">Deine Bestleistungen</h2>
-          </div>
+        <div className="content-card">
+          <h2 className="section-title">Deine Bestleistungen</h2>
           <div className="achievement-list">
             {stats.achievements.map((achievement, index) => (
               <div 
