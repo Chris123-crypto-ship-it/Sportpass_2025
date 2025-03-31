@@ -53,7 +53,7 @@
 }
 
 .stat-card {
-  background: rgba(255, 255, 255, 0.9);
+  background: white;
   backdrop-filter: blur(10px);
   border-radius: 24px;
   padding: 30px;
@@ -68,14 +68,7 @@
 }
 
 .stat-card::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(135deg, rgba(33, 147, 176, 0.1), rgba(109, 213, 237, 0.1));
-  border-radius: inherit;
-  z-index: 0;
-  opacity: 0;
-  transition: opacity 0.3s ease;
+  display: none;
 }
 
 .stat-card:hover {
@@ -116,6 +109,7 @@
   position: relative;
   z-index: 1;
   flex: 1;
+  background: none;
 }
 
 .stat-value {
@@ -331,4 +325,9 @@
   .achievement-list {
     grid-template-columns: 1fr;
   }
+}
+
+/* Wenn die grünen Banner separate Elemente sind */
+.stat-banner {
+  display: none;
 } 
