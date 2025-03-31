@@ -1,5 +1,5 @@
 import React from 'react';
-import { FaCheck, FaTimes } from 'react-icons/fa';
+import { FaCheck, FaTimes, FaQuestionCircle } from 'react-icons/fa';
 import '../pages/Profile.css';
 
 /**
@@ -8,8 +8,19 @@ import '../pages/Profile.css';
  * @returns {JSX.Element} Eine React-Komponente, die den Verifizierungsstatus anzeigt
  */
 const VerificationStatus = ({ isVerified }) => {
-  // Wenn der Wert undefined ist, zeige nichts an
-  if (isVerified === undefined) return null;
+  // Debug-Ausgabe im Konsolenfenster
+  console.log('VerificationStatus wird gerendert mit isVerified:', isVerified);
+
+  // Wenn der Wert undefined ist, zeige einen Fallback an
+  if (isVerified === undefined) {
+    console.log('Kein Verifizierungsstatus gefunden, zeige Fallback an');
+    return (
+      <div className="verification-status">
+        <FaQuestionCircle />
+        <span>Verifizierung ausstehend</span>
+      </div>
+    );
+  }
 
   return (
     <div className={`verification-status ${isVerified ? 'verified' : 'unverified'}`}>

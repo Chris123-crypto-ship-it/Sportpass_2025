@@ -1,58 +1,139 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
-import axios from 'axios';
 import config from '../config';
 
 const AuthContext = createContext();
 
-export const useAuth = () => {
-  return useContext(AuthContext);
-};
+export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(() => {
-    const storedUser = localStorage.getItem('user');
-    return storedUser ? JSON.parse(storedUser) : null;
-  });
-  const [loading, setLoading] = useState(false);
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    // Beim Start der App prüfen wir den Token
-    const token = localStorage.getItem('token');
-    const storedUser = localStorage.getItem('user');
-    
-    if (token && storedUser) {
-      // Token zu allen axios Requests hinzufügen
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      setUser(JSON.parse(storedUser));
-    }
+    // Versuche, gespeicherte Anmeldeinformationen zu laden
+    const checkAuth = async () => {
+      setLoading(true);
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          setLoading(false);
+          return;
+        }
+
+        // Token validieren
+        const response = await fetch(`${config.API_URL}/auth/validate`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (response.ok) {
+          const userData = await response.json();
+          console.log('User data loaded:', userData);
+
+          // Füge Demo-Daten für die neuen Attribute hinzu, falls sie nicht vorhanden sind
+          const enhancedUserData = {
+            ...userData,
+            points: userData.points !== undefined ? userData.points : 2350,
+            class: userData.class || 'intermediate_athlete',
+            is_verified: userData.is_verified !== undefined ? userData.is_verified : true,
+            weight: userData.weight || 75,
+            height: userData.height || 180
+          };
+
+          console.log('Enhanced user data:', enhancedUserData);
+          setUser(enhancedUserData);
+        } else {
+          // Token ist ungültig, lösche ihn
+          localStorage.removeItem('token');
+          setUser(null);
+        }
+      } catch (err) {
+        console.error('Auth check error:', err);
+        
+        // Für Testzwecke: Falls der Server nicht erreichbar ist, verwende Demo-Daten
+        const isLocalDevelopment = window.location.hostname === 'localhost';
+        if (isLocalDevelopment) {
+          console.log('Using demo data for local development');
+          const token = localStorage.getItem('token');
+          if (token) {
+            // Parse JWT payload (2. Teil nach dem Punkt)
+            try {
+              const payload = token.split('.')[1];
+              const decodedData = JSON.parse(atob(payload));
+              
+              const demoUser = {
+                id: decodedData.userId || '12345',
+                email: decodedData.email || 'demo@sportpass.com',
+                name: decodedData.name || 'Demo User',
+                role: decodedData.role || 'user',
+                // Demo-Daten für die neuen Attribute
+                points: 2350,
+                class: 'intermediate_athlete',
+                is_verified: true,
+                weight: 75,
+                height: 180,
+                token: token
+              };
+              
+              console.log('Using demo user:', demoUser);
+              setUser(demoUser);
+            } catch (e) {
+              console.error('Error parsing JWT:', e);
+              setUser(null);
+            }
+          }
+        } else {
+          setError('Verbindung zum Server fehlgeschlagen');
+          setUser(null);
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkAuth();
   }, []);
 
   const login = async (email, password) => {
+    setLoading(true);
+    setError(null);
     try {
-      setLoading(true);
-      setError(null);
-
-      const response = await axios.post(`${config.API_URL}/login`, {
-        email,
-        password
+      const response = await fetch(`${config.API_URL}/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ email, password })
       });
 
-      const { token, user: userData } = response.data;
+      const data = await response.json();
 
-      // Token und User-Daten speichern
-      localStorage.setItem('token', token);
-      localStorage.setItem('user', JSON.stringify(userData));
+      if (!response.ok) {
+        throw new Error(data.message || 'Anmeldung fehlgeschlagen');
+      }
 
-      // Token zu allen zukünftigen axios Requests hinzufügen
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      localStorage.setItem('token', data.token);
 
-      setUser(userData);
-      return { success: true, user: userData };
-    } catch (error) {
-      console.error('Login error:', error);
-      setError(error.response?.data?.error || 'Ein Fehler ist aufgetreten');
-      throw error;
+      // Füge Demo-Daten für die neuen Attribute hinzu
+      const enhancedUserData = {
+        ...data.user,
+        points: data.user.points !== undefined ? data.user.points : 2350,
+        class: data.user.class || 'intermediate_athlete',
+        is_verified: data.user.is_verified !== undefined ? data.user.is_verified : true,
+        weight: data.user.weight || 75,
+        height: data.user.height || 180,
+        token: data.token
+      };
+
+      setUser(enhancedUserData);
+      return true;
+    } catch (err) {
+      console.error('Login error:', err);
+      setError(err.message || 'Anmeldung fehlgeschlagen');
+      return false;
     } finally {
       setLoading(false);
     }
@@ -60,27 +141,42 @@ export const AuthProvider = ({ children }) => {
 
   const logout = () => {
     localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    delete axios.defaults.headers.common['Authorization'];
     setUser(null);
   };
 
-  const sendConfirmationEmail = (email, code) => {
-    // Logik zum Senden der E-Mail
-  };
+  const register = async (userData) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetch(`${config.API_URL}/auth/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(userData)
+      });
 
-  const value = {
-    user,
-    loading,
-    error,
-    login,
-    logout,
-    isAuthenticated: !!user
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Registrierung fehlgeschlagen');
+      }
+
+      return true;
+    } catch (err) {
+      console.error('Registration error:', err);
+      setError(err.message || 'Registrierung fehlgeschlagen');
+      return false;
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <AuthContext.Provider value={value}>
+    <AuthContext.Provider value={{ user, loading, error, login, logout, register }}>
       {children}
     </AuthContext.Provider>
   );
 };
+
+export default AuthContext;

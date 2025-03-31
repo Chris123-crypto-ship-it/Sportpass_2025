@@ -32,7 +32,7 @@
   right: -50%;
   width: 90%;
   height: 90%;
-  background: radial-gradient(circle, rgba(255, 193, 7, 0.05) 0%, rgba(255, 193, 7, 0) 70%);
+  background: radial-gradient(circle, rgba(66, 153, 225, 0.05) 0%, rgba(66, 153, 225, 0) 70%);
   z-index: 0;
   border-radius: 50%;
 }
@@ -42,22 +42,22 @@
   display: flex;
   align-items: center;
   gap: 15px;
-  background: linear-gradient(135deg, rgba(255, 193, 7, 0.1), rgba(255, 223, 127, 0.2));
+  background: linear-gradient(135deg, rgba(66, 153, 225, 0.1), rgba(144, 205, 244, 0.2));
   padding: 15px;
   border-radius: 15px;
   margin-top: 10px;
-  border: 1px solid rgba(255, 193, 7, 0.2);
+  border: 1px solid rgba(66, 153, 225, 0.2);
 }
 
 .points-icon {
   font-size: 2rem;
-  color: #ffc107;
+  color: #4299e1;
 }
 
 .points-value {
   font-size: 2rem;
   font-weight: 700;
-  background: linear-gradient(to right, #ffc107, #ffca2c);
+  background: linear-gradient(to right, #4299e1, #63b3ed);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -73,13 +73,13 @@
   position: absolute;
   top: 15px;
   right: 15px;
-  background: linear-gradient(135deg, #ffc107, #ff9800);
+  background: linear-gradient(135deg, #4299e1, #3182ce);
   color: white;
   padding: 8px 15px;
   border-radius: 20px;
   font-weight: 600;
   font-size: 0.9rem;
-  box-shadow: 0 4px 10px rgba(255, 193, 7, 0.3);
+  box-shadow: 0 4px 10px rgba(66, 153, 225, 0.3);
   z-index: 10;
 }
 
@@ -117,7 +117,7 @@
 .name-edit-btn {
   background: none;
   border: none;
-  color: #ffc107;
+  color: #4299e1;
   cursor: pointer;
   padding: 8px;
   display: flex;
@@ -128,7 +128,7 @@
 }
 
 .name-edit-btn:hover {
-  background: rgba(255, 193, 7, 0.1);
+  background: rgba(66, 153, 225, 0.1);
   transform: scale(1.1);
 }
 
@@ -154,8 +154,8 @@
 
 .name-edit-input:focus {
   outline: none;
-  border-color: #ffc107;
-  box-shadow: 0 0 0 3px rgba(255, 193, 7, 0.15);
+  border-color: #4299e1;
+  box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.15);
 }
 
 .name-edit-buttons {
@@ -173,14 +173,14 @@
 }
 
 .name-save-btn {
-  background-color: #ffc107;
-  color: #333;
+  background-color: #4299e1;
+  color: white;
 }
 
 .name-save-btn:hover {
-  background-color: #ffca2c;
+  background-color: #63b3ed;
   transform: translateY(-2px);
-  box-shadow: 0 4px 10px rgba(255, 193, 7, 0.3);
+  box-shadow: 0 4px 10px rgba(66, 153, 225, 0.3);
 }
 
 .name-cancel-btn {
@@ -228,7 +228,7 @@
   position: absolute;
   bottom: 5px;
   right: 5px;
-  background: #ffc107;
+  background: #4299e1;
   padding: 10px;
   border-radius: 50%;
   cursor: pointer;
@@ -239,7 +239,7 @@
 
 .profile-image-upload:hover {
   transform: scale(1.1);
-  background: #ffca2c;
+  background: #63b3ed;
   box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
 }
 
@@ -289,13 +289,13 @@
 }
 
 .profile-email svg, .profile-role svg {
-  color: #ffc107;
+  color: #4299e1;
   font-size: 1.2rem;
 }
 
 .profile-role {
-  background: linear-gradient(135deg, rgba(255, 193, 7, 0.1), rgba(255, 223, 127, 0.1));
-  border: 1px solid rgba(255, 193, 7, 0.2);
+  background: linear-gradient(135deg, rgba(66, 153, 225, 0.1), rgba(144, 205, 244, 0.1));
+  border: 1px solid rgba(66, 153, 225, 0.2);
   font-weight: 600;
 }
 
@@ -325,9 +325,11 @@
 
 .progress-bar {
   height: 100%;
-  background: linear-gradient(to right, #ffc107, #ffca2c);
+  background: linear-gradient(to right, #4299e1, #63b3ed);
   border-radius: 10px;
   transition: width 0.5s ease;
+  position: relative;
+  overflow: hidden;
 }
 
 .progress-info {
@@ -360,17 +362,17 @@
 }
 
 .chart-line {
-  stroke: #ffc107;
+  stroke: #4299e1;
   stroke-width: 2;
   fill: none;
 }
 
 .chart-area {
-  fill: rgba(255, 193, 7, 0.1);
+  fill: rgba(66, 153, 225, 0.1);
 }
 
 .chart-point {
-  fill: #ffc107;
+  fill: #4299e1;
   stroke: white;
   stroke-width: 2;
   cursor: pointer;
@@ -395,7 +397,7 @@
 
 .class-icon {
   font-size: 1.5rem;
-  color: #ffc107;
+  color: #4299e1;
 }
 
 .class-details {
@@ -451,7 +453,7 @@
   right: -100px;
   width: 200px;
   height: 200px;
-  background: radial-gradient(circle, rgba(255, 193, 7, 0.05) 0%, rgba(255, 193, 7, 0) 70%);
+  background: radial-gradient(circle, rgba(66, 153, 225, 0.05) 0%, rgba(66, 153, 225, 0) 70%);
   border-radius: 50%;
   z-index: 0;
 }
@@ -470,7 +472,7 @@
 }
 
 .section-title svg {
-  color: #ffc107;
+  color: #4299e1;
   font-size: 1.2em;
 }
 
@@ -496,7 +498,7 @@
   transform: translateX(-50%);
   width: 50px;
   height: 3px;
-  background: #ffc107;
+  background: #4299e1;
   border-radius: 3px;
 }
 
@@ -524,7 +526,7 @@
 .goal-card:hover {
   transform: translateY(-5px);
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-  border-color: rgba(255, 193, 7, 0.3);
+  border-color: rgba(66, 153, 225, 0.3);
 }
 
 .goal-card::before {
@@ -534,7 +536,7 @@
   left: 0;
   right: 0;
   height: 5px;
-  background: linear-gradient(to right, #ffc107, #ffca2c);
+  background: linear-gradient(to right, #4299e1, #63b3ed);
   opacity: 0;
   transition: opacity 0.3s ease;
 }
@@ -559,7 +561,7 @@
 .goal-icon svg, 
 .goal-icon i {
   font-size: 1.8rem;
-  color: #ffc107;
+  color: #4299e1;
   transition: all 0.3s ease;
 }
 
@@ -584,7 +586,7 @@
   color: #333;
   font-weight: 700;
   margin: 0;
-  background: linear-gradient(to right, #ffc107, #ffca2c);
+  background: linear-gradient(to right, #4299e1, #63b3ed);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -627,28 +629,28 @@
 
 .input-group input:focus {
   outline: none;
-  border-color: #ffc107;
-  box-shadow: 0 0 0 3px rgba(255, 193, 7, 0.15);
+  border-color: #4299e1;
+  box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.15);
   background: white;
 }
 
 .calculate-button {
   padding: 16px;
-  background: linear-gradient(to right, #ffc107, #ffca2c);
+  background: linear-gradient(to right, #4299e1, #63b3ed);
   border: none;
   border-radius: 12px;
-  color: #333;
+  color: white;
   font-weight: 600;
   font-size: 1.05em;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 10px rgba(255, 193, 7, 0.2);
+  box-shadow: 0 4px 10px rgba(66, 153, 225, 0.2);
 }
 
 .calculate-button:hover {
-  background: linear-gradient(to right, #ffca2c, #ffd54f);
+  background: linear-gradient(to right, #63b3ed, #90cdf4);
   transform: translateY(-3px);
-  box-shadow: 0 6px 15px rgba(255, 193, 7, 0.3);
+  box-shadow: 0 6px 15px rgba(66, 153, 225, 0.3);
 }
 
 .bmi-result {
@@ -733,13 +735,13 @@
 .bmi-recommendation {
   margin-top: 25px;
   padding: 20px;
-  background: rgba(255, 193, 7, 0.1);
+  background: rgba(66, 153, 225, 0.1);
   border-radius: 12px;
   text-align: left;
   color: #2c3e50;
   font-size: 1em;
   line-height: 1.6;
-  border-left: 4px solid #ffc107;
+  border-left: 4px solid #4299e1;
 }
 
 /* Ziel-Eingabe verbessern */
@@ -770,8 +772,8 @@
 
 .goal-input:focus {
   outline: none;
-  border-color: #ffc107;
-  box-shadow: 0 0 0 3px rgba(255, 193, 7, 0.15);
+  border-color: #4299e1;
+  box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.15);
 }
 
 .goals-list {
@@ -783,13 +785,13 @@
   height: 20px;
   border-radius: 4px;
   cursor: pointer;
-  accent-color: #ffc107;
+  accent-color: #4299e1;
 }
 
 .add-goal-button {
   padding: 10px 15px;
-  background: linear-gradient(to right, #ffc107, #ffca2c);
-  color: #333;
+  background: linear-gradient(to right, #4299e1, #63b3ed);
+  color: white;
   border: none;
   border-radius: 10px;
   font-weight: 600;
@@ -799,9 +801,9 @@
 }
 
 .add-goal-button:hover {
-  background: linear-gradient(to right, #ffca2c, #ffd54f);
+  background: linear-gradient(to right, #63b3ed, #90cdf4);
   transform: translateY(-2px);
-  box-shadow: 0 4px 10px rgba(255, 193, 7, 0.2);
+  box-shadow: 0 4px 10px rgba(66, 153, 225, 0.2);
 }
 
 .goal-delete-btn {
@@ -973,35 +975,35 @@
 
 /* Spezifische Stile für verschiedene Klassen-Badges */
 .beginner-badge .class-icon {
-  background: linear-gradient(135deg, #4ade80, #22c55e);
+  background: linear-gradient(135deg, #4299e1, #2b6cb0);
 }
 
 .intermediate-badge .class-icon {
-  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  background: linear-gradient(135deg, #3182ce, #2c5282);
 }
 
 .advanced-badge .class-icon {
-  background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+  background: linear-gradient(135deg, #2b6cb0, #1a365d);
 }
 
 .expert-badge .class-icon {
-  background: linear-gradient(135deg, #f59e0b, #d97706);
+  background: linear-gradient(135deg, #2c5282, #1a365d);
 }
 
 .beginner-badge .class-name {
-  color: #22c55e;
+  color: #4299e1;
 }
 
 .intermediate-badge .class-name {
-  color: #2563eb;
+  color: #3182ce;
 }
 
 .advanced-badge .class-name {
-  color: #6d28d9;
+  color: #2b6cb0;
 }
 
 .expert-badge .class-name {
-  color: #d97706;
+  color: #2c5282;
 }
 
 /* Animationen für Badges und Fortschrittsbalken */
@@ -1040,4 +1042,33 @@
   100% {
     transform: translateX(100%);
   }
+}
+
+/* Stil für die Fallback-Beschreibung in StatsHistory */
+.stat-description {
+  color: #718096;
+  font-size: 0.9rem;
+  margin-top: 10px;
+  padding: 10px;
+  background-color: rgba(66, 153, 225, 0.05);
+  border-radius: 8px;
+  border-left: 3px solid #4299e1;
+}
+
+/* Stil für den ausstehenden Verifizierungsstatus */
+.verification-status:not(.verified):not(.unverified) {
+  color: #718096;
+  background: rgba(113, 128, 150, 0.1);
+  border: 1px solid rgba(113, 128, 150, 0.3);
+}
+
+/* Zusätzliche Stile für Fallback-Elemente */
+.fallback-message {
+  text-align: center;
+  color: #718096;
+  font-style: italic;
+  padding: 15px;
+  background-color: rgba(66, 153, 225, 0.05);
+  border-radius: 8px;
+  margin-top: 10px;
 }

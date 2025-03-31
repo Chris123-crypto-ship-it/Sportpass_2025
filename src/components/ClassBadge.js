@@ -8,6 +8,9 @@ import '../pages/Profile.css';
  * @returns {JSX.Element} Eine React-Komponente, die die Klasse des Benutzers anzeigt
  */
 const ClassBadge = ({ className }) => {
+  // Debug-Ausgabe im Konsolenfenster
+  console.log('ClassBadge wird gerendert mit className:', className);
+
   // Formatiere den Klassennamen für die Anzeige
   const formatClassName = (className) => {
     if (!className) return '';
@@ -53,8 +56,23 @@ const ClassBadge = ({ className }) => {
     }
   };
 
-  // Wenn keine Klasse vorhanden ist, zeige nichts an
-  if (!className) return null;
+  // Wenn keine Klasse vorhanden ist, zeige einen Platzhalter an
+  if (!className) {
+    console.log('Keine Klasse gefunden, zeige Fallback an');
+    return (
+      <div className="class-info">
+        <div className="class-icon">
+          <FaGraduationCap />
+        </div>
+        <div className="class-details">
+          <div className="class-name">Keine Klasse</div>
+          <div className="class-description">
+            Setze dir Ziele und sammle Punkte, um eine Klasse freizuschalten!
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={`class-info ${getClassStyle(className)}`}>
