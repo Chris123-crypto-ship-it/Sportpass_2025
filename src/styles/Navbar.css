@@ -1,15 +1,14 @@
 .navbar {
-  background: #333;
+  background: white;
   padding: 0.5rem 2rem;
   position: sticky;
   top: 0;
   z-index: 1000;
   transition: all 0.3s ease;
-  color: white;
 }
 
 .navbar.scrolled {
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 .navbar-content {
@@ -27,25 +26,14 @@
   gap: 10px;
   text-decoration: none;
   color: #333;
-  transition: all 0.3s;
-}
-
-.logo:hover {
-  transform: scale(1.05);
 }
 
 .logo img {
   height: 40px;
   width: auto;
-  transition: transform 0.3s;
-}
-
-.logo:hover img {
-  transform: rotate(5deg);
 }
 
 .logo span {
-  color: white;
   font-size: 1.5rem;
   font-weight: 700;
   background: linear-gradient(135deg, #2193b0, #6dd5ed);
@@ -68,19 +56,21 @@
   gap: 5px;
   padding: 0.5rem 1rem;
   text-decoration: none;
-  color: #ddd;
+  color: #666;
   font-weight: 500;
   border-radius: 6px;
-  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  transition: all 0.2s;
   position: relative;
 }
 
-.nav-links li a:hover,
+.nav-links li a:hover {
+  color: #2193b0;
+  background: rgba(33, 147, 176, 0.1);
+}
+
 .nav-links li a.active {
   color: #2193b0;
   background: rgba(33, 147, 176, 0.1);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(33, 147, 176, 0.2);
 }
 
 /* Task Info Tooltip */
@@ -117,12 +107,11 @@
   cursor: pointer;
   position: relative;
   color: #666;
-  transition: transform 0.2s, color 0.2s, background 0.2s;
+  transition: color 0.2s;
 }
 
 .nav-icon-button:hover {
   color: #2193b0;
-  transform: translateY(-2px);
 }
 
 .notification-badge {
@@ -133,22 +122,6 @@
   height: 8px;
   background: #ff4757;
   border-radius: 50%;
-  animation: pulse 1.5s infinite;
-}
-
-@keyframes pulse {
-  0% {
-    transform: scale(0.95);
-    box-shadow: 0 0 0 0 rgba(255, 71, 87, 0.7);
-  }
-  70% {
-    transform: scale(1);
-    box-shadow: 0 0 0 6px rgba(255, 71, 87, 0);
-  }
-  100% {
-    transform: scale(0.95);
-    box-shadow: 0 0 0 0 rgba(255, 71, 87, 0);
-  }
 }
 
 .notifications-dropdown {
@@ -161,19 +134,6 @@
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
   padding: 1rem;
   margin-top: 10px;
-  animation: dropdown-appear 0.3s ease-out;
-  transform-origin: top right;
-}
-
-@keyframes dropdown-appear {
-  from {
-    opacity: 0;
-    transform: scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
 }
 
 .notifications-dropdown h3 {
@@ -221,16 +181,15 @@
   border: none;
   padding: 8px 12px;
   cursor: pointer;
-  color: #ddd;
+  color: #666;
   font-weight: 500;
   border-radius: 6px;
-  transition: transform 0.2s, color 0.2s, background 0.2s;
+  transition: all 0.2s;
 }
 
 .profile-button:hover {
   background: rgba(33, 147, 176, 0.1);
   color: #2193b0;
-  transform: translateY(-2px);
 }
 
 .profile-dropdown {
@@ -238,30 +197,16 @@
   top: 100%;
   right: 0;
   width: 250px;
-  background: #444;
+  background: white;
   border-radius: 8px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
   margin-top: 10px;
   overflow: hidden;
-  animation: dropdown-appear 0.3s ease-out;
-  transform-origin: top right;
-  color: #ddd;
-}
-
-@keyframes dropdown-appear {
-  from {
-    opacity: 0;
-    transform: scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
 }
 
 .profile-header {
   padding: 1rem;
-  background: #555;
+  background: #f8f9fa;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -278,11 +223,11 @@
 }
 
 .profile-info strong {
-  color: white;
+  color: #333;
 }
 
 .profile-info small {
-  color: #bbb;
+  color: #666;
 }
 
 .profile-dropdown ul {
@@ -297,7 +242,7 @@
   align-items: center;
   gap: 10px;
   padding: 0.5rem 1rem;
-  color: #ddd;
+  color: #666;
   text-decoration: none;
   width: 100%;
   border: none;
@@ -310,13 +255,13 @@
 
 .profile-dropdown li a:hover,
 .profile-dropdown li button:hover {
-  background: #555;
+  background: #f8f9fa;
   color: #2193b0;
 }
 
 .profile-dropdown .divider {
   height: 1px;
-  background: #666;
+  background: #eee;
   margin: 0.5rem 0;
 }
 
@@ -334,9 +279,8 @@
   padding: 8px 16px;
   border-radius: 6px;
   text-decoration: none;
-  font-weight: 600;
-  letter-spacing: 0.5px;
-  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  font-weight: 500;
+  transition: all 0.2s;
 }
 
 .login-button {
@@ -357,6 +301,7 @@
 
 .register-button:hover {
   background: #1a7a8e;
+  border-color: #1a7a8e;
 }
 
 /* Responsive Design */
@@ -382,16 +327,4 @@
   .profile-button span {
     display: none;
   }
-}
-
-/* Verbesserte Schriftart-Einstellungen */
-.navbar, 
-.profile-dropdown, 
-.notifications-dropdown {
-  font-family: 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-}
-
-/* Entfernung des Glaseffekts */
-.navbar {
-  backdrop-filter: none;
 } 
