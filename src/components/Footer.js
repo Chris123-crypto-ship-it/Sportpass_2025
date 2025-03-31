@@ -16,19 +16,19 @@ const Footer = () => {
   const sponsors = [
     { 
       name: 'Raiffeisenbank Gleisdorf', 
-      logo: 'https://www.raiffeisen.at/content/dam/raiffeisen/logo/raiffeisen-logo.png', 
+      logo: 'https://www.raiffeisen.at/content/dam/raiffeisen/logo/raiffeisen-logo-claim.png', 
       description: 'Hauptsponsor und Finanzpartner', 
       website: 'https://www.raiffeisen.at/de/online-banking/mein-elba.html' 
     },
     {
       name: 'Statec Binder',
-      logo: 'https://www.statec-binder.com/wp-content/themes/statec-binder/assets/images/logo.svg',
+      logo: 'https://www.statec-binder.com/wp-content/uploads/2020/10/statec-binder-logo.png',
       description: 'Technologiepartner aus Gleisdorf',
       website: 'https://www.statec-binder.com'
     },
     {
       name: 'Intersport Gleisdorf',
-      logo: 'https://www.intersport.at/on/demandware.static/Sites-intersport_at-Site/-/default/dw0c800d4f/images/logo.svg',
+      logo: 'https://www.intersport.at/on/demandware.static/-/Sites/default/dw8c800d4f/images/logo-intersport.svg',
       description: 'Sportausrüstungspartner',
       website: 'https://www.intersport.at'
     }
