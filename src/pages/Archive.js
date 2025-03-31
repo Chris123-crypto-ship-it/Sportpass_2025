@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useTasks } from '../context/TaskContext';
 import { useAuth } from '../context/AuthContext'; // Für den eingeloggten Benutzer
-import { FaCheckCircle, FaTimesCircle, FaFile, FaImage, FaVideo, FaUser, FaClock } from 'react-icons/fa';
+import { FaCheckCircle, FaTimesCircle, FaFile, FaImage, FaVideo, FaUser, FaClock, FaInfoCircle } from 'react-icons/fa';
 import './Archive.css';
 
 const Archive = () => {
@@ -132,6 +132,12 @@ const Archive = () => {
 
   return (
     <div className="archive-container">
+      <div className="archive-info">
+        <FaInfoCircle className="info-icon" />
+        <div className="info-text">
+          Hier findest du deine letzten akzeptierten und abgelehnten Einsendungen mit Datum. Aufgaben werden automatisch nach einer Woche aus dem Archiv gelöscht. Deine erreichten Punkte in der Rangliste bleiben davon unberührt und werden dauerhaft gespeichert.
+        </div>
+      </div>
       <h1 className="archive-header">Mein Archiv</h1>
       {loading ? (
         <div className="no-archive">Archiv wird geladen...</div>

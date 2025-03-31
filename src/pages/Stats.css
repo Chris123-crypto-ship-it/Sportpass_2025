@@ -331,4 +331,28 @@
   .achievement-list {
     grid-template-columns: 1fr;
   }
+}
+
+.stats-info {
+  display: flex;
+  align-items: flex-start;
+  gap: 15px;
+  background: rgba(33, 147, 176, 0.1);
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 30px;
+  border: 1px solid rgba(33, 147, 176, 0.2);
+}
+
+.info-icon {
+  font-size: 1.5rem;
+  color: #2193b0;
+  flex-shrink: 0;
+  margin-top: 3px;
+}
+
+.info-text {
+  color: #2c3e50;
+  font-size: 1rem;
+  line-height: 1.5;
 } 

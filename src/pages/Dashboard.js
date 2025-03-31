@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useTasks } from '../context/TaskContext';
-import { FaTrophy, FaRunning, FaDumbbell, FaRunning as FaFlexibility, FaCalendarCheck, FaMedal, FaUserCircle } from 'react-icons/fa';
+import { FaTrophy, FaRunning, FaDumbbell, FaRunning as FaFlexibility, FaCalendarCheck, FaMedal, FaUserCircle, FaInfoCircle } from 'react-icons/fa';
 import { Line } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
 import './Dashboard.css';
@@ -169,6 +169,12 @@ const Dashboard = () => {
 
   return (
     <div className="dashboard-container">
+      <div className="dashboard-info">
+        <FaInfoCircle className="info-icon" />
+        <div className="info-text">
+          Willkommen in deinem persönlichen Dashboard! Hier siehst du eine Übersicht deiner Aktivitäten und Leistungen. Beachte, dass detaillierte Aufgabenstatistiken nach einer Woche automatisch aus der Übersicht entfernt werden. Deine gesammelten Punkte bleiben davon unberührt und werden dauerhaft gespeichert.
+        </div>
+      </div>
       <div className="dashboard-header">
         <div className="user-welcome">
           <FaUserCircle className="user-icon" />

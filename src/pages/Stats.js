@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useTasks } from '../context/TaskContext';
-import { FaRunning, FaHeartbeat, FaDumbbell, FaMedal, FaFire, FaCalendarCheck } from 'react-icons/fa';
+import { FaRunning, FaHeartbeat, FaDumbbell, FaMedal, FaFire, FaCalendarCheck, FaInfoCircle } from 'react-icons/fa';
 import './Stats.css';
 
 const Stats = () => {
@@ -140,6 +140,12 @@ const Stats = () => {
 
   return (
     <div className="stats-container">
+      <div className="stats-info">
+        <FaInfoCircle className="info-icon" />
+        <div className="info-text">
+          Hier siehst du deine persönlichen Statistiken. Aufgaben und detaillierte Statistiken werden nach einer Woche automatisch aus der Übersicht entfernt. Deine gesammelten Punkte bleiben davon unberührt und werden dauerhaft in deinem Konto gespeichert.
+        </div>
+      </div>
       <div className="stats-header">
         <h1 className="stats-title">Deine Sportpass-Statistiken</h1>
         <div className="time-filter">
