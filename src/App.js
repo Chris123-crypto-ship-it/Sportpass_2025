@@ -1,6 +1,6 @@
 // src/App.js
 import React, { useEffect } from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { TaskProvider } from './context/TaskContext';
 import { keepServerAlive } from './services/socket';
@@ -24,6 +24,7 @@ import VerifyEmail from './pages/VerifyEmail';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 import Support from './pages/Support';
+import './App.css';
 
 function App() {
   useEffect(() => {
@@ -35,27 +36,34 @@ function App() {
     <AuthProvider>
       <TaskProvider>
         <Router>
-          <Navbar />
-          <div className="container">
-            <Routes>
-              <Route path="/" element={<Dashboard />} />
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/leaderboard" element={<Leaderboard />} />
-              <Route path="/tasks" element={<Tasks />} />
-              <Route path="/stats" element={<Stats />} />
-              <Route path="/archive" element={<Archive />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/admin-dashboard" element={<AdminDashboard />} />
-              <Route path="/participants" element={<Participants />} />
-              <Route path="/verify-email" element={<VerifyEmail />} />
-              <Route path="/forgot-password" element={<ForgotPassword />} />
-              <Route path="/reset-password" element={<ResetPassword />} />
-              <Route path="/support" element={<Support />} />
-            </Routes>
+          <div className="app">
+            <Navbar />
+            <main className="main-content">
+              <Routes>
+                {/* Startseite umleiten zum Login */}
+                <Route path="/" element={<Navigate to="/login" replace />} />
+                
+                {/* Öffentliche Routen */}
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
+                <Route path="/forgot-password" element={<ForgotPassword />} />
+                <Route path="/reset-password" element={<ResetPassword />} />
+                <Route path="/verify-email" element={<VerifyEmail />} />
+                <Route path="/leaderboard" element={<Leaderboard />} />
+                
+                {/* Geschützte Routen */}
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/tasks" element={<Tasks />} />
+                <Route path="/stats" element={<Stats />} />
+                <Route path="/archive" element={<Archive />} />
+                <Route path="/profile" element={<Profile />} />
+                <Route path="/admin-dashboard" element={<AdminDashboard />} />
+                <Route path="/participants" element={<Participants />} />
+                <Route path="/support" element={<Support />} />
+              </Routes>
+            </main>
+            <Footer />
           </div>
-          <Footer />
           <ToastContainer 
             position="top-right"
             autoClose={3000}
