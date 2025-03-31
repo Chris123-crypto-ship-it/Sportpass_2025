@@ -1,8 +1,9 @@
 // src/App.js
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { TaskProvider } from './context/TaskContext';
+import { keepServerAlive } from './services/socket';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import { ToastContainer, toast } from 'react-toastify';
@@ -25,6 +26,11 @@ import ResetPassword from './pages/ResetPassword';
 import Support from './pages/Support';
 
 function App() {
+  useEffect(() => {
+    // Starte den Keep-Alive-Mechanismus
+    keepServerAlive();
+  }, []);
+
   return (
     <AuthProvider>
       <TaskProvider>

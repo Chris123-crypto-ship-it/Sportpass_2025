@@ -9,22 +9,24 @@ const nodemailer = require('nodemailer');
 
 const app = express();
 
+// CORS-Konfiguration
+const corsOptions = {
+  origin: [
+    'https://sportpass-2025.vercel.app',
+    'http://localhost:3000'  // Für lokale Entwicklung
+  ],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true,
+  optionsSuccessStatus: 200
+};
+
+app.use(cors(corsOptions));
+app.use(express.json());
+
 // Erhöhe das Limit für JSON-Payloads
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
-
-// Verbesserte CORS-Konfiguration
-app.use(cors({
-  origin: [
-    'https://sportpass-2025.vercel.app',
-    'http://localhost:3000',
-    'http://localhost:5173'
-  ],
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'X-Requested-With'],
-  credentials: true,
-  maxAge: 86400 // CORS-Präflight-Cache für 24 Stunden
-}));
 
 // Middleware zum Debuggen von CORS
 app.use((req, res, next) => {
@@ -1649,6 +1651,11 @@ app.delete('/users/:id', authenticateToken, isAdmin, async (req, res) => {
     console.error('Fehler beim Löschen des Benutzers:', error);
     res.status(500).json({ message: 'Fehler beim Löschen des Benutzers' });
   }
+});
+
+// Ping-Endpunkt für Keep-Alive
+app.get('/ping', (req, res) => {
+  res.status(200).json({ status: 'ok', message: 'Server is alive' });
 });
 
 // 🔹 Server starten
