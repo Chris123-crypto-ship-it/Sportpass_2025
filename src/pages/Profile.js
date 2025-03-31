@@ -13,6 +13,7 @@ import {
   faBicycle 
 } from '@fortawesome/free-solid-svg-icons';
 import config from '../config';
+import { toast } from 'react-hot-toast';
 
 const Profile = () => {
   const { user } = useAuth();
@@ -63,28 +64,39 @@ const Profile = () => {
       // Speichern Sie den Namen zunächst nur lokal
       localStorage.setItem('userName', userName.trim());
       
-      // Optional: Versuchen Sie den Namen auch im Backend zu aktualisieren
-      try {
-        const response = await fetch(`${config.API_URL}/users/${user.id}`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${user.token}`
-          },
-          body: JSON.stringify({ name: userName.trim() })
-        });
+      if (!user || !user.id || !user.token) {
+        console.error('Benutzerinformationen fehlen');
+        alert('Bitte melden Sie sich erneut an, um Ihren Namen zu ändern.');
+        return;
+      }
+      
+      // Name in Datenbank aktualisieren
+      const response = await fetch(`${config.API_URL}/users/${user.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${user.token}`
+        },
+        body: JSON.stringify({ name: userName.trim() })
+      });
 
-        if (!response.ok) {
-          console.warn('Backend-Update fehlgeschlagen, Name wurde nur lokal gespeichert');
-        }
-      } catch (backendError) {
-        console.warn('Backend nicht erreichbar, Name wurde nur lokal gespeichert');
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Backend-Update fehlgeschlagen');
+      }
+      
+      // Lokale Auth-Informationen aktualisieren
+      const authContext = JSON.parse(localStorage.getItem('authContext') || '{}');
+      if (authContext && authContext.user) {
+        authContext.user.name = userName.trim();
+        localStorage.setItem('authContext', JSON.stringify(authContext));
       }
 
+      toast.success('Name erfolgreich aktualisiert');
       setIsEditingName(false);
     } catch (error) {
       console.error('Fehler beim Speichern des Namens:', error);
-      alert('Es gab ein Problem beim Speichern des Namens. Bitte versuchen Sie es erneut.');
+      toast.error('Fehler beim Speichern des Namens. Bitte versuchen Sie es erneut.');
     }
   };
 

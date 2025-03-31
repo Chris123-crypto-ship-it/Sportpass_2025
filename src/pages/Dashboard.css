@@ -322,4 +322,17 @@
   .stats-overview {
     grid-template-columns: 1fr;
   }
+}
+
+/* Entfernen der grünen Balken in der Statistik-Anzeige */
+.stat-progress-bar,
+.stat-bar {
+  display: none; /* Verbirgt die grünen Balken komplett */
+}
+
+/* Alternative: Transparenz setzen statt komplett entfernen */
+.stat-progress-bar,
+.stat-bar {
+  background-color: transparent !important;
+  border: none !important;
 } 
