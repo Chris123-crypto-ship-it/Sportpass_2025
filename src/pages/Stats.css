@@ -71,7 +71,7 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: none;
+  background: linear-gradient(135deg, rgba(33, 147, 176, 0.1), rgba(109, 213, 237, 0.1));
   border-radius: inherit;
   z-index: 0;
   opacity: 0;
@@ -85,7 +85,7 @@
 }
 
 .stat-card:hover::before {
-  opacity: 0;
+  opacity: 1;
 }
 
 .stat-icon-container {
@@ -124,8 +124,9 @@
   color: #2c3e50;
   margin-bottom: 5px;
   font-family: 'Inter', sans-serif;
-  -webkit-text-fill-color: initial;
-  background: none;
+  background: linear-gradient(90deg, #2193b0, #6dd5ed);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
   display: inline-block;
 }
 
@@ -215,7 +216,7 @@
 
 .progress-bar {
   height: 100%;
-  background: none;
+  background: linear-gradient(90deg, #2193b0, #6dd5ed);
   border-radius: 4px;
   transition: width 0.3s ease;
 }

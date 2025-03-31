@@ -305,31 +305,6 @@
   box-shadow: 0 4px 10px rgba(255, 193, 7, 0.3);
 }
 
-/* Logout-Button */
-.logout-button {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: rgba(220, 53, 69, 0.1);
-  color: #dc3545;
-  border: 1px solid #dc3545;
-  padding: 8px 16px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: 500;
-  transition: all 0.2s;
-  margin-right: 10px;
-}
-
-.logout-button:hover {
-  background: rgba(220, 53, 69, 0.2);
-  transform: translateY(-2px);
-}
-
-.logout-button svg {
-  font-size: 1.1rem;
-}
-
 /* Responsive Design */
 @media (max-width: 1024px) {
   .navbar {
@@ -352,18 +327,6 @@
   }
   
   .nav-links li a svg {
-    font-size: 1.3rem;
-  }
-  
-  .logout-button span {
-    display: none;
-  }
-  
-  .logout-button {
-    padding: 8px;
-  }
-  
-  .logout-button svg {
     font-size: 1.3rem;
   }
 }

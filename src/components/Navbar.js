@@ -86,22 +86,6 @@ const Navbar = () => {
                   <span>Archiv</span>
                 </Link>
               </li>
-              {user.role === 'admin' && (
-                <>
-                  <li>
-                    <Link to="/admin-dashboard" className={location.pathname === '/admin-dashboard' ? 'active' : ''}>
-                      <FaUserCog />
-                      <span>Admin</span>
-                    </Link>
-                  </li>
-                  <li>
-                    <Link to="/participants" className={location.pathname === '/participants' ? 'active' : ''}>
-                      <FaUserFriends />
-                      <span>Teilnehmer</span>
-                    </Link>
-                  </li>
-                </>
-              )}
             </>
           ) : (
             <li>
@@ -115,41 +99,58 @@ const Navbar = () => {
 
         <div className="navbar-right">
           {user ? (
-            <>
-              <button onClick={handleLogout} className="logout-button">
-                <FaSignOutAlt />
-                <span>Logout</span>
+            <div className="profile-wrapper">
+              <button className="profile-button" onClick={toggleProfileDropdown}>
+                <FaUser className="profile-icon" />
+                <span>{user.name || user.email}</span>
+                <FaAngleDown className={`dropdown-arrow ${showProfileDropdown ? 'open' : ''}`} />
               </button>
-              <div className="profile-wrapper">
-                <button className="profile-button" onClick={toggleProfileDropdown}>
-                  <FaUser className="profile-icon" />
-                  <span>{user.name || user.email}</span>
-                  <FaAngleDown className={`dropdown-arrow ${showProfileDropdown ? 'open' : ''}`} />
-                </button>
-                
-                {showProfileDropdown && (
-                  <div className="profile-dropdown">
-                    <div className="profile-header">
-                      <div className="profile-avatar">
-                        <FaUser />
-                      </div>
-                      <div className="profile-info">
-                        <strong>{user.name || 'Benutzer'}</strong>
-                        <small>{user.email}</small>
-                      </div>
+              
+              {showProfileDropdown && (
+                <div className="profile-dropdown">
+                  <div className="profile-header">
+                    <div className="profile-avatar">
+                      <FaUser />
                     </div>
-                    
-                    <ul>
-                      <li>
-                        <Link to="/profile" onClick={() => setShowProfileDropdown(false)}>
-                          <FaUser /> Profil
-                        </Link>
-                      </li>
-                    </ul>
+                    <div className="profile-info">
+                      <strong>{user.name || 'Benutzer'}</strong>
+                      <small>{user.email}</small>
+                    </div>
                   </div>
-                )}
-              </div>
-            </>
+                  
+                  <ul>
+                    <li>
+                      <Link to="/profile" onClick={() => setShowProfileDropdown(false)}>
+                        <FaUser /> Profil
+                      </Link>
+                    </li>
+                    
+                    {user.role === 'admin' && (
+                      <>
+                        <li>
+                          <Link to="/admin-dashboard" onClick={() => setShowProfileDropdown(false)}>
+                            <FaUserCog /> Admin Dashboard
+                          </Link>
+                        </li>
+                        <li>
+                          <Link to="/participants" onClick={() => setShowProfileDropdown(false)}>
+                            <FaUserFriends /> Teilnehmer
+                          </Link>
+                        </li>
+                      </>
+                    )}
+                    
+                    <div className="divider"></div>
+                    
+                    <li>
+                      <button onClick={handleLogout}>
+                        <FaSignOutAlt /> Logout
+                      </button>
+                    </li>
+                  </ul>
+                </div>
+              )}
+            </div>
           ) : (
             <div className="auth-buttons">
               <Link to="/login" className="login-button">
