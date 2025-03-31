@@ -4,7 +4,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { 
   FaTachometerAlt, FaMedal, FaTasks, FaChartBar, FaArchive, 
-  FaSignInAlt, FaUserPlus, FaSignOutAlt, FaBell, FaUser, FaCog, FaQuestion
+  FaSignInAlt, FaUserPlus, FaSignOutAlt
 } from 'react-icons/fa';
 import logo from '../assets/logo.png';
 import '../styles/Navbar.css';
@@ -14,7 +14,6 @@ const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [scrolled, setScrolled] = useState(false);
-  const [showNotifications, setShowNotifications] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
 
   // Scroll-Effekt für Navbar
@@ -31,13 +30,11 @@ const Navbar = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Klick außerhalb der Dropdowns schließt sie
+  // Klick außerhalb des Profil-Dropdowns schließt es
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (showNotifications || showProfileMenu) {
-        if (!event.target.closest('.notifications-wrapper') && 
-            !event.target.closest('.profile-wrapper')) {
-          setShowNotifications(false);
+      if (showProfileMenu) {
+        if (!event.target.closest('.profile-wrapper')) {
           setShowProfileMenu(false);
         }
       }
@@ -45,11 +42,10 @@ const Navbar = () => {
 
     document.addEventListener('click', handleClickOutside);
     return () => document.removeEventListener('click', handleClickOutside);
-  }, [showNotifications, showProfileMenu]);
+  }, [showProfileMenu]);
 
-  // Schließe Dropdowns bei Routenwechsel
+  // Schließe Dropdown bei Routenwechsel
   useEffect(() => {
-    setShowNotifications(false);
     setShowProfileMenu(false);
   }, [location]);
 
@@ -57,12 +53,6 @@ const Navbar = () => {
     logout();
     navigate('/login');
   };
-
-  // Beispiel-Benachrichtigungen (in echter App dynamisch laden)
-  const notifications = [
-    { id: 1, type: 'success', message: 'Neue Aufgabe freigeschaltet', isNew: true },
-    { id: 2, type: 'info', message: 'Deine Punkte wurden aktualisiert', isNew: false }
-  ];
 
   return (
     <nav className={`navbar ${scrolled ? 'scrolled' : ''}`}>
@@ -111,60 +101,20 @@ const Navbar = () => {
         <div className="navbar-right">
           {user ? (
             <>
-              <div className="notifications-wrapper">
-                <button 
-                  className="nav-icon-button" 
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setShowNotifications(!showNotifications);
-                    setShowProfileMenu(false);
-                  }}
-                >
-                  <FaBell />
-                  {notifications.some(n => n.isNew) && <span className="notification-badge"></span>}
-                </button>
-
-                {showNotifications && (
-                  <div className="notifications-dropdown">
-                    <h3>Benachrichtigungen</h3>
-                    {notifications.length > 0 ? (
-                      notifications.map(notification => (
-                        <div 
-                          key={notification.id} 
-                          className={`notification-item ${notification.isNew ? 'new' : ''} ${notification.type}`}
-                        >
-                          <span className="notification-icon">
-                            {notification.type === 'success' ? <FaTasks /> : <FaBell />}
-                          </span>
-                          <span>{notification.message}</span>
-                        </div>
-                      ))
-                    ) : (
-                      <p>Keine neuen Benachrichtigungen</p>
-                    )}
-                  </div>
-                )}
-              </div>
-
               <div className="profile-wrapper">
                 <button 
                   className="profile-button"
                   onClick={(e) => {
                     e.stopPropagation();
                     setShowProfileMenu(!showProfileMenu);
-                    setShowNotifications(false);
                   }}
                 >
-                  <FaUser />
                   <span>{user.name || 'Benutzer'}</span>
                 </button>
 
                 {showProfileMenu && (
                   <div className="profile-dropdown">
                     <div className="profile-header">
-                      <div className="profile-avatar">
-                        <FaUser />
-                      </div>
                       <div className="profile-info">
                         <strong>{user.name}</strong>
                         <small>{user.email}</small>
@@ -173,17 +123,7 @@ const Navbar = () => {
                     <ul>
                       <li>
                         <Link to="/profile">
-                          <FaUser /> Mein Profil
-                        </Link>
-                      </li>
-                      <li>
-                        <Link to="/settings">
-                          <FaCog /> Einstellungen
-                        </Link>
-                      </li>
-                      <li>
-                        <Link to="/help">
-                          <FaQuestion /> Hilfe
+                          Mein Profil
                         </Link>
                       </li>
                       {user.role === 'admin' && (
@@ -196,7 +136,7 @@ const Navbar = () => {
                           </li>
                           <li>
                             <Link to="/participants">
-                              <FaUser /> Teilnehmer
+                              Teilnehmer
                             </Link>
                           </li>
                         </>

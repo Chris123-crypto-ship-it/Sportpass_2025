@@ -1,16 +1,15 @@
 .navbar {
-  background: white;
+  background: #333;
   padding: 0.5rem 2rem;
   position: sticky;
   top: 0;
   z-index: 1000;
   transition: all 0.3s ease;
-  backdrop-filter: blur(10px);
-  background: rgba(255, 255, 255, 0.85);
+  color: white;
 }
 
 .navbar.scrolled {
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
 }
 
 .navbar-content {
@@ -46,6 +45,7 @@
 }
 
 .logo span {
+  color: white;
   font-size: 1.5rem;
   font-weight: 700;
   background: linear-gradient(135deg, #2193b0, #6dd5ed);
@@ -68,7 +68,7 @@
   gap: 5px;
   padding: 0.5rem 1rem;
   text-decoration: none;
-  color: #666;
+  color: #ddd;
   font-weight: 500;
   border-radius: 6px;
   transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
@@ -221,7 +221,7 @@
   border: none;
   padding: 8px 12px;
   cursor: pointer;
-  color: #666;
+  color: #ddd;
   font-weight: 500;
   border-radius: 6px;
   transition: transform 0.2s, color 0.2s, background 0.2s;
@@ -238,13 +238,14 @@
   top: 100%;
   right: 0;
   width: 250px;
-  background: white;
+  background: #444;
   border-radius: 8px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
   margin-top: 10px;
   overflow: hidden;
   animation: dropdown-appear 0.3s ease-out;
   transform-origin: top right;
+  color: #ddd;
 }
 
 @keyframes dropdown-appear {
@@ -260,7 +261,7 @@
 
 .profile-header {
   padding: 1rem;
-  background: #f8f9fa;
+  background: #555;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -277,11 +278,11 @@
 }
 
 .profile-info strong {
-  color: #333;
+  color: white;
 }
 
 .profile-info small {
-  color: #666;
+  color: #bbb;
 }
 
 .profile-dropdown ul {
@@ -296,7 +297,7 @@
   align-items: center;
   gap: 10px;
   padding: 0.5rem 1rem;
-  color: #666;
+  color: #ddd;
   text-decoration: none;
   width: 100%;
   border: none;
@@ -309,13 +310,13 @@
 
 .profile-dropdown li a:hover,
 .profile-dropdown li button:hover {
-  background: #f8f9fa;
+  background: #555;
   color: #2193b0;
 }
 
 .profile-dropdown .divider {
   height: 1px;
-  background: #eee;
+  background: #666;
   margin: 0.5rem 0;
 }
 
@@ -346,8 +347,6 @@
 
 .login-button:hover {
   background: rgba(33, 147, 176, 0.1);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(33, 147, 176, 0.2);
 }
 
 .register-button {
@@ -358,9 +357,6 @@
 
 .register-button:hover {
   background: #1a7a8e;
-  border-color: #1a7a8e;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(33, 147, 176, 0.2);
 }
 
 /* Responsive Design */
@@ -393,4 +389,9 @@
 .profile-dropdown, 
 .notifications-dropdown {
   font-family: 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+
+/* Entfernung des Glaseffekts */
+.navbar {
+  backdrop-filter: none;
 } 
