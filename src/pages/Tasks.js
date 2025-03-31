@@ -23,6 +23,7 @@ const Tasks = () => {
   const fileInputRefs = useRef({});
   const [loading, setLoading] = useState(false);
   const [showInfoModal, setShowInfoModal] = useState(false);
+  const [submissionsLoaded, setSubmissionsLoaded] = useState(false);
 
   const categories = [
     { value: 'all', label: 'Alle Kategorien' },
@@ -35,8 +36,21 @@ const Tasks = () => {
   ];
 
   useEffect(() => {
-    fetchTasks();
-    fetchSubmissions();
+    const loadData = async () => {
+      setLoading(true);
+      try {
+        await fetchTasks();
+        await fetchSubmissions();
+        setSubmissionsLoaded(true);
+      } catch (error) {
+        console.error('Fehler beim Laden der Daten:', error);
+        toast.error('Fehler beim Laden der Aufgaben und Einreichungen');
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    loadData();
   }, []);
 
   useEffect(() => {
@@ -635,134 +649,141 @@ const Tasks = () => {
         </div>
       </div>
 
-      <div className="tasks-grid">
-        {loading ? (
-          <div className="loading">Laden...</div>
-        ) : filteredTasks.length === 0 ? (
-          <div className="no-tasks">Keine Aufgaben gefunden</div>
-        ) : (
-          filteredTasks.map(task => (
-            <TaskCard key={task.id} task={task} />
-          ))
-        )}
-      </div>
-
-      <div className="submissions-section">
-        <h2 className="submissions-header">
-          <span className="submissions-title">Meine ausstehenden Einsendungen</span>
-        </h2>
-        
-        {userSubmissions.length === 0 ? (
-          <div className="no-submissions">
-            Keine ausstehenden Einsendungen vorhanden.
-          </div>
-        ) : (
-        <div className="submissions-grid">
-            {userSubmissions.map(submission => {
-              const task = tasks.find(t => t.id === submission.task_id);
-            return (
-                <div key={submission.id} className="submission-card">
-                  <div className="submission-header">
-                    <h4 className="submission-title">{task?.title || 'Unbekannte Aufgabe'}</h4>
-                    <span className="submission-status pending">
-                      <FaClock /> Ausstehend
-                    </span>
-                  </div>
-
-                  {renderSubmissionAttachment(submission)}
-
-                  <div className="submission-actions">
-                    <button 
-                      className="delete-button"
-                      onClick={() => handleDeleteSubmission(submission.id)}
-                    >
-                      <FaTrash /> Löschen
-                    </button>
-                  </div>
-                </div>
-            );
-          })}
-          </div>
+      {loading || !submissionsLoaded ? (
+        <div className="loading-container">
+          <div className="spinner"></div>
+          <p className="loading-text">Aufgaben und Einreichungsdaten werden geladen...</p>
+        </div>
+      ) : (
+        <>
+          <div className="tasks-grid">
+            {filteredTasks.length === 0 ? (
+              <div className="no-tasks">Keine Aufgaben gefunden</div>
+            ) : (
+              filteredTasks.map(task => (
+                <TaskCard key={task.id} task={task} />
+              ))
             )}
-      </div>
+          </div>
 
-      {user?.role === 'admin' && (
-        <div className="admin-section">
-          <h1 className="admin-title">Aufgabenüberprüfung</h1>
-          <div className="admin-submissions-grid">
-              {submissions
-                .filter(s => s.status === 'pending')
-              .map(submission => {
-                const task = tasks.find(t => t.id === submission.task_id);
+          <div className="submissions-section">
+            <h2 className="submissions-header">
+              <span className="submissions-title">Meine ausstehenden Einsendungen</span>
+            </h2>
+            
+            {userSubmissions.length === 0 ? (
+              <div className="no-submissions">
+                Keine ausstehenden Einsendungen vorhanden.
+              </div>
+            ) : (
+            <div className="submissions-grid">
+                {userSubmissions.map(submission => {
+                  const task = tasks.find(t => t.id === submission.task_id);
                 return (
-                  <div key={submission.id} className="admin-submission-card">
-                    <div className="admin-submission-header">
-                      <h3>{task?.title}</h3>
-                      <div className="admin-submission-info">
-                        <span className="admin-user">
-                          <FaUser /> {submission.user_email}
-                        </span>
-                        <span className="admin-points">
-                          {task?.dynamic ? (
-                            `${submission.submission_details?.task_points || 0} Punkte (${task.multiplier} pro ${task.dynamic_type})`
-                          ) : (
-                            `${task?.points || 0} Punkte`
-                          )}
+                    <div key={submission.id} className="submission-card">
+                      <div className="submission-header">
+                        <h4 className="submission-title">{task?.title || 'Unbekannte Aufgabe'}</h4>
+                        <span className="submission-status pending">
+                          <FaClock /> Ausstehend
                         </span>
                       </div>
-                    </div>
 
-                    <div className="admin-submission-content">
-                      {submission.file_url && (
-                        <div className="admin-file-preview">
-                          {submission.file_url.match(/\.(jpg|jpeg|png|gif)$/i) || 
-                           submission.file_url.startsWith('data:image') ? (
-                            <img 
-                              src={submission.file_url} 
-                              alt="Eingereichte Datei"
-                              className="admin-preview-image"
-                            />
-                          ) : (
-                            <video controls className="admin-preview-video">
-                              <source src={submission.file_url} type="video/mp4" />
-                              Ihr Browser unterstützt keine Videowiedergabe.
-                            </video>
-                          )}
-                        </div>
-                      )}
+                      {renderSubmissionAttachment(submission)}
 
-                      <div className="admin-submission-details">
-                        <textarea
-                          className="admin-comment"
-                          placeholder="Admin-Kommentar..."
-                          value={submission.id === activeSubmissionId ? adminComment : ''}
-                          onChange={(e) => {
-                            setAdminComment(e.target.value);
-                            setActiveSubmissionId(submission.id);
-                          }}
-                        />
-
-                        <div className="admin-actions">
-                          <button 
-                            className="approve-button"
-                            onClick={() => handleApproveSubmission(submission.id, adminComment)}
-                          >
-                            Genehmigen
-                          </button>
-                          <button 
-                            className="reject-button"
-                            onClick={() => handleRejectSubmission(submission.id, adminComment)}
-                          >
-                            Ablehnen
-                          </button>
-                        </div>
-                        </div>
+                      <div className="submission-actions">
+                        <button 
+                          className="delete-button"
+                          onClick={() => handleDeleteSubmission(submission.id)}
+                        >
+                          <FaTrash /> Löschen
+                        </button>
                       </div>
                     </div>
                 );
               })}
-            </div>
-        </div>
+              </div>
+            )}
+          </div>
+
+          {user?.role === 'admin' && (
+            <div className="admin-section">
+              <h1 className="admin-title">Aufgabenüberprüfung</h1>
+              <div className="admin-submissions-grid">
+                  {submissions
+                    .filter(s => s.status === 'pending')
+                  .map(submission => {
+                    const task = tasks.find(t => t.id === submission.task_id);
+                    return (
+                      <div key={submission.id} className="admin-submission-card">
+                        <div className="admin-submission-header">
+                          <h3>{task?.title}</h3>
+                          <div className="admin-submission-info">
+                            <span className="admin-user">
+                              <FaUser /> {submission.user_email}
+                            </span>
+                            <span className="admin-points">
+                              {task?.dynamic ? (
+                                `${submission.submission_details?.task_points || 0} Punkte (${task.multiplier} pro ${task.dynamic_type})`
+                              ) : (
+                                `${task?.points || 0} Punkte`
+                              )}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="admin-submission-content">
+                          {submission.file_url && (
+                            <div className="admin-file-preview">
+                              {submission.file_url.match(/\.(jpg|jpeg|png|gif)$/i) || 
+                               submission.file_url.startsWith('data:image') ? (
+                                <img 
+                                  src={submission.file_url} 
+                                  alt="Eingereichte Datei"
+                                  className="admin-preview-image"
+                                />
+                              ) : (
+                                <video controls className="admin-preview-video">
+                                  <source src={submission.file_url} type="video/mp4" />
+                                  Ihr Browser unterstützt keine Videowiedergabe.
+                                </video>
+                              )}
+                            </div>
+                          )}
+
+                          <div className="admin-submission-details">
+                            <textarea
+                              className="admin-comment"
+                              placeholder="Admin-Kommentar..."
+                              value={submission.id === activeSubmissionId ? adminComment : ''}
+                              onChange={(e) => {
+                                setAdminComment(e.target.value);
+                                setActiveSubmissionId(submission.id);
+                              }}
+                            />
+
+                            <div className="admin-actions">
+                              <button 
+                                className="approve-button"
+                                onClick={() => handleApproveSubmission(submission.id, adminComment)}
+                              >
+                                Genehmigen
+                              </button>
+                              <button 
+                                className="reject-button"
+                                onClick={() => handleRejectSubmission(submission.id, adminComment)}
+                              >
+                                Ablehnen
+                              </button>
+                            </div>
+                            </div>
+                          </div>
+                        </div>
+                    </div>
+                  );
+                })}
+              </div>
+          )}
+        </>
       )}
 
       {/* Info Modal */}
