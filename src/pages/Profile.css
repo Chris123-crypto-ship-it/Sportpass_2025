@@ -201,15 +201,14 @@
   font-size: 2em;
   font-weight: 700;
   margin-bottom: 5px;
-  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
-  -webkit-background-clip: text;
+  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);    
   -webkit-text-fill-color: transparent;
 }
 
 .stat-label {
   color: rgba(255, 255, 255, 0.8);
   font-size: 0.9em;
-}
+} 
 
 /* Hauptinhalt */
 .profile-content {

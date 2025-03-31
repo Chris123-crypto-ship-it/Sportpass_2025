@@ -13,7 +13,7 @@ import {
   faBicycle 
 } from '@fortawesome/free-solid-svg-icons';
 import config from '../config';
-import { toast } from 'react-hot-toast';
+import { toast } from 'react-toastify';
 
 const Profile = () => {
   const { user, updateUser } = useAuth();
