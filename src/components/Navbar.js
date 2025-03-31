@@ -5,7 +5,8 @@ import { useAuth } from '../context/AuthContext';
 import { 
   FaTachometerAlt, FaMedal, FaTasks, FaChartBar, FaArchive, 
   FaSignInAlt, FaUserPlus, FaSignOutAlt, FaBell, FaCog,
-  FaUserCircle, FaCaretDown, FaAward, FaCalendarCheck
+  FaUserCircle, FaCaretDown, FaAward, FaCalendarCheck,
+  FaUsers
 } from 'react-icons/fa';
 import logo from '../assets/logo.png';
 import '../styles/Navbar.css';
@@ -147,32 +148,32 @@ const Navbar = () => {
                     
                     <ul>
                       <li>
-                        <Link to="/profile">
+                        <Link to="/profile" onClick={() => setShowProfileMenu(false)}>
                           <FaUserCircle /> Profil
                         </Link>
                       </li>
-                      {user.role === 'admin' && (
+                      {user?.role === 'admin' && (
                         <>
                           <li>
-                            <Link to="/admin-dashboard">
+                            <Link to="/admin-dashboard" onClick={() => setShowProfileMenu(false)}>
                               <FaTachometerAlt /> Admin Dashboard
                             </Link>
                           </li>
                           <li>
-                            <Link to="/participants">
-                              <FaUserPlus /> Teilnehmer
+                            <Link to="/participants" onClick={() => setShowProfileMenu(false)}>
+                              <FaUsers /> Teilnehmer
                             </Link>
                           </li>
                         </>
                       )}
                       <li>
-                        <Link to="/settings">
+                        <Link to="/settings" onClick={() => setShowProfileMenu(false)}>
                           <FaCog /> Einstellungen
                         </Link>
                       </li>
                       <li className="divider" />
                       <li>
-                        <button onClick={handleLogout}>
+                        <button className="logout-button" onClick={handleLogout}>
                           <FaSignOutAlt /> Abmelden
                         </button>
                       </li>

@@ -1,10 +1,23 @@
+/* Farbvariablen am Anfang der Datei */
+:root {
+  --primary-color: #333333;
+  --primary-hover: #444444;
+  --accent-color: #ffc107;
+  --accent-hover: #ffb300;
+  --text-light: #ffffff;
+  --text-dark: #333333;
+  --background-light: #ffffff;
+  --border-color: #e0e0e0;
+}
+
 .navbar {
-  background: white;
+  background: var(--background-light);
   padding: 0.5rem 2rem;
   position: sticky;
   top: 0;
   z-index: 1000;
   transition: all 0.3s ease;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .navbar.scrolled {
@@ -39,6 +52,7 @@
   background: linear-gradient(135deg, #2193b0, #6dd5ed);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+  color: var(--primary-color);
 }
 
 /* Navigation Links */
@@ -56,7 +70,7 @@
   gap: 5px;
   padding: 0.5rem 1rem;
   text-decoration: none;
-  color: #666;
+  color: var(--text-dark);
   font-weight: 500;
   border-radius: 6px;
   transition: all 0.2s;
@@ -64,13 +78,13 @@
 }
 
 .nav-links li a:hover {
-  color: #2193b0;
-  background: rgba(33, 147, 176, 0.1);
+  color: var(--accent-color);
+  background: rgba(255, 193, 7, 0.1);
 }
 
 .nav-links li a.active {
-  color: #2193b0;
-  background: rgba(33, 147, 176, 0.1);
+  color: var(--accent-color);
+  background: rgba(255, 193, 7, 0.1);
 }
 
 /* Task Info Tooltip */
@@ -79,8 +93,8 @@
   top: 100%;
   left: 50%;
   transform: translateX(-50%);
-  background: #333;
-  color: white;
+  background: var(--primary-color);
+  color: var(--text-light);
   padding: 5px 10px;
   border-radius: 4px;
   font-size: 0.8rem;
@@ -106,12 +120,12 @@
   padding: 8px;
   cursor: pointer;
   position: relative;
-  color: #666;
+  color: var(--text-dark);
   transition: color 0.2s;
 }
 
 .nav-icon-button:hover {
-  color: #2193b0;
+  color: var(--accent-color);
 }
 
 .notification-badge {
@@ -120,7 +134,7 @@
   right: 0;
   width: 8px;
   height: 8px;
-  background: #ff4757;
+  background: var(--accent-color);
   border-radius: 50%;
 }
 
@@ -181,15 +195,15 @@
   border: none;
   padding: 8px 12px;
   cursor: pointer;
-  color: #666;
+  color: var(--text-dark);
   font-weight: 500;
   border-radius: 6px;
   transition: all 0.2s;
 }
 
 .profile-button:hover {
-  background: rgba(33, 147, 176, 0.1);
-  color: #2193b0;
+  background: rgba(255, 193, 7, 0.1);
+  color: var(--accent-color);
 }
 
 .profile-dropdown {
@@ -197,16 +211,17 @@
   top: 100%;
   right: 0;
   width: 250px;
-  background: white;
+  background: var(--background-light);
   border-radius: 8px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
   margin-top: 10px;
   overflow: hidden;
+  border: 1px solid var(--border-color);
 }
 
 .profile-header {
   padding: 1rem;
-  background: #f8f9fa;
+  background: rgba(255, 193, 7, 0.1);
   display: flex;
   align-items: center;
   gap: 10px;
@@ -242,7 +257,7 @@
   align-items: center;
   gap: 10px;
   padding: 0.5rem 1rem;
-  color: #666;
+  color: var(--text-dark);
   text-decoration: none;
   width: 100%;
   border: none;
@@ -255,8 +270,8 @@
 
 .profile-dropdown li a:hover,
 .profile-dropdown li button:hover {
-  background: #f8f9fa;
-  color: #2193b0;
+  background: rgba(255, 193, 7, 0.1);
+  color: var(--accent-color);
 }
 
 .profile-dropdown .divider {
@@ -285,23 +300,22 @@
 
 .login-button {
   background: none;
-  color: #2193b0;
-  border: 1px solid #2193b0;
+  color: var(--primary-color);
+  border: 1px solid var(--primary-color);
 }
 
 .login-button:hover {
-  background: rgba(33, 147, 176, 0.1);
+  background: rgba(51, 51, 51, 0.1);
 }
 
 .register-button {
-  background: #2193b0;
-  color: white;
-  border: 1px solid #2193b0;
+  background: var(--primary-color);
+  color: var(--text-light);
+  border: 1px solid var(--primary-color);
 }
 
 .register-button:hover {
-  background: #1a7a8e;
-  border-color: #1a7a8e;
+  background: var(--primary-hover);
 }
 
 /* Responsive Design */
@@ -326,5 +340,42 @@
   
   .profile-button span {
     display: none;
+  }
+}
+
+/* Dropdown Menüs schließen bei Klick außerhalb */
+@media (min-width: 769px) {
+  .navbar-content {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+}
+
+/* Mobile Anpassungen */
+@media (max-width: 768px) {
+  .navbar {
+    padding: 0.5rem 1rem;
+  }
+
+  .navbar-center {
+    display: none;
+  }
+
+  .profile-button span,
+  .profile-button .FaCaretDown {
+    display: none;
+  }
+
+  .auth-buttons {
+    gap: 8px;
+  }
+
+  .login-button,
+  .register-button {
+    padding: 6px 12px;
+    font-size: 0.9rem;
   }
 } 
