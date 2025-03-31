@@ -1,11 +1,11 @@
 /* Farbvariablen am Anfang der Datei */
 :root {
-  --primary-color: #333333;
-  --primary-hover: #444444;
-  --accent-color: #ffc107;
-  --accent-hover: #ffb300;
+  --primary-color: #205375; /* Dunkles Blau */
+  --primary-hover: #2C74B3; /* Helleres Blau beim Hover */
+  --accent-color: #F66B0E; /* Orange für Akzente */
+  --accent-hover: #FF8C32; /* Helleres Orange beim Hover */
   --text-light: #ffffff;
-  --text-dark: #333333;
+  --text-dark: #112B3C;
   --background-light: #ffffff;
   --border-color: #e0e0e0;
 }
@@ -79,12 +79,12 @@
 
 .nav-links li a:hover {
   color: var(--accent-color);
-  background: rgba(255, 193, 7, 0.1);
+  background: rgba(246, 107, 14, 0.1);
 }
 
 .nav-links li a.active {
   color: var(--accent-color);
-  background: rgba(255, 193, 7, 0.1);
+  background: rgba(246, 107, 14, 0.1);
 }
 
 /* Task Info Tooltip */
@@ -202,7 +202,7 @@
 }
 
 .profile-button:hover {
-  background: rgba(255, 193, 7, 0.1);
+  background: rgba(32, 83, 117, 0.1);
   color: var(--accent-color);
 }
 
@@ -221,7 +221,7 @@
 
 .profile-header {
   padding: 1rem;
-  background: rgba(255, 193, 7, 0.1);
+  background: rgba(32, 83, 117, 0.1);
   display: flex;
   align-items: center;
   gap: 10px;
@@ -305,7 +305,7 @@
 }
 
 .login-button:hover {
-  background: rgba(51, 51, 51, 0.1);
+  background: rgba(32, 83, 117, 0.1);
 }
 
 .register-button {
@@ -316,6 +316,24 @@
 
 .register-button:hover {
   background: var(--primary-hover);
+}
+
+/* Logout Button */
+.logout-button {
+  color: #dc3545; /* Rot für Logout */
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 10px 15px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.logout-button:hover {
+  background: rgba(220, 53, 69, 0.1);
 }
 
 /* Responsive Design */
