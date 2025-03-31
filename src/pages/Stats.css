@@ -17,7 +17,6 @@
   font-weight: 800;
   color: #2c3e50;
   background: linear-gradient(90deg, #2193b0, #6dd5ed);
-  -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
@@ -330,4 +329,11 @@
   .achievement-list {
     grid-template-columns: 1fr;
   }
-} 
+}
+
+/* Entfernen aller farbigen Hintergründe für Balken */
+.stat-scale-bar {
+  background: none;
+}
+
+/* Wenn es weitere solche Elemente gibt, hier anpassen */ 

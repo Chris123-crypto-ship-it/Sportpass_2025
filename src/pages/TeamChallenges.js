@@ -128,7 +128,7 @@ const TeamChallenges = () => {
 
           .progress-fill {
             height: 100%;
-            background: linear-gradient(90deg, #4CAF50, #8BC34A);
+            background: #2193b0;
             transition: width 0.3s ease;
           }
         `}
