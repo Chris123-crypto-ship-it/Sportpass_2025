@@ -60,78 +60,25 @@ const Profile = () => {
     }
 
     try {
-      // Speichern Sie den Namen zunächst lokal
+      // Speichern Sie den Namen zunächst nur lokal
       localStorage.setItem('userName', userName.trim());
       
-      // Holen Sie sich die Benutzerinformationen - versuche verschiedene Möglichkeiten
-      const token = localStorage.getItem('token');
-      
-      // Versuche user aus verschiedenen Quellen zu laden
-      let userData = null;
-      
-      // 1. Versuche aus dem direkten user-Objekt in localStorage
+      // Optional: Versuchen Sie den Namen auch im Backend zu aktualisieren
       try {
-        userData = JSON.parse(localStorage.getItem('user') || '{}');
-      } catch (e) {
-        console.warn('Fehler beim Parsen der Benutzerinformationen aus localStorage', e);
-      }
-      
-      // 2. Falls user-Objekt nicht vollständig ist, versuche das aktuelle user-Objekt aus dem Context
-      if (!userData || !userData.id) {
-        if (user && user.id) {
-          userData = user;
-          console.log('Verwende Benutzerinformationen aus dem AuthContext');
-        }
-      }
-      
-      // Benutzer die user_id aus dem Kontext, falls vorhanden und id fehlt
-      if (!userData.id && user && user.id) {
-        userData.id = user.id;
-      }
-      
-      // Prüfen ob wir eine Benutzer-ID haben
-      if (!userData || !userData.id) {
-        console.warn('Keine Benutzer-ID gefunden, Name wurde nur lokal gespeichert');
-        alert('Der Name wurde lokal gespeichert, aber nicht mit dem Server synchronisiert. Bitte später erneut versuchen oder neu anmelden.');
-        setIsEditingName(false);
-        return;
-      }
-      
-      // Name in Datenbank aktualisieren
-      console.log(`Aktualisiere Benutzer mit ID: ${userData.id}`);
-      const response = await fetch(`${config.API_URL}/users/${userData.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ name: userName.trim() })
-      });
+        const response = await fetch(`${config.API_URL}/users/${user.id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${user.token}`
+          },
+          body: JSON.stringify({ name: userName.trim() })
+        });
 
-      if (!response.ok) {
-        console.warn('Backend-Update fehlgeschlagen, Name wurde nur lokal gespeichert');
-        alert('Der Name wurde lokal gespeichert, aber nicht mit dem Server synchronisiert.');
-      } else {
-        // Aktualisiere alle lokalen Speicherorte mit dem neuen Namen
-        
-        // 1. Aktualisiere user im localStorage
-        if (userData) {
-          userData.name = userName.trim();
-          localStorage.setItem('user', JSON.stringify(userData));
+        if (!response.ok) {
+          console.warn('Backend-Update fehlgeschlagen, Name wurde nur lokal gespeichert');
         }
-        
-        // 2. Versuche authContext zu aktualisieren, falls vorhanden
-        try {
-          const authContext = JSON.parse(localStorage.getItem('authContext') || '{}');
-          if (authContext && authContext.user) {
-            authContext.user.name = userName.trim();
-            localStorage.setItem('authContext', JSON.stringify(authContext));
-          }
-        } catch (e) {
-          console.warn('AuthContext konnte nicht aktualisiert werden', e);
-        }
-        
-        alert('Name erfolgreich aktualisiert!');
+      } catch (backendError) {
+        console.warn('Backend nicht erreichbar, Name wurde nur lokal gespeichert');
       }
 
       setIsEditingName(false);

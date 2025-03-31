@@ -322,21 +322,4 @@
   .stats-overview {
     grid-template-columns: 1fr;
   }
-}
-
-/* Entfernen aller möglichen grünen Balken */
-.stat-bar, 
-.progress-bar, 
-.stat-progress-bar, 
-.stat-progress, 
-.category-progress,
-.progress-container,
-.progress-indicator,
-[class*="progress"],
-[class*="bar"] {
-  display: none !important;
-  background-color: transparent !important;
-  height: 0 !important;
-  border: none !important;
-  overflow: hidden !important;
 } 

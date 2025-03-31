@@ -207,11 +207,18 @@
 }
 
 .category-progress {
-  display: none !important;
+  width: 100%;
+  height: 8px;
+  background: #e2e8f0;
+  border-radius: 4px;
+  overflow: hidden;
 }
 
 .progress-bar {
-  display: none !important;
+  height: 100%;
+  background: linear-gradient(90deg, #2193b0, #6dd5ed);
+  border-radius: 4px;
+  transition: width 0.3s ease;
 }
 
 .category-count {
