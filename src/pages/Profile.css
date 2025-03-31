@@ -283,7 +283,7 @@
 }
 
 .goal-icon {
-  background: #f0f4ff;
+  background: transparent;
   width: 50px;
   height: 50px;
   border-radius: 50%;
@@ -291,22 +291,21 @@
   align-items: center;
   justify-content: center;
   margin-right: 1rem;
-  transition: all 0.3s ease;
 }
 
-.goal-card:hover .goal-icon {
-  background: #4a90e2;
-  color: white;
-}
-
+.goal-icon i,
 .goal-icon svg {
   font-size: 1.5rem;
   color: #4a90e2;
-  transition: all 0.3s ease;
+}
+
+.goal-card:hover .goal-icon {
+  background: transparent;
+  color: #4a90e2;
 }
 
 .goal-card:hover .goal-icon svg {
-  color: white;
+  color: #4a90e2;
 }
 
 .goal-content {
