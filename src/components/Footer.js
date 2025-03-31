@@ -14,9 +14,24 @@ const Footer = () => {
   const [showFaqModal, setShowFaqModal] = useState(false);
 
   const sponsors = [
-    { name: 'Sport GmbH', logo: 'https://via.placeholder.com/100x50?text=Sport+GmbH', description: 'Unterstützt uns seit 2022 mit Sportgeräten', website: 'https://example-sport.com' },
-    { name: 'Health AG', logo: 'https://via.placeholder.com/100x50?text=Health+AG', description: 'Offizieller Gesundheitspartner', website: 'https://example-health.com' },
-    { name: 'Fitness Pro', logo: 'https://via.placeholder.com/100x50?text=Fitness+Pro', description: 'Stellt Trainingsmaterialien zur Verfügung', website: 'https://example-fitness.com' }
+    { 
+      name: 'Raiffeisenbank Gleisdorf', 
+      logo: 'https://www.raiffeisen.at/content/dam/raiffeisen/logo/raiffeisen-logo.png', 
+      description: 'Hauptsponsor und Finanzpartner', 
+      website: 'https://www.raiffeisen.at/de/online-banking/mein-elba.html' 
+    },
+    {
+      name: 'Statec Binder',
+      logo: 'https://www.statec-binder.com/wp-content/themes/statec-binder/assets/images/logo.svg',
+      description: 'Technologiepartner aus Gleisdorf',
+      website: 'https://www.statec-binder.com'
+    },
+    {
+      name: 'Intersport Gleisdorf',
+      logo: 'https://www.intersport.at/on/demandware.static/Sites-intersport_at-Site/-/default/dw0c800d4f/images/logo.svg',
+      description: 'Sportausrüstungspartner',
+      website: 'https://www.intersport.at'
+    }
   ];
 
   // Zufälliger Motivationsspruch
