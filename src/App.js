@@ -6,7 +6,7 @@ import { TaskProvider } from './context/TaskContext';
 import { keepServerAlive } from './services/socket';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
-import { ToastContainer, toast } from 'react-toastify';
+import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 // Seiten
@@ -39,7 +39,7 @@ function App() {
         <Router>
           <div className="app page-background">
             <Navbar />
-            <main className="page-container">
+            <div className="page-container">
               <Routes>
                 {/* Startseite umleiten zum Login */}
                 <Route path="/" element={<Navigate to="/login" replace />} />
@@ -62,20 +62,20 @@ function App() {
                 <Route path="/participants" element={<Participants />} />
                 <Route path="/support" element={<Support />} />
               </Routes>
-            </main>
+            </div>
             <Footer />
+            <ToastContainer 
+              position="top-right"
+              autoClose={3000}
+              hideProgressBar={false}
+              newestOnTop
+              closeOnClick
+              rtl={false}
+              pauseOnFocusLoss
+              draggable
+              pauseOnHover
+            />
           </div>
-          <ToastContainer 
-            position="top-right"
-            autoClose={3000}
-            hideProgressBar={false}
-            newestOnTop
-            closeOnClick
-            rtl={false}
-            pauseOnFocusLoss
-            draggable
-            pauseOnHover
-          />
         </Router>
       </TaskProvider>
     </AuthProvider>
