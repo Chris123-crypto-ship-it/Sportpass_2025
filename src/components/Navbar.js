@@ -1,56 +1,168 @@
 // src/components/Navbar.js
-import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { 
-  FaTachometerAlt, FaMedal, FaTasks, FaChartBar, FaArchive, FaSignInAlt, FaUserPlus, FaSignOutAlt
+  FaTachometerAlt, FaMedal, FaTasks, FaChartBar, FaArchive, FaSignInAlt, 
+  FaUserPlus, FaSignOutAlt, FaUser, FaAngleDown, FaUserCog, FaUserFriends
 } from 'react-icons/fa';
 import logo from '../assets/logo.png';
+import '../styles/Navbar.css';
 
 const Navbar = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const [scrolled, setScrolled] = useState(false);
+  const [showProfileDropdown, setShowProfileDropdown] = useState(false);
+
+  // Behandle Scroll-Effekt
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 20) {
+        setScrolled(true);
+      } else {
+        setScrolled(false);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
 
   const handleLogout = () => {
     logout();
     navigate('/login');
+    setShowProfileDropdown(false);
+  };
+
+  const toggleProfileDropdown = () => {
+    setShowProfileDropdown(!showProfileDropdown);
   };
 
   return (
-    <nav>
-      <div className="logo">
-        <img src={logo} alt="Sportpass Logo" />
-        <span>Sportpass</span>
+    <nav className={`navbar ${scrolled ? 'scrolled' : ''}`}>
+      <div className="navbar-content">
+        <Link to="/" className="logo">
+          <img src={logo} alt="Sportpass Logo" />
+          <span>SportPass</span>
+        </Link>
+
+        <ul className="nav-links">
+          {user ? (
+            <>
+              <li>
+                <Link to="/dashboard" className={location.pathname === '/dashboard' ? 'active' : ''}>
+                  <FaTachometerAlt />
+                  <span>Dashboard</span>
+                </Link>
+              </li>
+              <li>
+                <Link to="/leaderboard" className={location.pathname === '/leaderboard' ? 'active' : ''}>
+                  <FaMedal />
+                  <span>Leaderboard</span>
+                </Link>
+              </li>
+              <li>
+                <Link to="/tasks" className={location.pathname === '/tasks' ? 'active' : ''}>
+                  <FaTasks />
+                  <span>Aufgaben</span>
+                  {location.pathname === '/tasks' && (
+                    <span className="task-info">Neue Aufgaben jeden Sonntag!</span>
+                  )}
+                </Link>
+              </li>
+              <li>
+                <Link to="/stats" className={location.pathname === '/stats' ? 'active' : ''}>
+                  <FaChartBar />
+                  <span>Statistiken</span>
+                </Link>
+              </li>
+              <li>
+                <Link to="/archive" className={location.pathname === '/archive' ? 'active' : ''}>
+                  <FaArchive />
+                  <span>Archiv</span>
+                </Link>
+              </li>
+            </>
+          ) : (
+            <li>
+              <Link to="/leaderboard" className={location.pathname === '/leaderboard' ? 'active' : ''}>
+                <FaMedal />
+                <span>Leaderboard</span>
+              </Link>
+            </li>
+          )}
+        </ul>
+
+        <div className="navbar-right">
+          {user ? (
+            <div className="profile-wrapper">
+              <button className="profile-button" onClick={toggleProfileDropdown}>
+                <FaUser className="profile-icon" />
+                <span>{user.name || user.email}</span>
+                <FaAngleDown className={`dropdown-arrow ${showProfileDropdown ? 'open' : ''}`} />
+              </button>
+              
+              {showProfileDropdown && (
+                <div className="profile-dropdown">
+                  <div className="profile-header">
+                    <div className="profile-avatar">
+                      <FaUser />
+                    </div>
+                    <div className="profile-info">
+                      <strong>{user.name || 'Benutzer'}</strong>
+                      <small>{user.email}</small>
+                    </div>
+                  </div>
+                  
+                  <ul>
+                    <li>
+                      <Link to="/profile" onClick={() => setShowProfileDropdown(false)}>
+                        <FaUser /> Profil
+                      </Link>
+                    </li>
+                    
+                    {user.role === 'admin' && (
+                      <>
+                        <li>
+                          <Link to="/admin-dashboard" onClick={() => setShowProfileDropdown(false)}>
+                            <FaUserCog /> Admin Dashboard
+                          </Link>
+                        </li>
+                        <li>
+                          <Link to="/participants" onClick={() => setShowProfileDropdown(false)}>
+                            <FaUserFriends /> Teilnehmer
+                          </Link>
+                        </li>
+                      </>
+                    )}
+                    
+                    <div className="divider"></div>
+                    
+                    <li>
+                      <button onClick={handleLogout}>
+                        <FaSignOutAlt /> Logout
+                      </button>
+                    </li>
+                  </ul>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="auth-buttons">
+              <Link to="/login" className="login-button">
+                <FaSignInAlt /> Login
+              </Link>
+              <Link to="/register" className="register-button">
+                <FaUserPlus /> Registrieren
+              </Link>
+            </div>
+          )}
+        </div>
       </div>
-      <ul>
-        {user ? (
-          // Angemeldeter Benutzer sieht alle Navigationspunkte
-          <>
-            <li><Link to="/dashboard"><FaTachometerAlt /> Dashboard</Link></li>
-            <li><Link to="/leaderboard"><FaMedal /> Leaderboard</Link></li>
-            <li><Link to="/tasks"><FaTasks /> Aufgaben</Link></li>
-            <li><Link to="/stats"><FaChartBar /> Statistiken</Link></li>
-            <li><Link to="/archive"><FaArchive /> Archiv</Link></li>
-            <li><Link to="/profile">Profil</Link></li>
-            {/* Nur Admins sehen den Admin-Dashboard-Link und den zusätzlichen Teilnehmer-Link */}
-            {user.role === 'admin' && (
-              <>
-                <li><Link to="/admin-dashboard">Admin Dashboard</Link></li>
-                <li><Link to="/participants">Teilnehmer</Link></li>
-              </>
-            )}
-            <li>{user.name}</li>
-            <li><button onClick={handleLogout}><FaSignOutAlt /> Logout</button></li>
-          </>
-        ) : (
-          // Nicht angemeldeter Benutzer sieht nur Leaderboard, Login, Registrieren
-          <>
-            <li><Link to="/leaderboard"><FaMedal /> Leaderboard</Link></li>
-            <li><Link to="/login"><FaSignInAlt /> Login</Link></li>
-            <li><Link to="/register"><FaUserPlus /> Registrieren</Link></li>
-          </>
-        )}
-      </ul>
     </nav>
   );
 };
