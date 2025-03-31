@@ -69,13 +69,20 @@ export const AuthProvider = ({ children }) => {
     // Logik zum Senden der E-Mail
   };
 
+  const updateUser = (userData) => {
+    setUser(userData);
+    // Optional: Aktualisiere auch den gespeicherten Benutzer im localStorage
+    localStorage.setItem('user', JSON.stringify(userData));
+  };
+
   const value = {
     user,
     loading,
     error,
     login,
     logout,
-    isAuthenticated: !!user
+    isAuthenticated: !!user,
+    updateUser
   };
 
   return (
