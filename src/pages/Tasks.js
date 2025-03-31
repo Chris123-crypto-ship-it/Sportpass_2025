@@ -32,7 +32,6 @@ const Tasks = () => {
     { value: 'cardio', label: 'Cardio' },
     { value: 'endurance', label: 'Ausdauer' },
     { value: 'team', label: 'Team' },
-
   ];
 
   useEffect(() => {
@@ -655,14 +654,16 @@ const Tasks = () => {
           <p className="loading-text">Aufgaben und Einreichungsdaten werden geladen...</p>
         </div>
       ) : (
-        <React.Fragment>
+        <div className="tasks-content">
           <div className="tasks-grid">
             {filteredTasks.length === 0 ? (
               <div className="no-tasks">Keine Aufgaben gefunden</div>
             ) : (
-              filteredTasks.map(task => (
-                <TaskCard key={task.id} task={task} />
-              ))
+              <>
+                {filteredTasks.map(task => (
+                  <TaskCard key={task.id} task={task} />
+                ))}
+              </>
             )}
           </div>
 
@@ -704,7 +705,7 @@ const Tasks = () => {
               </div>
             )}
           </div>
-
+          
           {user?.role === 'admin' && (
             <div className="admin-section">
               <h1 className="admin-title">Aufgabenüberprüfung</h1>
@@ -735,7 +736,7 @@ const Tasks = () => {
                           {submission.file_url && (
                             <div className="admin-file-preview">
                               {submission.file_url.match(/\.(jpg|jpeg|png|gif)$/i) || 
-                               submission.file_url.startsWith('data:image') ? (
+                              submission.file_url.startsWith('data:image') ? (
                                 <img 
                                   src={submission.file_url} 
                                   alt="Eingereichte Datei"
@@ -775,19 +776,17 @@ const Tasks = () => {
                                 Ablehnen
                               </button>
                             </div>
-                            </div>
                           </div>
                         </div>
-                    </div>
-                  );
-                })}
+                      </div>
+                    );
+                  })}
               </div>
             </div>
           )}
-        </React.Fragment>
+        </div>
       )}
 
-      {/* Info Modal */}
       {showInfoModal && (
         <div className="modal-overlay" onClick={() => setShowInfoModal(false)}>
           <div className="modal-content task-info-modal" onClick={e => e.stopPropagation()}>
