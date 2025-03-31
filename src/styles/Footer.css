@@ -155,17 +155,21 @@
 }
 
 .sponsor-logo {
-  height: 80px;
+  height: 100px;
   display: flex;
   align-items: center;
   justify-content: center;
   margin-bottom: 15px;
+  padding: 10px;
+  background: white;
+  border-radius: 8px;
 }
 
 .sponsor-logo img {
   max-height: 100%;
   max-width: 100%;
   object-fit: contain;
+  filter: brightness(1.02);
 }
 
 .sponsor-card h3 {
