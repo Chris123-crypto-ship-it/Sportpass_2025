@@ -143,7 +143,7 @@ const Stats = () => {
       <div className="stats-info">
         <FaInfoCircle className="info-icon" />
         <div className="info-text">
-          Hier siehst du deine persönlichen Statistiken. Aufgaben und detaillierte Statistiken werden nach einer Woche automatisch aus der Übersicht entfernt. Deine gesammelten Punkte bleiben davon unberührt und werden dauerhaft in deinem Konto gespeichert.
+          Hier siehst du deine persönlichen Statistiken. Aufgaben und detaillierte Statistiken werden nach einer Woche automatisch aus der Übersicht entfernt. Deine gesammelten Punkte bleiben davon unberührt und werden dauerhaft in deinem Konto gespeichert. Falls keine Statistiken angezeigt werden, gehe bitte kurz zum Archiv und warte, bis die Daten dort geladen sind. Kehre dann zur Statistik-Seite zurück.
         </div>
       </div>
       <div className="stats-header">

@@ -172,7 +172,7 @@ const Dashboard = () => {
       <div className="dashboard-info">
         <FaInfoCircle className="info-icon" />
         <div className="info-text">
-          Willkommen in deinem persönlichen Dashboard! Hier siehst du eine Übersicht deiner Aktivitäten und Leistungen. Beachte, dass detaillierte Aufgabenstatistiken nach einer Woche automatisch aus der Übersicht entfernt werden. Deine gesammelten Punkte bleiben davon unberührt und werden dauerhaft gespeichert.
+          Willkommen in deinem persönlichen Dashboard! Hier siehst du eine Übersicht deiner Aktivitäten und Leistungen. Beachte, dass detaillierte Aufgabenstatistiken nach einer Woche automatisch aus der Übersicht entfernt werden. Deine gesammelten Punkte bleiben davon unberührt und werden dauerhaft gespeichert. Falls keine Daten angezeigt werden, gehe bitte kurz zum Archiv und warte, bis die Daten dort geladen sind. Kehre dann zum Dashboard zurück.
         </div>
       </div>
       <div className="dashboard-header">
