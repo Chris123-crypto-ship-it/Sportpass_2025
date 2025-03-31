@@ -53,7 +53,8 @@ const Profile = () => {
     };
   }, []);
 
-  const handleNameChange = async () => {
+  const handleNameChange = async (e) => {
+    e.preventDefault();
     if (!userName.trim()) {
       alert('Bitte geben Sie einen Namen ein.');
       return;
@@ -63,28 +64,33 @@ const Profile = () => {
       // Speichern Sie den Namen zunächst nur lokal
       localStorage.setItem('userName', userName.trim());
       
-      // Optional: Versuchen Sie den Namen auch im Backend zu aktualisieren
-      try {
-        const response = await fetch(`${config.API_URL}/users/${user.id}`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${user.token}`
-          },
-          body: JSON.stringify({ name: userName.trim() })
-        });
-
-        if (!response.ok) {
-          console.warn('Backend-Update fehlgeschlagen, Name wurde nur lokal gespeichert');
-        }
-      } catch (backendError) {
-        console.warn('Backend nicht erreichbar, Name wurde nur lokal gespeichert');
+      // Backend-Update mit korrektem Token
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('Kein Authentifizierungs-Token gefunden');
       }
 
+      const response = await fetch(`${config.API_URL}/users/${user.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ name: userName.trim() })
+      });
+
+      if (!response.ok) {
+        throw new Error('Backend-Update fehlgeschlagen');
+      }
+
+      const data = await response.json();
+      console.log('Name erfolgreich aktualisiert:', data);
       setIsEditingName(false);
     } catch (error) {
       console.error('Fehler beim Speichern des Namens:', error);
       alert('Es gab ein Problem beim Speichern des Namens. Bitte versuchen Sie es erneut.');
+      // Name aus dem localStorage zurücksetzen
+      setUserName(user?.name || 'Sportpass Nutzer');
     }
   };
 

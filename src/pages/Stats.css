@@ -16,9 +16,15 @@
   font-size: 2.4rem;
   font-weight: 800;
   color: #2c3e50;
+<<<<<<< HEAD
   background: linear-gradient(90deg, #2193b0, #6dd5ed);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+=======
+  background: none;
+  -webkit-text-fill-color: initial;
+  background-clip: initial;
+>>>>>>> 2e8191e9377bdaadfcd2b00ac01d9267420d1888
 }
 
 .time-filter {
@@ -58,7 +64,11 @@
   border-radius: 24px;
   padding: 30px;
   position: relative;
+<<<<<<< HEAD
   overflow: hidden;
+=======
+  overflow: visible;
+>>>>>>> 2e8191e9377bdaadfcd2b00ac01d9267420d1888
   border: 1px solid rgba(255, 255, 255, 0.2);
   transition: all 0.3s ease;
   box-shadow: 0 8px 32px rgba(31, 38, 135, 0.15);
@@ -68,6 +78,7 @@
 }
 
 .stat-card::before {
+<<<<<<< HEAD
   content: '';
   position: absolute;
   inset: 0;
@@ -86,11 +97,19 @@
 
 .stat-card:hover::before {
   opacity: 1;
+=======
+  display: none;
+>>>>>>> 2e8191e9377bdaadfcd2b00ac01d9267420d1888
 }
 
 .stat-icon-container {
   position: relative;
+<<<<<<< HEAD
   z-index: 1;
+=======
+  z-index: 2;
+  background: none;
+>>>>>>> 2e8191e9377bdaadfcd2b00ac01d9267420d1888
 }
 
 .stat-icon {
@@ -106,6 +125,21 @@
   box-shadow: 0 10px 20px rgba(33, 147, 176, 0.2);
   transform: rotate(-5deg);
   transition: transform 0.3s ease;
+<<<<<<< HEAD
+=======
+  position: relative;
+  z-index: 2;
+}
+
+.stat-card:hover {
+  transform: translateY(-5px);
+  border-color: rgba(33, 147, 176, 0.5);
+  box-shadow: 0 15px 35px rgba(33, 147, 176, 0.2);
+}
+
+.stat-card:hover::before {
+  opacity: 1;
+>>>>>>> 2e8191e9377bdaadfcd2b00ac01d9267420d1888
 }
 
 .stat-card:hover .stat-icon {
@@ -114,7 +148,11 @@
 
 .stat-info {
   position: relative;
+<<<<<<< HEAD
   z-index: 1;
+=======
+  z-index: 2;
+>>>>>>> 2e8191e9377bdaadfcd2b00ac01d9267420d1888
   flex: 1;
 }
 
@@ -124,10 +162,19 @@
   color: #2c3e50;
   margin-bottom: 5px;
   font-family: 'Inter', sans-serif;
+<<<<<<< HEAD
   background: linear-gradient(90deg, #2193b0, #6dd5ed);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   display: inline-block;
+=======
+  background: none;
+  -webkit-background-clip: initial;
+  -webkit-text-fill-color: initial;
+  background-clip: initial;
+  position: relative;
+  z-index: 2;
+>>>>>>> 2e8191e9377bdaadfcd2b00ac01d9267420d1888
 }
 
 .stat-label {
@@ -136,12 +183,22 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 1px;
+<<<<<<< HEAD
+=======
+  position: relative;
+  z-index: 2;
+>>>>>>> 2e8191e9377bdaadfcd2b00ac01d9267420d1888
 }
 
 .stat-sublabel {
   color: #94a3b8;
   font-size: 0.9rem;
   margin-top: 5px;
+<<<<<<< HEAD
+=======
+  position: relative;
+  z-index: 2;
+>>>>>>> 2e8191e9377bdaadfcd2b00ac01d9267420d1888
 }
 
 /* Unterer Bereich */
