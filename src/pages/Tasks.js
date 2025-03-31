@@ -655,7 +655,7 @@ const Tasks = () => {
           <p className="loading-text">Aufgaben und Einreichungsdaten werden geladen...</p>
         </div>
       ) : (
-        <>
+        <React.Fragment>
           <div className="tasks-grid">
             {filteredTasks.length === 0 ? (
               <div className="no-tasks">Keine Aufgaben gefunden</div>
@@ -676,10 +676,10 @@ const Tasks = () => {
                 Keine ausstehenden Einsendungen vorhanden.
               </div>
             ) : (
-            <div className="submissions-grid">
+              <div className="submissions-grid">
                 {userSubmissions.map(submission => {
                   const task = tasks.find(t => t.id === submission.task_id);
-                return (
+                  return (
                     <div key={submission.id} className="submission-card">
                       <div className="submission-header">
                         <h4 className="submission-title">{task?.title || 'Unbekannte Aufgabe'}</h4>
@@ -699,8 +699,8 @@ const Tasks = () => {
                         </button>
                       </div>
                     </div>
-                );
-              })}
+                  );
+                })}
               </div>
             )}
           </div>
@@ -709,8 +709,8 @@ const Tasks = () => {
             <div className="admin-section">
               <h1 className="admin-title">Aufgabenüberprüfung</h1>
               <div className="admin-submissions-grid">
-                  {submissions
-                    .filter(s => s.status === 'pending')
+                {submissions
+                  .filter(s => s.status === 'pending')
                   .map(submission => {
                     const task = tasks.find(t => t.id === submission.task_id);
                     return (
@@ -782,8 +782,9 @@ const Tasks = () => {
                   );
                 })}
               </div>
+            </div>
           )}
-        </>
+        </React.Fragment>
       )}
 
       {/* Info Modal */}
