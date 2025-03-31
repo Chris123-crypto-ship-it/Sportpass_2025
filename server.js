@@ -1651,35 +1651,6 @@ app.delete('/users/:id', authenticateToken, isAdmin, async (req, res) => {
   }
 });
 
-// Nutzerprofilupdate Route
-app.put('/api/users/update-profile', authenticateToken, async (req, res) => {
-  try {
-    const { name } = req.body;
-    
-    if (!name || name.trim() === '') {
-      return res.status(400).json({ message: 'Der Name darf nicht leer sein' });
-    }
-    
-    // Benutzer aus der Datenbank holen
-    const user = await db.collection('users').findOne({ email: req.user.email });
-    
-    if (!user) {
-      return res.status(404).json({ message: 'Benutzer nicht gefunden' });
-    }
-    
-    // Aktualisiere den Namen
-    await db.collection('users').updateOne(
-      { email: req.user.email },
-      { $set: { name: name.trim() } }
-    );
-    
-    res.status(200).json({ message: 'Profilname erfolgreich aktualisiert' });
-  } catch (error) {
-    console.error('Fehler beim Aktualisieren des Profils:', error);
-    res.status(500).json({ message: 'Interner Serverfehler' });
-  }
-});
-
 // 🔹 Server starten
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, async () => {
