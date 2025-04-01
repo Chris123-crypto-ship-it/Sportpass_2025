@@ -569,4 +569,26 @@
     width: 36px;
     height: 36px;
   }
+}
+
+.impressum-section {
+  margin-bottom: 20px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #eee;
+}
+
+.impressum-section:last-child {
+  border-bottom: none;
+}
+
+.impressum-section h3 {
+  margin-top: 0;
+  color: #333;
+  font-size: 1.1rem;
+}
+
+.impressum-section p {
+  margin-bottom: 0;
+  line-height: 1.6;
+  color: #555;
 } 

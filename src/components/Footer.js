@@ -3,8 +3,11 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FaShoppingCart, FaHandshake, FaInfoCircle, FaUserFriends, 
          FaBook, FaShieldAlt, FaNewspaper, FaChevronUp, FaFacebookF, 
-         FaInstagram, FaTwitter, FaCalendarAlt, FaTrophy, FaQuestion } from 'react-icons/fa';
+         FaInstagram, FaTwitter, FaCalendarAlt, FaTrophy, FaQuestion, FaFileAlt } from 'react-icons/fa';
 import '../styles/Footer.css';
+import raiffeisenLogo from '../assets/images/raiffeisen-logo.jpg';
+import statecBinderLogo from '../assets/images/statec-binder-logo.jpg';
+import intersportLogo from '../assets/images/intersport-logo.jpg';
 
 const Footer = () => {
   const [showSponsorsModal, setShowSponsorsModal] = useState(false);
@@ -12,23 +15,24 @@ const Footer = () => {
   const [showAboutModal, setShowAboutModal] = useState(false);
   const [showPrivacyModal, setShowPrivacyModal] = useState(false);
   const [showFaqModal, setShowFaqModal] = useState(false);
+  const [showImpressumModal, setShowImpressumModal] = useState(false);
 
   const sponsors = [
     { 
       name: 'Raiffeisenbank Gleisdorf', 
-      logo: 'https://www.raiffeisen.at/content/dam/raiffeisen/logo/raiffeisen-logo-claim.png', 
+      logo: raiffeisenLogo, 
       description: 'Hauptsponsor und Finanzpartner', 
       website: 'https://www.raiffeisen.at/de/online-banking/mein-elba.html' 
     },
     {
       name: 'Statec Binder',
-      logo: 'https://www.statec-binder.com/wp-content/uploads/2020/10/statec-binder-logo.png',
+      logo: statecBinderLogo,
       description: 'Technologiepartner aus Gleisdorf',
       website: 'https://www.statec-binder.com'
     },
     {
       name: 'Intersport Gleisdorf',
-      logo: 'https://www.intersport.at/on/demandware.static/-/Sites/default/dw8c800d4f/images/logo-intersport.svg',
+      logo: intersportLogo,
       description: 'Sportausrüstungspartner',
       website: 'https://www.intersport.at'
     }
@@ -87,6 +91,9 @@ const Footer = () => {
               </button>
               <button className="footer-link-button" onClick={() => setShowFaqModal(true)}>
                 <FaQuestion /> FAQ
+              </button>
+              <button className="footer-link-button" onClick={() => setShowImpressumModal(true)}>
+                <FaFileAlt /> Impressum
               </button>
             </div>
           </div>
@@ -309,6 +316,65 @@ const Footer = () => {
             <p className="faq-more-help">Weitere Fragen? <Link to="/support">Kontaktiere unseren Support</Link></p>
             
             <button className="modal-close" onClick={() => setShowFaqModal(false)}>
+              Schließen
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Impressum Modal */}
+      {showImpressumModal && (
+        <div className="modal-overlay" onClick={() => setShowImpressumModal(false)}>
+          <div className="modal-content" onClick={e => e.stopPropagation()}>
+            <h2>Impressum</h2>
+            
+            <div className="impressum-section">
+              <h3>Angaben gemäß § 5 TMG</h3>
+              <p>
+                SportPass<br />
+                Ein Schulprojekt des BG/BRG Gleisdorf<br />
+                Doktor-Hermann-Hornung-Gasse 29<br />
+                8200 Gleisdorf<br />
+                Österreich
+              </p>
+            </div>
+            
+            <div className="impressum-section">
+              <h3>Kontakt</h3>
+              <p>
+                E-Mail: sportpass146@gmail.com<br />
+                Telefon: +43 (0) 664 920 2893
+              </p>
+            </div>
+            
+            <div className="impressum-section">
+              <h3>Vertreten durch</h3>
+              <p>
+                Christian Lorger<br />
+                Schüler des BG/BRG Gleisdorf
+              </p>
+            </div>
+            
+            <div className="impressum-section">
+              <h3>Über das Projekt</h3>
+              <p>
+                SportPass ist ein Schulprojekt, das im Rahmen des Unterrichts am BG/BRG Gleisdorf entwickelt wurde. 
+                Das Projekt zielt darauf ab, Schülerinnen und Schüler zu mehr sportlicher Aktivität zu motivieren 
+                und die Schulgemeinschaft durch gemeinsame sportliche Herausforderungen zu stärken.
+              </p>
+            </div>
+            
+            <div className="impressum-section">
+              <h3>Haftungsausschluss</h3>
+              <p>
+                Die Inhalte unserer Seiten wurden mit größter Sorgfalt erstellt. Für die Richtigkeit, 
+                Vollständigkeit und Aktualität der Inhalte können wir jedoch keine Gewähr übernehmen. 
+                Dies ist ein Schulprojekt und dient primär der Förderung der sportlichen Aktivität 
+                innerhalb der Schulgemeinschaft.
+              </p>
+            </div>
+            
+            <button className="modal-close" onClick={() => setShowImpressumModal(false)}>
               Schließen
             </button>
           </div>
