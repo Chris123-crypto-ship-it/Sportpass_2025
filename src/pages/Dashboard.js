@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useTasks } from '../context/TaskContext';
 import { FaTrophy, FaRunning, FaDumbbell, FaRunning as FaFlexibility, FaCalendarCheck, FaMedal, FaUserCircle, FaInfoCircle } from 'react-icons/fa';
@@ -11,54 +11,32 @@ ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, T
 
 const Dashboard = () => {
   const { user } = useAuth();
-  const { tasks, submissions, archive } = useTasks();
+  const { tasks, submissions, userStatsSubmissions, fetchUserStatsSubmissions, fetchTasks, loadingStats } = useTasks();
+
+  // Daten beim Mounten laden
+  useEffect(() => {
+    fetchTasks();
+    fetchUserStatsSubmissions();
+  }, [fetchTasks, fetchUserStatsSubmissions]);
 
   // Lade-Status prüfen
-  const isLoading = !user || !tasks || !submissions;
+  const isLoading = loadingStats || !tasks;
 
   // Berechne Statistiken
   const stats = useMemo(() => {
-    if (!archive || !tasks) return null;
+    if (isLoading || !userStatsSubmissions) return null;
 
-    const approvedSubmissions = archive.filter(
-      sub => sub.status === 'approved' && sub.user_email === user?.email
-    );
+    const approvedSubmissions = userStatsSubmissions;
 
     const totalPoints = approvedSubmissions.reduce((sum, sub) => {
-      // Versuche die Punkte aus den Submission-Details zu holen
-      let points = 0;
-      try {
-        const details = typeof sub.details === 'string' 
-          ? JSON.parse(sub.details) 
-          : sub.details;
-        
-        // Verwende die berechneten Punkte aus den Details
-        points = details?.task_points || details?.calculated_points || 0;
-      } catch (e) {
-        console.error('Fehler beim Parsen der Submission-Details:', e);
-        const task = tasks.find(t => t.id === sub.task_id);
-        points = task?.points || 0;
-      }
-      return sum + points;
+      return sum + (sub.calculated_points || 0);
     }, 0);
 
     const categoryStats = approvedSubmissions.reduce((acc, sub) => {
       const task = tasks.find(t => t.id === sub.task_id);
       const category = task?.category || 'Sonstige';
+      const points = sub.calculated_points || 0;
       
-      // Punkte aus den Details holen
-      let points = 0;
-      try {
-        const details = typeof sub.details === 'string' 
-          ? JSON.parse(sub.details) 
-          : sub.details;
-        points = details?.task_points || details?.calculated_points || 0;
-      } catch (e) {
-        console.error('Fehler beim Parsen der Submission-Details:', e);
-        points = task?.points || 0;
-      }
-      
-      // Summiere die Punkte pro Kategorie
       acc[category] = (acc[category] || 0) + points;
       return acc;
     }, {});
@@ -68,17 +46,7 @@ const Dashboard = () => {
       .slice(0, 5)
       .map(sub => {
         const task = tasks.find(t => t.id === sub.task_id);
-        let points = 0;
-        
-        try {
-          const details = typeof sub.details === 'string' 
-            ? JSON.parse(sub.details) 
-            : sub.details;
-          points = details?.task_points || details?.calculated_points || 0;
-        } catch (e) {
-          console.error('Fehler beim Parsen der Submission-Details:', e);
-          points = task?.points || 0;
-        }
+        const points = sub.calculated_points || 0;
 
         return {
           title: task?.title || 'Unbekannte Aufgabe',
@@ -93,11 +61,11 @@ const Dashboard = () => {
       categoryStats,
       recentActivity
     };
-  }, [archive, tasks, user]);
+  }, [isLoading, userStatsSubmissions, tasks]);
 
   // Diagrammdaten vorbereiten
   const chartData = useMemo(() => {
-    if (!archive || !tasks) return null;
+    if (isLoading || !userStatsSubmissions) return null;
 
     const last7Days = [...Array(7)].map((_, i) => {
       const date = new Date();
@@ -105,25 +73,13 @@ const Dashboard = () => {
       return date.toISOString().split('T')[0];
     }).reverse();
 
-    const approvedSubmissions = archive.filter(
-      sub => sub.status === 'approved' && sub.user_email === user?.email
-    );
+    const approvedSubmissions = userStatsSubmissions;
 
     const dailyPoints = last7Days.map(date => {
       return approvedSubmissions
         .filter(sub => sub.created_at.startsWith(date))
         .reduce((sum, sub) => {
-          let points = 0;
-          try {
-            const details = typeof sub.details === 'string' 
-              ? JSON.parse(sub.details) 
-              : sub.details;
-            points = details?.task_points || details?.calculated_points || 0;
-          } catch (e) {
-            console.error('Fehler beim Parsen der Submission-Details:', e);
-            const task = tasks.find(t => t.id === sub.task_id);
-            points = task?.points || 0;
-          }
+          const points = sub.calculated_points || 0;
           return sum + points;
         }, 0);
     });
@@ -141,7 +97,7 @@ const Dashboard = () => {
         }
       ]
     };
-  }, [archive, tasks, user]);
+  }, [isLoading, userStatsSubmissions]);
 
   const chartOptions = {
     responsive: true,

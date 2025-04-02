@@ -7,7 +7,7 @@ import './Stats.css';
 
 const Stats = () => {
   const { user } = useAuth();
-  const { archive, tasks } = useTasks();
+  const { tasks, userStatsSubmissions, fetchUserStatsSubmissions, fetchTasks, loadingStats } = useTasks();
   const [timeFilter, setTimeFilter] = useState('all');
   const [stats, setStats] = useState({
     totalPoints: 0,
@@ -16,53 +16,46 @@ const Stats = () => {
     categories: {},
     achievements: []
   });
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (!user || !archive || !tasks) return;
+    fetchTasks();
+    fetchUserStatsSubmissions();
+  }, [fetchTasks, fetchUserStatsSubmissions]);
 
-    // Zeitfilter anwenden
+  useEffect(() => {
+    if (loadingStats || !tasks || !userStatsSubmissions) {
+        setIsLoading(true);
+        return;
+    }
+    setIsLoading(false);
+
     const now = new Date();
     const msPerDay = 24 * 60 * 60 * 1000;
     
-    let filteredArchive = archive.filter(sub => 
-      sub.status === 'approved' && sub.user_email === user.email
-    );
+    let filteredSubmissions = userStatsSubmissions;
 
     if (timeFilter !== 'all') {
       const days = timeFilter === 'week' ? 7 : 30;
-      filteredArchive = filteredArchive.filter(sub => 
+      filteredSubmissions = filteredSubmissions.filter(sub => 
         (now - new Date(sub.created_at)) <= days * msPerDay
       );
     }
 
-    // Statistiken berechnen
-    const totalPoints = filteredArchive.reduce((sum, sub) => {
-      let points = 0;
-      try {
-        const details = typeof sub.details === 'string' 
-          ? JSON.parse(sub.details) 
-          : sub.details;
-        points = details?.task_points || details?.calculated_points || 0;
-      } catch (e) {
-        console.error('Fehler beim Parsen der Submission-Details:', e);
-        const task = tasks.find(t => t.id === sub.task_id);
-        points = task?.points || 0;
-      }
-      return sum + points;
+    const totalPoints = filteredSubmissions.reduce((sum, sub) => {
+      return sum + (sub.calculated_points || 0);
     }, 0);
 
-    const activities = filteredArchive.length;
+    const activities = filteredSubmissions.length;
 
-    // Aktive Tage berechnen
     const uniqueDays = new Set(
-      filteredArchive.map(sub => 
+      filteredSubmissions.map(sub => 
         new Date(sub.created_at).toISOString().split('T')[0]
       )
     );
     const activeDays = uniqueDays.size;
 
-    // Kategorien berechnen
-    const categories = filteredArchive.reduce((acc, sub) => {
+    const categories = filteredSubmissions.reduce((acc, sub) => {
       const task = tasks.find(t => t.id === sub.task_id);
       const category = task?.category || 'Sonstige';
       if (!acc[category]) {
@@ -73,28 +66,18 @@ const Stats = () => {
         };
       }
       
-      // Punkte aus den Details holen
-      let points = 0;
-      try {
-        const details = typeof sub.details === 'string' 
-          ? JSON.parse(sub.details) 
-          : sub.details;
-        points = details?.task_points || details?.calculated_points || 0;
-      } catch (e) {
-        console.error('Fehler beim Parsen der Submission-Details:', e);
-        points = task?.points || 0;
-      }
+      const points = sub.calculated_points || 0;
       
       acc[category].count++;
       acc[category].points += points;
       return acc;
     }, {});
 
-    // Achievements berechnen
-    const achievements = calculateAchievements(totalPoints, activities, activeDays);
+    const achievements = calculateAchievements(totalPoints, activities, activeDays, categories);
 
     setStats({ totalPoints, activities, activeDays, categories, achievements });
-  }, [user, archive, tasks, timeFilter]);
+
+  }, [user, userStatsSubmissions, tasks, timeFilter, loadingStats]);
 
   const getCategoryIcon = (category) => {
     switch (category.toLowerCase()) {
@@ -109,7 +92,7 @@ const Stats = () => {
     }
   };
 
-  const calculateAchievements = (points, activities, days) => {
+  const calculateAchievements = (points, activities, days, categories) => {
     return [
       {
         icon: '🏃',
@@ -133,10 +116,19 @@ const Stats = () => {
         icon: '⭐',
         name: 'All-Star',
         details: 'Alle Kategorien gemeistert',
-        unlocked: Object.keys(stats.categories).length >= 3
+        unlocked: Object.keys(categories).length >= 3
       }
     ];
   };
+
+  if (isLoading) {
+    return (
+      <div className="stats-container stats-loading">
+        <div className="loading-spinner"></div>
+        <p>Lade Statistiken...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="stats-container">
