@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext, useCallback } from 'react';
+import React, { createContext, useState, useContext, useCallback, useEffect } from 'react';
 import { useAuth } from './AuthContext';
 import axios from 'axios';
 import { toast } from 'react-toastify';
@@ -10,11 +10,11 @@ export const TaskProvider = ({ children }) => {
   const { user } = useAuth();
   const [tasks, setTasks] = useState([]);
   const [submissions, setSubmissions] = useState([]);
-  const [archive, setArchive] = useState([]);
+  const [pagination, setPagination] = useState(null);
+  const [selectedSubmission, setSelectedSubmission] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [loadingDetails, setLoadingDetails] = useState(false);
   const [error, setError] = useState(null);
-  const [selectedFile, setSelectedFile] = useState(null);
-  const [submissionDetails, setSubmissionDetails] = useState('');
 
   const getHeaders = useCallback(() => {
     const token = localStorage.getItem('token');
@@ -55,27 +55,58 @@ export const TaskProvider = ({ children }) => {
     }
   }, [checkToken, getHeaders]);
 
-  const fetchSubmissions = async () => {
+  const fetchSubmissions = async (page = 1, limit = 50) => {
     try {
       checkToken();
       setLoading(true);
       setError(null);
 
-      const response = await axios.get(`${config.API_URL}/submissions`, {
+      const response = await axios.get(`${config.API_URL}/submissions?page=${page}&limit=${limit}`, {
         headers: getHeaders()
       });
       
-      setSubmissions(response.data);
+      setSubmissions(response.data.submissions || []);
+      setPagination(response.data.pagination || null);
+
     } catch (error) {
-      console.error('Fehler beim Abrufen der Einsendungen:', error);
-      setError('Fehler beim Laden der Einsendungen');
+      console.error('Fehler beim Abrufen der Einsendungsliste:', error);
+      setError('Fehler beim Laden der Einsendungsliste');
       setSubmissions([]);
+      setPagination(null);
     } finally {
       setLoading(false);
     }
   };
 
+  const fetchSubmissionDetails = async (id) => {
+    if (!id) {
+      setSelectedSubmission(null);
+      return null;
+    }
+    try {
+      checkToken();
+      setLoadingDetails(true);
+      setError(null);
+      
+      const response = await axios.get(`${config.API_URL}/submissions/${id}`, {
+        headers: getHeaders()
+      });
+      
+      setSelectedSubmission(response.data);
+      return response.data;
+      
+    } catch (error) {
+      console.error(`Fehler beim Abrufen der Submission-Details (ID: ${id}):`, error);
+      setError('Fehler beim Laden der Submission-Details');
+      setSelectedSubmission(null);
+      return null;
+    } finally {
+      setLoadingDetails(false);
+    }
+  };
+
   const fetchArchive = useCallback(async () => {
+    console.warn('fetchArchive muss möglicherweise überarbeitet werden!');
     try {
       checkToken();
       setLoading(true);
@@ -85,15 +116,14 @@ export const TaskProvider = ({ children }) => {
         headers: getHeaders()
       });
       
-      // Nur genehmigte oder abgelehnte Submissions in das Archiv
       const archivedSubmissions = response.data.filter(sub => 
         ['approved', 'rejected'].includes(sub.status)
       );
-      setArchive(archivedSubmissions);
+      setSubmissions(archivedSubmissions);
     } catch (error) {
       console.error('Fehler beim Abrufen des Archivs:', error);
       setError('Fehler beim Laden des Archivs');
-      setArchive([]);
+      setSubmissions([]);
     } finally {
       setLoading(false);
     }
@@ -137,7 +167,7 @@ export const TaskProvider = ({ children }) => {
         headers: getHeaders()
       });
 
-      await fetchSubmissions();
+      await fetchSubmissions(pagination?.page || 1);
       return true;
     } catch (error) {
       console.error('Fehler beim Einreichen der Aufgabe:', error);
@@ -151,17 +181,14 @@ export const TaskProvider = ({ children }) => {
     try {
       checkToken();
       const response = await axios.post(`${config.API_URL}/approve-submission`, 
-        { 
-          submissionId, 
-          adminComment
-        },
-        {
-          headers: getHeaders()
-        }
+        { submissionId, adminComment },
+        { headers: getHeaders() }
       );
 
-      await fetchSubmissions();
-      await fetchArchive();
+      await fetchSubmissions(pagination?.page || 1);
+      if (selectedSubmission?.id === submissionId) {
+        setSelectedSubmission(prev => ({ ...prev, status: 'approved', admin_comment: adminComment }));
+      }
       return response.data;
     } catch (error) {
       console.error('Fehler bei der Genehmigung:', error);
@@ -173,17 +200,14 @@ export const TaskProvider = ({ children }) => {
     try {
       checkToken();
       const response = await axios.post(`${config.API_URL}/reject-submission`,
-        { 
-          submissionId, 
-          adminComment
-        },
-        {
-          headers: getHeaders()
-        }
+        { submissionId, adminComment },
+        { headers: getHeaders() }
       );
 
-      await fetchSubmissions();
-      await fetchArchive();
+      await fetchSubmissions(pagination?.page || 1);
+      if (selectedSubmission?.id === submissionId) {
+        setSelectedSubmission(prev => ({ ...prev, status: 'rejected', admin_comment: adminComment }));
+      }
       return response.data;
     } catch (error) {
       console.error('Fehler bei der Ablehnung:', error);
@@ -203,7 +227,7 @@ export const TaskProvider = ({ children }) => {
       });
 
       console.log('Einsendung erfolgreich gelöscht');
-      await fetchSubmissions();
+      await fetchSubmissions(pagination?.page || 1);
     } catch (error) {
       console.error('Fehler beim Löschen der Einsendung:', error);
       setError('Fehler beim Löschen der Einsendung');
@@ -252,7 +276,6 @@ export const TaskProvider = ({ children }) => {
         { headers: getHeaders() }
       );
 
-      // Aktualisiere die lokale Tasks-Liste
       setTasks(prevTasks => 
         prevTasks.map(task => 
           task.id === taskId 
@@ -274,11 +297,14 @@ export const TaskProvider = ({ children }) => {
   const contextValue = {
     tasks,
     submissions,
-    archive,
+    pagination,
+    selectedSubmission,
     loading,
+    loadingDetails,
     error,
     fetchTasks,
     fetchSubmissions,
+    fetchSubmissionDetails,
     fetchArchive,
     submitTask,
     handleApproveSubmission,
