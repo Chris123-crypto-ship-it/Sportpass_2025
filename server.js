@@ -1651,7 +1651,7 @@ app.get('/user-stats-submissions', authenticateToken, async (req, res) => {
         user_email,
         status,
         created_at,
-        details, // Wird für Punkteberechnung benötigt
+        details, 
         admin_comment
       `)
       .eq('user_email', userEmail)
