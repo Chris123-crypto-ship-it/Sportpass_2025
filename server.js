@@ -9,51 +9,23 @@ const nodemailer = require('nodemailer');
 
 const app = express();
 
-// CORS-Konfiguration
-const corsOptions = {
-  origin: [
-    'https://sportpass-2025.vercel.app',
-    'http://localhost:3000'  // Für lokale Entwicklung
-  ],
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
+// CORS vor allen anderen Middlewares aktivieren
+app.use(cors({
+  origin: 'https://sportpass-2025.vercel.app',
   credentials: true,
-  optionsSuccessStatus: 200
-};
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 
-app.use(cors(corsOptions));
-
-// Middleware zum Debuggen von CORS und Requests
-app.use((req, res, next) => {
-  const origin = req.headers.origin;
-  console.log('Request Origin:', origin);
-  console.log('Request Path:', req.path);
-  
-  if (corsOptions.origin.includes(origin)) {
-    res.header('Access-Control-Allow-Origin', origin);
-    console.log('CORS Header gesetzt für:', origin);
-  }
-  
-  res.header('Access-Control-Allow-Credentials', 'true');
-  res.header('Access-Control-Allow-Methods', 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  
-  if (req.method === 'OPTIONS') {
-    console.log('OPTIONS Request beantwortet');
-    return res.status(200).end();
-  }
-  next();
-});
-
-// Middleware zum Debuggen von Anfragen
-app.use((req, res, next) => {
-  console.log(`${new Date().toISOString()} | ${req.method} ${req.url} | Origin: ${req.headers.origin || 'keine'}`);
-  next();
-});
-
-// Erhöhe das Limit für JSON-Payloads
+// Body Parser
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
+
+// Debug-Logging für alle Requests
+app.use((req, res, next) => {
+  console.log(`${new Date().toISOString()} | ${req.method} ${req.path} | Origin: ${req.headers.origin || 'none'}`);
+  next();
+});
 
 // Supabase Client
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
@@ -603,11 +575,21 @@ app.post('/submit-task', authenticateToken, async (req, res) => {
 app.get('/submissions', async (req, res) => {
   try {
     console.log('Submissions Request erhalten');
+    
+    // Limit hinzufügen und nur notwendige Felder selektieren
     const { data: submissions, error } = await supabase
       .from('submissions')
       .select(`
-        *,
-        tasks:task_id (
+        id,
+        task_id,
+        user_email,
+        status,
+        details,
+        created_at,
+        admin_comment,
+        file_url,
+        attachment_url,
+        tasks (
           id,
           title,
           dynamic,
@@ -617,7 +599,8 @@ app.get('/submissions', async (req, res) => {
           expiration_date
         )
       `)
-      .order('created_at', { ascending: false });
+      .order('created_at', { ascending: false })
+      .limit(100); // Limit auf die letzten 100 Einträge
 
     if (error) {
       console.error('Fehler beim Abrufen der Einsendungen:', error);
