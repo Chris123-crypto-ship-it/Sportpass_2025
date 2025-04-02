@@ -15,6 +15,8 @@ export const TaskProvider = ({ children }) => {
   const [loading, setLoading] = useState(false);
   const [loadingDetails, setLoadingDetails] = useState(false);
   const [error, setError] = useState(null);
+  const [archivePagination, setArchivePagination] = useState(null);
+  const [archiveSubmissions, setArchiveSubmissions] = useState([]);
 
   const getHeaders = useCallback(() => {
     const token = localStorage.getItem('token');
@@ -105,29 +107,28 @@ export const TaskProvider = ({ children }) => {
     }
   };
 
-  const fetchArchive = useCallback(async () => {
-    console.warn('fetchArchive muss möglicherweise überarbeitet werden!');
+  const fetchArchivePage = async (page = 1, limit = 20) => {
     try {
       checkToken();
       setLoading(true);
       setError(null);
 
-      const response = await axios.get(`${config.API_URL}/submissions`, {
+      const response = await axios.get(`${config.API_URL}/submissions?page=${page}&limit=${limit}`, {
         headers: getHeaders()
       });
-      
-      const archivedSubmissions = response.data.filter(sub => 
-        ['approved', 'rejected'].includes(sub.status)
-      );
-      setSubmissions(archivedSubmissions);
+
+      setArchivePagination(response.data.pagination || null);
+      setArchiveSubmissions(response.data.submissions || []);
+
     } catch (error) {
-      console.error('Fehler beim Abrufen des Archivs:', error);
+      console.error('Fehler beim Abrufen der Archivseite:', error);
       setError('Fehler beim Laden des Archivs');
-      setSubmissions([]);
+      setArchiveSubmissions([]);
+      setArchivePagination(null);
     } finally {
       setLoading(false);
     }
-  }, [checkToken, getHeaders]);
+  };
 
   const submitTask = async (taskId, userEmail, file, details) => {
     try {
@@ -305,7 +306,9 @@ export const TaskProvider = ({ children }) => {
     fetchTasks,
     fetchSubmissions,
     fetchSubmissionDetails,
-    fetchArchive,
+    archiveSubmissions,
+    archivePagination,
+    fetchArchivePage,
     submitTask,
     handleApproveSubmission,
     handleRejectSubmission,
