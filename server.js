@@ -23,17 +23,23 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
-// Middleware zum Debuggen von CORS
+// Middleware zum Debuggen von CORS und Requests
 app.use((req, res, next) => {
   const origin = req.headers.origin;
+  console.log('Request Origin:', origin);
+  console.log('Request Path:', req.path);
+  
   if (corsOptions.origin.includes(origin)) {
     res.header('Access-Control-Allow-Origin', origin);
+    console.log('CORS Header gesetzt für:', origin);
   }
+  
   res.header('Access-Control-Allow-Credentials', 'true');
   res.header('Access-Control-Allow-Methods', 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS');
   res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   
   if (req.method === 'OPTIONS') {
+    console.log('OPTIONS Request beantwortet');
     return res.status(200).end();
   }
   next();
@@ -596,6 +602,7 @@ app.post('/submit-task', authenticateToken, async (req, res) => {
 // 🔹 Einsendungen abrufen
 app.get('/submissions', async (req, res) => {
   try {
+    console.log('Submissions Request erhalten');
     const { data: submissions, error } = await supabase
       .from('submissions')
       .select(`
@@ -614,44 +621,54 @@ app.get('/submissions', async (req, res) => {
 
     if (error) {
       console.error('Fehler beim Abrufen der Einsendungen:', error);
-      return res.status(500).json({ message: 'Fehler beim Abrufen der Einsendungen' });
+      return res.status(500).json({ 
+        message: 'Fehler beim Abrufen der Einsendungen', 
+        error: error.message 
+      });
     }
 
-    // Einsendungen mit berechneten Punkten anreichern
+    // Einsendungen verarbeiten
     const submissionsWithInfo = submissions.map(submission => {
       let submissionDetails;
       try {
         submissionDetails = typeof submission.details === 'string' 
           ? JSON.parse(submission.details) 
-          : submission.details;
+          : (submission.details || {});
       } catch (e) {
         console.error('Fehler beim Parsen der Submission-Details:', e);
         submissionDetails = {};
       }
 
-      // Punkte aus den gespeicherten Details verwenden
       const calculatedPoints = submissionDetails.task_points || 0;
       
-      const isExpired = submission.tasks.expiration_date && 
+      const isExpired = submission.tasks?.expiration_date && 
         new Date(submission.tasks.expiration_date) < new Date();
+
+      // Verwende direkt die URLs aus der submissions Tabelle
+      const fileUrl = submission.file_url || submission.attachment_url || null;
 
       return {
         ...submission,
         calculated_points: calculatedPoints,
         task_status: isExpired ? 'expired' : 'active',
+        file_url: fileUrl,
         submission_details: {
           ...submissionDetails,
-          task_type: submission.tasks.dynamic ? 'dynamic' : 'static',
-          base_points: submission.tasks.points,
-          multiplier: submission.tasks.multiplier
+          task_type: submission.tasks?.dynamic ? 'dynamic' : 'static',
+          base_points: submission.tasks?.points,
+          multiplier: submission.tasks?.multiplier
         }
       };
     });
 
+    console.log('Submissions erfolgreich abgerufen:', submissionsWithInfo.length);
     res.json(submissionsWithInfo);
   } catch (error) {
     console.error('Server-Fehler:', error);
-    res.status(500).json({ message: 'Interner Serverfehler' });
+    res.status(500).json({ 
+      message: 'Interner Serverfehler', 
+      error: error.message 
+    });
   }
 });
 
