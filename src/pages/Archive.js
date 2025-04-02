@@ -173,24 +173,6 @@ const Archive = () => {
               );
             })}
           </div>
-
-          {archivePagination && archivePagination.pages > 1 && (
-            <div className="pagination-controls archive-pagination">
-              <button
-                onClick={() => handlePageChange(currentPage - 1)}
-                disabled={currentPage <= 1 || loading}
-              >
-                <FaChevronLeft /> Zurück
-              </button>
-              <span>Seite {currentPage} von {archivePagination.pages}</span>
-              <button
-                onClick={() => handlePageChange(currentPage + 1)}
-                disabled={currentPage >= archivePagination.pages || loading}
-              >
-                Weiter <FaChevronRight />
-              </button>
-            </div>
-          )}
         </>
       )}
     </div>
