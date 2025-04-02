@@ -17,6 +17,8 @@ export const TaskProvider = ({ children }) => {
   const [error, setError] = useState(null);
   const [archivePagination, setArchivePagination] = useState(null);
   const [archiveSubmissions, setArchiveSubmissions] = useState([]);
+  const [userStatsSubmissions, setUserStatsSubmissions] = useState([]);
+  const [loadingStats, setLoadingStats] = useState(false);
 
   const getHeaders = useCallback(() => {
     const token = localStorage.getItem('token');
@@ -127,6 +129,27 @@ export const TaskProvider = ({ children }) => {
       setArchivePagination(null);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchUserStatsSubmissions = async () => {
+    if (!checkToken()) return;
+    try {
+      setLoadingStats(true);
+      setError(null);
+
+      const response = await axios.get(`${config.API_URL}/user-stats-submissions`, {
+        headers: getHeaders()
+      });
+
+      setUserStatsSubmissions(response.data || []);
+
+    } catch (error) {
+      console.error('Fehler beim Abrufen der Statistik-Submissions:', error);
+      setError('Fehler beim Laden der Statistikdaten');
+      setUserStatsSubmissions([]);
+    } finally {
+      setLoadingStats(false);
     }
   };
 
@@ -302,6 +325,7 @@ export const TaskProvider = ({ children }) => {
     selectedSubmission,
     loading,
     loadingDetails,
+    loadingStats,
     error,
     fetchTasks,
     fetchSubmissions,
@@ -309,6 +333,8 @@ export const TaskProvider = ({ children }) => {
     archiveSubmissions,
     archivePagination,
     fetchArchivePage,
+    userStatsSubmissions,
+    fetchUserStatsSubmissions,
     submitTask,
     handleApproveSubmission,
     handleRejectSubmission,
