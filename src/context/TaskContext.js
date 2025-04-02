@@ -132,7 +132,7 @@ export const TaskProvider = ({ children }) => {
     }
   };
 
-  const fetchUserStatsSubmissions = async () => {
+  const fetchUserStatsSubmissions = useCallback(async () => {
     if (!checkToken()) return;
     try {
       setLoadingStats(true);
@@ -151,7 +151,7 @@ export const TaskProvider = ({ children }) => {
     } finally {
       setLoadingStats(false);
     }
-  };
+  }, [checkToken, getHeaders]);
 
   const submitTask = async (taskId, userEmail, file, details) => {
     try {
