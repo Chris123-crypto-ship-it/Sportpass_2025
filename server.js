@@ -567,54 +567,41 @@ app.post('/submit-task', authenticateToken, async (req, res) => {
 
 // 🔹 Einsendungen abrufen
 app.get('/submissions', async (req, res) => {
-  console.log(`${new Date().toISOString()} | Submissions Request erhalten für Seite ${req.query.page || 1}`);
+  console.log(`${new Date().toISOString()} | Submissions Request erhalten (VEREINFACHT) für Seite ${req.query.page || 1}`);
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 50;
     const offset = (page - 1) * limit;
 
-    console.log(`${new Date().toISOString()} | Führe Datenbankabfrage aus (limit: ${limit}, offset: ${offset})...`);
+    console.log(`${new Date().toISOString()} | Führe SEHR VEREINFACHTE Datenbankabfrage aus (limit: ${limit}, offset: ${offset})...`);
     
-    // Optimierte Abfrage mit Pagination und Join
+    // SEHR VEREINFACHTE Abfrage: Kein Join, nur minimale Felder
     const { data: submissions, error, count } = await supabase
       .from('submissions')
       .select(`
-        id,
-        task_id,
+        id, 
+        task_id, 
         user_email,
         status,
-        details,
         created_at,
-        admin_comment,
-        file_url,
-        attachment_url,
-        tasks!inner (
-          id,
-          title,
-          dynamic,
-          dynamic_type,
-          multiplier,
-          points
-        )
+        admin_comment 
       `, { count: 'exact' })
       .order('created_at', { ascending: false })
       .range(offset, offset + limit - 1);
 
     if (error) {
-      console.error(`${new Date().toISOString()} | Fehler beim Abrufen der Einsendungen:`, error);
+      console.error(`${new Date().toISOString()} | Fehler beim Abrufen der Einsendungen (VEREINFACHT):`, error);
       return res.status(500).json({ 
         message: 'Fehler beim Abrufen der Einsendungen', 
         error: error.message 
       });
     }
     
-    console.log(`${new Date().toISOString()} | Datenbankabfrage erfolgreich (${submissions?.length || 0} Einträge). Sende Rohdaten...`);
+    console.log(`${new Date().toISOString()} | SEHR VEREINFACHTE Datenbankabfrage erfolgreich (${submissions?.length || 0} Einträge). Sende minimale Rohdaten...`);
 
-    // !! DATENVERARBEITUNG (map) TESTWEISE ENTFERNT !!
-    
-    // Sende rohe Submissions und Pagination-Informationen
+    // Sende minimale Rohdaten und Pagination-Informationen
     res.json({
-      submissions: submissions || [], // Sende rohe Daten
+      submissions: submissions || [], // Sende nur die Basis-Daten
       pagination: {
         total: count,
         page,
@@ -622,9 +609,9 @@ app.get('/submissions', async (req, res) => {
         pages: Math.ceil(count / limit)
       }
     });
-    console.log(`${new Date().toISOString()} | Rohe Antwort erfolgreich gesendet.`);
+    console.log(`${new Date().toISOString()} | Minimale Rohe Antwort erfolgreich gesendet.`);
   } catch (error) {
-    console.error(`${new Date().toISOString()} | Unerwarteter Server-Fehler:`, error);
+    console.error(`${new Date().toISOString()} | Unerwarteter Server-Fehler (VEREINFACHT):`, error);
     res.status(500).json({ 
       message: 'Interner Serverfehler', 
       error: error.message 
