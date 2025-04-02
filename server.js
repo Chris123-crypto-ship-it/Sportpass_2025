@@ -1637,6 +1637,62 @@ app.get('/ping', (req, res) => {
   res.status(200).json({ status: 'ok', message: 'Server is alive' });
 });
 
+// NEUER ENDPUNKT: Alle für Statistiken relevanten Submissions eines Benutzers laden
+app.get('/user-stats-submissions', authenticateToken, async (req, res) => {
+  const userEmail = req.user.email; // Email aus dem Token holen
+  console.log(`${new Date().toISOString()} | Stats-Submissions angefordert für User: ${userEmail}`);
+  try {
+    // Nur genehmigte Submissions holen, nur relevante Felder auswählen
+    const { data: submissions, error } = await supabase
+      .from('submissions')
+      .select(`
+        id,
+        task_id,
+        user_email,
+        status,
+        created_at,
+        details, // Wird für Punkteberechnung benötigt
+        admin_comment
+      `)
+      .eq('user_email', userEmail)
+      .eq('status', 'approved'); // Nur genehmigte für Gesamtpunkte etc.
+      // Optional: Nach Datum sortieren, falls benötigt
+      // .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error(`${new Date().toISOString()} | Fehler beim Abrufen der Stats-Submissions für ${userEmail}:`, error);
+      return res.status(500).json({ message: 'Fehler beim Abrufen der Statistikdaten', error: error.message });
+    }
+
+    console.log(`${new Date().toISOString()} | Stats-Submissions für ${userEmail} erfolgreich abgerufen (${submissions?.length || 0} Einträge).`);
+
+    // Optional: Hier könnten die Punkte bereits extrahiert werden, um das Frontend zu entlasten
+    const processedSubmissions = submissions.map(sub => {
+        let points = 0;
+        try {
+            const details = typeof sub.details === 'string' ? JSON.parse(sub.details) : (sub.details || {});
+            points = details.task_points || details.calculated_points || 0;
+        } catch (e) {
+            console.warn(`Warnung: Konnte Details für Submission ${sub.id} nicht parsen.`);
+            // Fallback vielleicht über Task-Daten? Hier nicht inkludiert, da Task-Join fehlt.
+        }
+        return {
+            id: sub.id,
+            task_id: sub.task_id,
+            created_at: sub.created_at,
+            calculated_points: points // Direkt die Punkte mitgeben
+            // Weitere benötigte Felder hier hinzufügen
+        };
+    });
+
+    res.json(processedSubmissions || []); // Verarbeitete Daten senden
+
+  } catch (error) {
+    console.error(`${new Date().toISOString()} | Unerwarteter Server-Fehler bei Stats-Submissions für ${userEmail}:`, error);
+    res.status(500).json({ message: 'Interner Serverfehler', error: error.message });
+  }
+});
+
 // NEUER ENDPUNKT: Einzelne Submission mit allen Details laden
 app.get('/submissions/:id', authenticateToken, async (req, res) => {
   const { id } = req.params;
