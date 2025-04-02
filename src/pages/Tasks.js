@@ -2,19 +2,35 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useTasks } from '../context/TaskContext';
 import { FaRunning, FaHeartbeat, FaDumbbell, FaMedal, FaFire, FaStar, 
-         FaUpload, FaFileImage, FaVideo, FaTrash, FaClock, FaCheck, FaTimes, FaFile, FaImage, FaCheckCircle, FaTimesCircle, FaUser, FaTag, FaFilter, FaInfoCircle } from 'react-icons/fa';
+         FaUpload, FaFileImage, FaVideo, FaTrash, FaClock, FaCheck, FaTimes, FaFile, FaImage, FaCheckCircle, FaTimesCircle, FaUser, FaTag, FaFilter, FaInfoCircle, FaEye, FaSpinner } from 'react-icons/fa';
 import { toast } from 'react-toastify';
 import '../styles/Tasks.css';
 
 const Tasks = () => {
   const { user } = useAuth();
-  const { tasks, submissions, fetchTasks, fetchSubmissions, submitTask, handleApproveSubmission, handleRejectSubmission, deleteTask, deleteSubmission } = useTasks();
+  const { 
+    tasks, 
+    submissions, 
+    pagination,
+    selectedSubmission,
+    loading: loadingTasks,
+    loadingDetails,
+    error, 
+    fetchTasks, 
+    fetchSubmissions, 
+    fetchSubmissionDetails,
+    submitTask, 
+    handleApproveSubmission, 
+    handleRejectSubmission, 
+    deleteTask, 
+    deleteSubmission 
+  } = useTasks();
   const [selectedFile, setSelectedFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
   const [currentTaskId, setCurrentTaskId] = useState(null);
   const [duration, setDuration] = useState('');
   const [message, setMessage] = useState('');
-  const [adminComment, setAdminComment] = useState('');
+  const [adminComment, setAdminComment] = useState({});
   const [filter, setFilter] = useState('all');
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [filteredTasks, setFilteredTasks] = useState([]);
@@ -23,7 +39,8 @@ const Tasks = () => {
   const fileInputRefs = useRef({});
   const [loading, setLoading] = useState(false);
   const [showInfoModal, setShowInfoModal] = useState(false);
-  const [submissionsLoaded, setSubmissionsLoaded] = useState(false);
+  const [viewingSubmissionId, setViewingSubmissionId] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
 
   const categories = [
     { value: 'all', label: 'Alle Kategorien' },
@@ -39,8 +56,7 @@ const Tasks = () => {
       setLoading(true);
       try {
         await fetchTasks();
-        await fetchSubmissions();
-        setSubmissionsLoaded(true);
+        await fetchSubmissions(currentPage);
       } catch (error) {
         console.error('Fehler beim Laden der Daten:', error);
         toast.error('Fehler beim Laden der Aufgaben und Einreichungen');
@@ -123,7 +139,7 @@ const Tasks = () => {
       
       handleRemoveFile(taskId);
       
-      await fetchSubmissions();
+      await fetchSubmissions(currentPage);
       
       setLoading(false);
       
@@ -304,10 +320,11 @@ const Tasks = () => {
 
     try {
       await deleteSubmission(submissionId);
-      await fetchSubmissions();
+      await fetchSubmissions(currentPage);
+      toast.success("Einsendung gelöscht.");
     } catch (error) {
       console.error('Fehler beim Löschen der Einsendung:', error);
-      alert('Fehler beim Löschen der Einsendung');
+      toast.error('Fehler beim Löschen der Einsendung');
     }
   };
 
@@ -362,6 +379,20 @@ const Tasks = () => {
     );
   };
 
+  const handleAdminCommentChange = (submissionId, value) => {
+    setAdminComment(prev => ({ ...prev, [submissionId]: value }));
+  };
+
+  const handleViewDetails = (submissionId) => {
+    if (viewingSubmissionId === submissionId) {
+      setViewingSubmissionId(null);
+      fetchSubmissionDetails(null);
+    } else {
+      setViewingSubmissionId(submissionId);
+      fetchSubmissionDetails(submissionId);
+    }
+  };
+
   const TaskCard = ({ task }) => {
     console.log('Task Data:', {
       expiration_date: task.expiration_date,
@@ -376,61 +407,51 @@ const Tasks = () => {
     const { submitTask, submissions } = useTasks();
     const isExpired = task.expiration_date && new Date(task.expiration_date) < new Date();
 
-    // Zähle die Einreichungen des Benutzers für diese Aufgabe
-    const userSubmissionsCount = submissions.filter(
-      s => s.task_id === task.id && 
-           s.user_email === user?.email && 
-           (s.status === 'approved' || s.status === 'pending')
+    const userSubmissionsForThisTask = submissions.filter(
+      s => s.task_id === task.id && s.user_email === user?.email
+    );
+    
+    const userSubmissionsCount = userSubmissionsForThisTask.filter(
+      s => s.status === 'approved' || s.status === 'pending'
     ).length;
-
-    // Prüfe, ob maximale Anzahl erreicht wurde
-    const hasReachedMaxSubmissions = task.max_submissions && userSubmissionsCount >= task.max_submissions;
 
     const handleSubmit = async () => {
       if (!user) {
-        alert('Bitte melde dich an, um eine Aufgabe einzureichen.');
+        toast.error('Bitte melde dich an.');
         return;
       }
-
       if (isExpired) {
-        alert('Diese Aufgabe ist bereits abgelaufen.');
-        return;
-      }
-
-      if (hasReachedMaxSubmissions) {
-        alert(`Du hast bereits die maximale Anzahl an Einreichungen (${task.max_submissions}) für diese Aufgabe erreicht.`);
+        toast.warn('Diese Aufgabe ist bereits abgelaufen.');
         return;
       }
 
       if (!selectedFile) {
-        alert('Bitte wähle eine Datei aus.');
+        toast.error('Bitte wähle eine Datei aus.');
         return;
       }
-
       if (task.dynamic && (!dynamicValue || parseFloat(dynamicValue) <= 0)) {
-        alert(`Bitte gib einen Wert für ${task.dynamic_type === 'minutes' ? 'Minuten' : 'Kilometer'} ein.`);
+        toast.error(`Bitte gib einen Wert für ${task.dynamic_type === 'minutes' ? 'Minuten' : 'Kilometer'} ein.`);
         return;
       }
 
       try {
         setIsSubmitting(true);
-
         const details = task.dynamic 
           ? {
               dynamic_value: dynamicValue,
               dynamic_type: task.dynamic_type,
-              calculated_points: Math.round(parseFloat(dynamicValue) * task.multiplier)
             }
           : {};
 
         await submitTask(task.id, user.email, selectedFile, details);
-
         setSelectedFile(null);
         setDynamicValue('');
-        alert('Aufgabe erfolgreich eingereicht!');
+        toast.success('Aufgabe erfolgreich eingereicht!');
+        fetchSubmissions(1);
       } catch (error) {
         console.error('Fehler beim Einreichen:', error);
-        alert('Fehler beim Einreichen der Aufgabe. Bitte versuche es erneut.');
+        const errorMsg = error.response?.data?.message || 'Fehler beim Einreichen der Aufgabe.';
+        toast.error(errorMsg);
       } finally {
         setIsSubmitting(false);
       }
@@ -470,7 +491,7 @@ const Tasks = () => {
     };
 
     return (
-      <div className="task-card">
+      <div className={`task-card ${isExpired ? 'expired' : ''}`}>
         <div className="task-header">
           <h3 className="task-title">{task.title}</h3>
           <div className="task-meta-info">
@@ -499,7 +520,7 @@ const Tasks = () => {
             </div>
 
             {task.expiration_date && (
-              <div className="expiration">
+              <div className={`expiration ${isExpired ? 'expired-text' : ''}`}>
                 <span>
                   {new Date(task.expiration_date) < new Date() 
                     ? 'Abgelaufen am: ' 
@@ -536,7 +557,7 @@ const Tasks = () => {
           
           {task.max_submissions && (
             <div className="submission-count-info">
-              <span className={hasReachedMaxSubmissions ? 'submissions-limit-reached' : ''}>
+              <span className={userSubmissionsCount >= task.max_submissions ? 'submissions-limit-reached' : ''}>
                 Einreichungen: {userSubmissionsCount} / {task.max_submissions}
               </span>
             </div>
@@ -556,7 +577,7 @@ const Tasks = () => {
                   }
                 }}
                 style={{ display: 'none' }}
-                disabled={hasReachedMaxSubmissions}
+                disabled={userSubmissionsCount >= task.max_submissions || isSubmitting}
               />
               {!selectedFile ? (
                 <div className="upload-placeholder">
@@ -588,13 +609,30 @@ const Tasks = () => {
           <button
             className="submit-button"
             onClick={handleSubmit}
-            disabled={!selectedFile || (task.dynamic && !dynamicValue) || hasReachedMaxSubmissions || isSubmitting}
+            disabled={!selectedFile || (task.dynamic && !dynamicValue) || userSubmissionsCount >= task.max_submissions || isSubmitting}
           >
-            {hasReachedMaxSubmissions ? 'Maximale Anzahl erreicht' : 'Aufgabe einreichen'}
+            {isSubmitting ? <FaSpinner className="spin" /> : (userSubmissionsCount >= task.max_submissions ? 'Maximale Anzahl erreicht' : 'Aufgabe einreichen')}
           </button>
         </div>
       </div>
     );
+  };
+
+  const renderAttachmentPreview = (submissionData) => {
+    if (!submissionData || !submissionData.file_url) return <div className="no-attachment">Kein Anhang vorhanden.</div>;
+    
+    const url = submissionData.file_url;
+    if (url.startsWith('data:image')) {
+      return <img src={url} alt="Anhang" className="admin-preview-image" />;
+    } else if (url.startsWith('data:video')) {
+      return (
+        <video controls className="admin-preview-video">
+          <source src={url} /> Ihr Browser unterstützt das Video nicht.
+        </video>
+      );
+    } else {
+      return <div className="no-attachment"><FaFile /> Anhang vorhanden (Typ unbekannt)</div>;
+    }
   };
 
   return (
@@ -648,7 +686,7 @@ const Tasks = () => {
         </div>
       </div>
 
-      {loading || !submissionsLoaded ? (
+      {loading || !submissions ? (
         <div className="loading-container">
           <div className="spinner"></div>
           <p className="loading-text">Aufgaben und Einreichungsdaten werden geladen...</p>
@@ -714,70 +752,63 @@ const Tasks = () => {
                   .filter(s => s.status === 'pending')
                   .map(submission => {
                     const task = tasks.find(t => t.id === submission.task_id);
+                    const isViewing = viewingSubmissionId === submission.id;
+                    const currentAdminComment = adminComment[submission.id] || '';
+                    
+                    const detailsData = isViewing ? selectedSubmission : null;
+                    
                     return (
-                      <div key={submission.id} className="admin-submission-card">
+                      <div key={submission.id} className={`admin-submission-card ${isViewing ? 'details-visible' : ''}`}>
                         <div className="admin-submission-header">
                           <h3>{task?.title}</h3>
                           <div className="admin-submission-info">
                             <span className="admin-user">
                               <FaUser /> {submission.user_email}
                             </span>
-                            <span className="admin-points">
-                              {task?.dynamic ? (
-                                `${submission.submission_details?.task_points || 0} Punkte (${task.multiplier} pro ${task.dynamic_type})`
-                              ) : (
-                                `${task?.points || 0} Punkte`
-                              )}
-                            </span>
                           </div>
                         </div>
 
-                        <div className="admin-submission-content">
-                          {submission.file_url && (
-                            <div className="admin-file-preview">
-                              {submission.file_url.match(/\.(jpg|jpeg|png|gif)$/i) || 
-                              submission.file_url.startsWith('data:image') ? (
-                                <img 
-                                  src={submission.file_url} 
-                                  alt="Eingereichte Datei"
-                                  className="admin-preview-image"
-                                />
-                              ) : (
-                                <video controls className="admin-preview-video">
-                                  <source src={submission.file_url} type="video/mp4" />
-                                  Ihr Browser unterstützt keine Videowiedergabe.
-                                </video>
-                              )}
-                            </div>
-                          )}
+                        <button onClick={() => handleViewDetails(submission.id)} className="view-details-button">
+                          {loadingDetails && isViewing ? <FaSpinner className="spin" /> : <FaEye />}
+                          {isViewing ? ' Details verbergen' : ' Details anzeigen'}
+                        </button>
 
-                          <div className="admin-submission-details">
-                            <textarea
-                              className="admin-comment"
-                              placeholder="Admin-Kommentar..."
-                              value={submission.id === activeSubmissionId ? adminComment : ''}
-                              onChange={(e) => {
-                                setAdminComment(e.target.value);
-                                setActiveSubmissionId(submission.id);
-                              }}
-                            />
-
-                            <div className="admin-actions">
-                              <button 
-                                className="approve-button"
-                                onClick={() => handleApproveSubmission(submission.id, adminComment)}
-                              >
-                                Genehmigen
-                              </button>
-                              <button 
-                                className="reject-button"
-                                onClick={() => handleRejectSubmission(submission.id, adminComment)}
-                              >
-                                Ablehnen
-                              </button>
-                            </div>
+                        {isViewing && (
+                          <div className="admin-submission-content">
+                            {loadingDetails ? (
+                              <div className="loading-details">Details werden geladen... <FaSpinner className="spin"/></div>
+                            ) : !selectedSubmission || selectedSubmission.id !== submission.id ? (
+                              <div className="error-details">Details konnten nicht geladen werden.</div>
+                            ) : (
+                              <> 
+                                <div className="admin-file-preview">
+                                  {renderAttachmentPreview(selectedSubmission)}
+                                </div>
+                                
+                                <div className="admin-submission-details">
+                                  <div className="admin-points-details"> 
+                                    <strong>Punkte: </strong>
+                                    {selectedSubmission.calculated_points !== undefined 
+                                      ? `${selectedSubmission.calculated_points}`
+                                      : (task?.dynamic ? 'Dynamisch' : `${task?.points || '?'}`) 
+                                    }
+                                    {task?.dynamic && ` (${task.multiplier} / ${task.dynamic_type === 'minutes' ? 'Min' : 'Km'})`}
+                                  </div>
+                                  <textarea
+                                    className="admin-comment"
+                                    placeholder="Admin-Kommentar..."
+                                    value={currentAdminComment}
+                                    onChange={(e) => handleAdminCommentChange(submission.id, e.target.value)}
+                                  />
+                                  <div className="admin-actions">
+                                    <button className="approve-button" onClick={() => handleApproveSubmission(submission.id, currentAdminComment)}><FaCheckCircle /> Genehmigen</button>
+                                    <button className="reject-button" onClick={() => handleRejectSubmission(submission.id, currentAdminComment)}><FaTimesCircle /> Ablehnen</button>
+                                  </div>
+                                </div>
+                              </> 
+                            )}
                           </div>
-                        </div>
+                        )}
                       </div>
                     );
                   })}
