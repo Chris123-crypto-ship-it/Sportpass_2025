@@ -96,6 +96,7 @@ const Archive = () => {
         <FaInfoCircle />
         <div className="info-text">
           Hier findest du eine Übersicht deiner genehmigten oder abgelehnten Einsendungen.
+          <strong>Beachte:</strong> Einträge werden nach 7 Tagen automatisch aus dieser Ansicht entfernt, deine erreichten Punkte bleiben jedoch bestehen.
         </div>
       </div>
       <h1 className="archive-header">Mein Archiv</h1>
