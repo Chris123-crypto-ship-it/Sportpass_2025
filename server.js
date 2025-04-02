@@ -583,7 +583,7 @@ app.get('/submissions', async (req, res) => {
         task_id,
         user_email,
         status,
-        details, // Vorerst Details mitladen
+        details,
         created_at,
         admin_comment,
         file_url,
