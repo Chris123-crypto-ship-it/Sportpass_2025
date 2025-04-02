@@ -9,46 +9,17 @@ const nodemailer = require('nodemailer');
 
 const app = express();
 
-// CORS-Konfiguration - MUSS VOR ALLEN ANDEREN MIDDLEWARES STEHEN
-app.use((req, res, next) => {
-  // Debug-Logging
-  console.log('Eingehende Anfrage:');
-  console.log('Method:', req.method);
-  console.log('Path:', req.path);
-  console.log('Origin:', req.headers.origin);
-  console.log('Headers:', req.headers);
+// Aktiviere CORS für alle Routen
+app.use(cors({
+  origin: 'https://sportpass-2025.vercel.app',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
+}));
 
-  // CORS-Header setzen
-  res.header('Access-Control-Allow-Origin', 'https://sportpass-2025.vercel.app');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
-  res.header('Access-Control-Allow-Credentials', 'true');
-
-  // Debug-Logging für gesetzte Header
-  console.log('Gesetzte CORS-Header:');
-  console.log('Access-Control-Allow-Origin:', res.getHeader('Access-Control-Allow-Origin'));
-  console.log('Access-Control-Allow-Methods:', res.getHeader('Access-Control-Allow-Methods'));
-  console.log('Access-Control-Allow-Headers:', res.getHeader('Access-Control-Allow-Headers'));
-  console.log('Access-Control-Allow-Credentials:', res.getHeader('Access-Control-Allow-Credentials'));
-
-  // Handle OPTIONS requests
-  if (req.method === 'OPTIONS') {
-    console.log('OPTIONS Request - Sende 200 OK');
-    return res.status(200).end();
-  }
-
-  next();
-});
-
-// Body Parser Middleware
+// Body Parser
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
-
-// Request Logging
-app.use((req, res, next) => {
-  console.log(`${new Date().toISOString()} | ${req.method} ${req.path} | Origin: ${req.headers.origin || 'none'}`);
-  next();
-});
 
 // Supabase Client
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
@@ -596,15 +567,15 @@ app.post('/submit-task', authenticateToken, async (req, res) => {
 
 // 🔹 Einsendungen abrufen
 app.get('/submissions', async (req, res) => {
+  console.log(`${new Date().toISOString()} | Submissions Request erhalten für Seite ${req.query.page || 1}`);
   try {
-    console.log('Submissions Request erhalten');
-    
-    // Basis-Query mit Pagination
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 50;
     const offset = (page - 1) * limit;
 
-    // Optimierte Abfrage mit Pagination
+    console.log(`${new Date().toISOString()} | Führe Datenbankabfrage aus (limit: ${limit}, offset: ${offset})...`);
+    
+    // Optimierte Abfrage mit Pagination und Join
     const { data: submissions, error, count } = await supabase
       .from('submissions')
       .select(`
@@ -630,12 +601,14 @@ app.get('/submissions', async (req, res) => {
       .range(offset, offset + limit - 1);
 
     if (error) {
-      console.error('Fehler beim Abrufen der Einsendungen:', error);
+      console.error(`${new Date().toISOString()} | Fehler beim Abrufen der Einsendungen:`, error);
       return res.status(500).json({ 
         message: 'Fehler beim Abrufen der Einsendungen', 
         error: error.message 
       });
     }
+    
+    console.log(`${new Date().toISOString()} | Datenbankabfrage erfolgreich (${submissions?.length || 0} Einträge). Verarbeite Daten...`);
 
     // Einsendungen verarbeiten
     const submissionsWithInfo = submissions.map(submission => {
@@ -645,8 +618,8 @@ app.get('/submissions', async (req, res) => {
           ? JSON.parse(submission.details) 
           : (submission.details || {});
       } catch (e) {
-        console.error('Fehler beim Parsen der Submission-Details:', e);
-        submissionDetails = {};
+        console.error(`${new Date().toISOString()} | Fehler beim Parsen der Submission-Details (ID: ${submission.id}):`, e);
+        submissionDetails = {}; // Fallback auf leeres Objekt
       }
 
       const calculatedPoints = submissionDetails.task_points || 0;
@@ -654,7 +627,7 @@ app.get('/submissions', async (req, res) => {
       return {
         ...submission,
         calculated_points: calculatedPoints,
-        task_status: 'active',
+        task_status: 'active', // Vereinfacht, da expiration_date entfernt wurde
         file_url: submission.file_url || submission.attachment_url || null,
         submission_details: {
           ...submissionDetails,
@@ -665,7 +638,7 @@ app.get('/submissions', async (req, res) => {
       };
     });
 
-    console.log('Submissions erfolgreich abgerufen:', submissionsWithInfo.length);
+    console.log(`${new Date().toISOString()} | Datenverarbeitung abgeschlossen. Sende Antwort...`);
     
     // Sende Pagination-Informationen mit
     res.json({
@@ -677,8 +650,9 @@ app.get('/submissions', async (req, res) => {
         pages: Math.ceil(count / limit)
       }
     });
+    console.log(`${new Date().toISOString()} | Antwort erfolgreich gesendet.`);
   } catch (error) {
-    console.error('Server-Fehler:', error);
+    console.error(`${new Date().toISOString()} | Unerwarteter Server-Fehler:`, error);
     res.status(500).json({ 
       message: 'Interner Serverfehler', 
       error: error.message 
