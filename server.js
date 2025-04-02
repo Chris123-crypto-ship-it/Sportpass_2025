@@ -1637,6 +1637,73 @@ app.get('/ping', (req, res) => {
   res.status(200).json({ status: 'ok', message: 'Server is alive' });
 });
 
+// NEUER ENDPUNKT: Einzelne Submission mit allen Details laden
+app.get('/submissions/:id', authenticateToken, async (req, res) => {
+  const { id } = req.params;
+  console.log(`${new Date().toISOString()} | Einzelne Submission Details angefordert (ID: ${id})`);
+  try {
+    const { data: submission, error } = await supabase
+      .from('submissions')
+      .select(`
+        *,
+        tasks (
+          id,
+          title,
+          dynamic,
+          dynamic_type,
+          multiplier,
+          points,
+          description,
+          category,
+          difficulty,
+          expiration_date
+        )
+      `)
+      .eq('id', id)
+      .maybeSingle(); // Gibt null zurück, wenn nicht gefunden, statt Fehler
+
+    if (error) {
+      console.error(`${new Date().toISOString()} | Fehler beim Abrufen der Submission-Details (ID: ${id}):`, error);
+      return res.status(500).json({ message: 'Fehler beim Abrufen der Submission-Details', error: error.message });
+    }
+
+    if (!submission) {
+      console.log(`${new Date().toISOString()} | Submission nicht gefunden (ID: ${id})`);
+      return res.status(404).json({ message: 'Submission nicht gefunden' });
+    }
+
+    console.log(`${new Date().toISOString()} | Submission-Details erfolgreich abgerufen (ID: ${id})`);
+    
+    // Parse details JSON sicher
+    let submissionDetails;
+    try {
+      submissionDetails = typeof submission.details === 'string' 
+        ? JSON.parse(submission.details) 
+        : (submission.details || {});
+    } catch (e) {
+      console.error(`${new Date().toISOString()} | Fehler beim Parsen der Details (ID: ${id}):`, e);
+      submissionDetails = {}; // Fallback
+    }
+    
+    // Berechne Punkte (falls nötig, hier oder im Frontend)
+    const calculatedPoints = submissionDetails.task_points || 0; 
+
+    // Kombiniere die Daten für die Antwort
+    const responseData = {
+      ...submission,
+      details: submissionDetails, // Geparsed
+      calculated_points: calculatedPoints,
+      // Füge hier ggf. weitere berechnete Felder hinzu
+    };
+
+    res.json(responseData);
+
+  } catch (error) {
+    console.error(`${new Date().toISOString()} | Unerwarteter Server-Fehler bei Submission-Details (ID: ${id}):`, error);
+    res.status(500).json({ message: 'Interner Serverfehler', error: error.message });
+  }
+});
+
 // 🔹 Server starten
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, async () => {
