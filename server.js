@@ -583,7 +583,7 @@ app.get('/submissions', async (req, res) => {
         task_id,
         user_email,
         status,
-        details,
+        details, // Vorerst Details mitladen
         created_at,
         admin_comment,
         file_url,
@@ -608,41 +608,13 @@ app.get('/submissions', async (req, res) => {
       });
     }
     
-    console.log(`${new Date().toISOString()} | Datenbankabfrage erfolgreich (${submissions?.length || 0} Einträge). Verarbeite Daten...`);
+    console.log(`${new Date().toISOString()} | Datenbankabfrage erfolgreich (${submissions?.length || 0} Einträge). Sende Rohdaten...`);
 
-    // Einsendungen verarbeiten
-    const submissionsWithInfo = submissions.map(submission => {
-      let submissionDetails;
-      try {
-        submissionDetails = typeof submission.details === 'string' 
-          ? JSON.parse(submission.details) 
-          : (submission.details || {});
-      } catch (e) {
-        console.error(`${new Date().toISOString()} | Fehler beim Parsen der Submission-Details (ID: ${submission.id}):`, e);
-        submissionDetails = {}; // Fallback auf leeres Objekt
-      }
-
-      const calculatedPoints = submissionDetails.task_points || 0;
-
-      return {
-        ...submission,
-        calculated_points: calculatedPoints,
-        task_status: 'active', // Vereinfacht, da expiration_date entfernt wurde
-        file_url: submission.file_url || submission.attachment_url || null,
-        submission_details: {
-          ...submissionDetails,
-          task_type: submission.tasks?.dynamic ? 'dynamic' : 'static',
-          base_points: submission.tasks?.points,
-          multiplier: submission.tasks?.multiplier
-        }
-      };
-    });
-
-    console.log(`${new Date().toISOString()} | Datenverarbeitung abgeschlossen. Sende Antwort...`);
+    // !! DATENVERARBEITUNG (map) TESTWEISE ENTFERNT !!
     
-    // Sende Pagination-Informationen mit
+    // Sende rohe Submissions und Pagination-Informationen
     res.json({
-      submissions: submissionsWithInfo,
+      submissions: submissions || [], // Sende rohe Daten
       pagination: {
         total: count,
         page,
@@ -650,7 +622,7 @@ app.get('/submissions', async (req, res) => {
         pages: Math.ceil(count / limit)
       }
     });
-    console.log(`${new Date().toISOString()} | Antwort erfolgreich gesendet.`);
+    console.log(`${new Date().toISOString()} | Rohe Antwort erfolgreich gesendet.`);
   } catch (error) {
     console.error(`${new Date().toISOString()} | Unerwarteter Server-Fehler:`, error);
     res.status(500).json({ 
