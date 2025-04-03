@@ -1,34 +1,30 @@
 import React, { useEffect, useState } from 'react';
 import { useTasks } from '../context/TaskContext';
 import { useAuth } from '../context/AuthContext';
-import { FaCheckCircle, FaTimesCircle, FaFile, FaImage, FaVideo, FaUser, FaClock, FaInfoCircle, FaEye, FaSpinner, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
+import { FaCheckCircle, FaTimesCircle, FaFile, FaImage, FaVideo, FaClock, FaInfoCircle, FaEye, FaSpinner } from 'react-icons/fa';
 import './Archive.css';
 
 const Archive = () => {
   const {
-    tasks,
-    fetchTasks,
-    archiveSubmissions,
-    archivePagination,
-    fetchArchivePage,
+    allArchiveSubmissions,
+    fetchAllArchiveSubmissions,
     selectedSubmission,
     fetchSubmissionDetails,
-    loading,
+    loadingArchive,
     loadingDetails,
     error
   } = useTasks();
   const { user } = useAuth();
-  const [currentPage, setCurrentPage] = useState(1);
   const [viewingSubmissionId, setViewingSubmissionId] = useState(null);
 
   useEffect(() => {
-    fetchTasks('archive');
-    fetchArchivePage(currentPage);
-  }, [fetchTasks, fetchArchivePage, currentPage]);
+    if (user) {
+      fetchAllArchiveSubmissions();
+    }
+  }, [user, fetchAllArchiveSubmissions]);
 
-  const getTaskTitle = (taskId) => {
-    const task = tasks.find(t => t.id === taskId);
-    return task ? task.title : 'Unbekannte Aufgabe';
+  const getTaskTitle = (submission) => {
+    return submission.task_title || 'Unbekannte Aufgabe';
   };
 
   const formatDate = (dateString) => {
@@ -70,18 +66,11 @@ const Archive = () => {
     return <div className="archive-file-preview-other"><FaFile /> Anhang</div>;
   };
 
-  const userFilteredArchive = archiveSubmissions.filter(submission =>
-    submission.user_email === user?.email &&
-    ['approved', 'rejected'].includes(submission.status)
+  const userFilteredArchive = allArchiveSubmissions.filter(submission =>
+    submission.user_email === user?.email
   );
 
-  const handlePageChange = (newPage) => {
-    if (newPage >= 1 && newPage <= (archivePagination?.pages || 1)) {
-      setCurrentPage(newPage);
-    }
-  };
-
-  if (error && !archiveSubmissions.length) {
+  if (error && !userFilteredArchive.length) {
     return (
       <div className="archive-container">
         <h1 className="archive-header">Fehler</h1>
@@ -101,10 +90,10 @@ const Archive = () => {
       </div>
       <h1 className="archive-header">Mein Archiv</h1>
 
-      {loading && !archiveSubmissions.length ? (
+      {loadingArchive ? (
         <div className="loading-container"><div className="spinner"></div><p>Archiv wird geladen...</p></div>
       ) : !userFilteredArchive || userFilteredArchive.length === 0 ? (
-        <div className="no-archive">Keine archivierten Einsendungen auf dieser Seite gefunden.</div>
+        <div className="no-archive">Keine archivierten Einsendungen gefunden.</div>
       ) : (
         <>
           <div className="archive-grid">
@@ -116,7 +105,7 @@ const Archive = () => {
                 <div key={submission.id} className={`archive-card ${isViewing ? 'details-visible' : ''}`}>
                   <div className="archive-card-header">
                     <h2 className="archive-task-title">
-                      {getTaskTitle(submission.task_id)}
+                      {getTaskTitle(submission)}
                     </h2>
                     <span className={`archive-status ${submission.status}`}>
                       {submission.status === 'approved' ? <FaCheckCircle /> : <FaTimesCircle />}
@@ -157,7 +146,7 @@ const Archive = () => {
                               <h4>Zusätzliche Informationen:</h4>
                               <ul>
                                 {Object.entries(detailsData.details).map(([key, value]) => {
-                                  if (!['task_points', 'task_type', 'base_points'].includes(key) && value !== null && value !== '') {
+                                  if (!['task_points', 'task_type', 'base_points', 'calculated_points', 'dynamic_value', 'multiplier'].includes(key) && value !== null && value !== '') {
                                     return <li key={key}><strong>{key.replace(/_/g, ' ')}:</strong> {String(value)}</li>;
                                   }
                                   return null;
