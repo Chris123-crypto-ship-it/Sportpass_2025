@@ -1760,6 +1760,90 @@ app.get('/submissions/:id', authenticateToken, async (req, res) => {
   }
 });
 
+// NEUER ENDPUNKT: Alle archivierten Submissions eines Benutzers laden (approved/rejected)
+app.get('/archive-submissions', authenticateToken, async (req, res) => {
+  const userEmail = req.user.email;
+  console.log(`${new Date().toISOString()} | Archiv-Submissions angefordert für User: ${userEmail}`);
+  try {
+    const { data: submissions, error } = await supabase
+      .from('submissions')
+      .select(`
+        id,
+        task_id,
+        user_email,
+        status,
+        created_at,
+        admin_comment,
+        details,
+        file_url, 
+        tasks ( title ) 
+      `)
+      .eq('user_email', userEmail)
+      .in('status', ['approved', 'rejected']) // Nur genehmigte oder abgelehnte
+      .order('created_at', { ascending: false }); // Neueste zuerst
+
+    if (error) {
+      console.error(`${new Date().toISOString()} | Fehler beim Abrufen der Archiv-Submissions für ${userEmail}:`, error);
+      return res.status(500).json({ message: 'Fehler beim Abrufen der Archivdaten', error: error.message });
+    }
+
+    console.log(`${new Date().toISOString()} | Archiv-Submissions für ${userEmail} erfolgreich abgerufen (${submissions?.length || 0} Einträge).`);
+    
+    // Optional: Details parsen, falls im Frontend benötigt (kann auch dort geschehen)
+    const processedSubmissions = submissions.map(sub => {
+       let parsedDetails = {};
+       try {
+         parsedDetails = typeof sub.details === 'string' ? JSON.parse(sub.details) : (sub.details || {});
+       } catch(e) {
+          console.warn(`Warnung: Konnte Details für Archiv-Submission ${sub.id} nicht parsen.`);
+       }
+       return {
+         ...sub,
+         details: parsedDetails, // Sende geparste Details
+         task_title: sub.tasks?.title || 'Unbekannte Aufgabe' // Füge Task-Titel hinzu
+       };
+    });
+
+    res.json(processedSubmissions || []);
+
+  } catch (error) {
+    console.error(`${new Date().toISOString()} | Unerwarteter Server-Fehler bei Archiv-Submissions für ${userEmail}:`, error);
+    res.status(500).json({ message: 'Interner Serverfehler', error: error.message });
+  }
+});
+
+// NEUER ENDPUNKT: Alle Submissions eines Benutzers laden (minimal für Zählung/Status)
+app.get('/user-all-submissions', authenticateToken, async (req, res) => {
+  const userEmail = req.user.email;
+  console.log(`${new Date().toISOString()} | ALLE User-Submissions (minimal) angefordert für User: ${userEmail}`);
+  try {
+    const { data: submissions, error } = await supabase
+      .from('submissions')
+      .select(`
+        id,
+        task_id,
+        user_email,
+        status,
+        created_at 
+      `)
+      .eq('user_email', userEmail)
+      .order('created_at', { ascending: false }); // Optional: Neueste zuerst
+
+    if (error) {
+      console.error(`${new Date().toISOString()} | Fehler beim Abrufen ALLER User-Submissions für ${userEmail}:`, error);
+      return res.status(500).json({ message: 'Fehler beim Abrufen der Benutzer-Einsendungen', error: error.message });
+    }
+
+    console.log(`${new Date().toISOString()} | ALLE User-Submissions für ${userEmail} erfolgreich abgerufen (${submissions?.length || 0} Einträge).`);
+    
+    res.json(submissions || []); // Nur die minimalen Daten senden
+
+  } catch (error) {
+    console.error(`${new Date().toISOString()} | Unerwarteter Server-Fehler bei ALLEN User-Submissions für ${userEmail}:`, error);
+    res.status(500).json({ message: 'Interner Serverfehler', error: error.message });
+  }
+});
+
 // 🔹 Server starten
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, async () => {
