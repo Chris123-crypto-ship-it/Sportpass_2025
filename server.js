@@ -280,7 +280,8 @@ app.post('/add-task', authenticateToken, async (req, res) => {
       static_points,
       difficulty,
       expiration_date,
-      max_submissions
+      max_submissions,
+      details_link
     } = req.body;
 
     // Debug-Log
@@ -317,7 +318,8 @@ app.post('/add-task', authenticateToken, async (req, res) => {
       points: !isDynamic ? parseInt(static_points) : 0, // 0 für dynamische Aufgaben
       difficulty: parseInt(difficulty) || 1,
       expiration_date: expiration_date ? new Date(expiration_date).toISOString() : null,
-      max_submissions: max_submissions ? parseInt(max_submissions) : null
+      max_submissions: max_submissions ? parseInt(max_submissions) : null,
+      details_link: details_link || null
     };
 
     // Debug-Log
@@ -1840,6 +1842,61 @@ app.get('/user-all-submissions', authenticateToken, async (req, res) => {
 
   } catch (error) {
     console.error(`${new Date().toISOString()} | Unerwarteter Server-Fehler bei ALLEN User-Submissions für ${userEmail}:`, error);
+    res.status(500).json({ message: 'Interner Serverfehler', error: error.message });
+  }
+});
+
+// NEUER ENDPUNKT: Punkte für mehrere Benutzer gleichzeitig aktualisieren
+app.post('/bulk-update-points', authenticateToken, isAdmin, async (req, res) => {
+  const { userIds, pointsToAdd } = req.body;
+  console.log(`${new Date().toISOString()} | Bulk Punkt-Update angefordert für ${userIds?.length} User. Punkte: ${pointsToAdd}`);
+
+  if (!Array.isArray(userIds) || userIds.length === 0 || typeof pointsToAdd !== 'number') {
+    return res.status(400).json({ message: 'Ungültige Anfrage: userIds (Array) und pointsToAdd (Nummer) sind erforderlich.' });
+  }
+
+  try {
+    // Hole die aktuellen Punkte der betroffenen Benutzer
+    const { data: users, error: fetchError } = await supabase
+      .from('users')
+      .select('id, points')
+      .in('id', userIds);
+
+    if (fetchError) {
+      console.error("Fehler beim Abrufen der Benutzer für Bulk-Update:", fetchError);
+      return res.status(500).json({ message: 'Fehler beim Abrufen der Benutzerdaten', error: fetchError.message });
+    }
+
+    if (!users || users.length === 0) {
+      return res.status(404).json({ message: 'Keine der angegebenen Benutzer-IDs gefunden.' });
+    }
+
+    // Berechne neue Punkte und bereite Updates vor
+    const updates = users.map(user => ({
+      id: user.id,
+      points: (user.points || 0) + pointsToAdd
+    }));
+
+    // Führe das Bulk-Update durch
+    // Supabase upsert kann hier verwendet werden, um mehrere Zeilen basierend auf der ID zu aktualisieren.
+    const { data: updatedData, error: updateError } = await supabase
+      .from('users')
+      .upsert(updates, { onConflict: 'id' })
+      .select('id, points'); // Optional: aktualisierte Daten zurückgeben
+
+    if (updateError) {
+      console.error("Fehler beim Bulk-Update der Punkte:", updateError);
+      return res.status(500).json({ message: 'Fehler beim Aktualisieren der Punkte', error: updateError.message });
+    }
+
+    console.log(`${new Date().toISOString()} | Bulk Punkt-Update erfolgreich für ${updatedData?.length || 0} User.`);
+    res.json({ 
+      message: `Punkte erfolgreich für ${updatedData?.length || 0} Benutzer aktualisiert.`, 
+      updatedUsers: updatedData // Optional: Gibt die aktualisierten IDs und neuen Punktestände zurück
+    });
+
+  } catch (error) {
+    console.error(`${new Date().toISOString()} | Unerwarteter Server-Fehler bei Bulk Punkt-Update:`, error);
     res.status(500).json({ message: 'Interner Serverfehler', error: error.message });
   }
 });
