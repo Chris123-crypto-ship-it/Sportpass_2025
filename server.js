@@ -1856,46 +1856,62 @@ app.post('/bulk-update-points', authenticateToken, isAdmin, async (req, res) => 
   }
 
   try {
-    // Hole die aktuellen Punkte der betroffenen Benutzer
-    const { data: users, error: fetchError } = await supabase
-      .from('users')
-      .select('id, points')
-      .in('id', userIds);
+    // Erstelle ein Array von Promises für die einzelnen Updates
+    const updatePromises = userIds.map(async (userId) => {
+      try {
+        // Hole zuerst den aktuellen Punktestand, um Inkrementierung sicherzustellen
+        const { data: currentUser, error: fetchUserError } = await supabase
+          .from('users')
+          .select('points')
+          .eq('id', userId)
+          .single();
+          
+        if (fetchUserError || !currentUser) {
+            console.error(`Fehler beim Abrufen von User ${userId} oder User nicht gefunden:`, fetchUserError?.message || 'Nicht gefunden');
+            return null; // Überspringen dieses Users, gibt null zurück für das Ergebnisarray
+        }
 
-    if (fetchError) {
-      console.error("Fehler beim Abrufen der Benutzer für Bulk-Update:", fetchError);
-      return res.status(500).json({ message: 'Fehler beim Abrufen der Benutzerdaten', error: fetchError.message });
-    }
+        const currentPoints = currentUser.points || 0;
+        const newPoints = currentPoints + pointsToAdd;
 
-    if (!users || users.length === 0) {
-      return res.status(404).json({ message: 'Keine der angegebenen Benutzer-IDs gefunden.' });
-    }
+        // Führe das einzelne Update nur für die 'points'-Spalte durch
+        const { data: updatedUser, error: updateError } = await supabase
+          .from('users')
+          .update({ points: newPoints })
+          .eq('id', userId)
+          .select('id, points'); // Gibt das aktualisierte Objekt zurück
 
-    // Berechne neue Punkte und bereite Updates vor
-    const updates = users.map(user => ({
-      id: user.id,
-      points: (user.points || 0) + pointsToAdd
-    }));
-
-    // Führe das Bulk-Update durch
-    // Supabase upsert kann hier verwendet werden, um mehrere Zeilen basierend auf der ID zu aktualisieren.
-    const { data: updatedData, error: updateError } = await supabase
-      .from('users')
-      .upsert(updates, { onConflict: 'id' })
-      .select('id, points'); // Optional: aktualisierte Daten zurückgeben
-
-    if (updateError) {
-      console.error("Fehler beim Bulk-Update der Punkte:", updateError);
-      return res.status(500).json({ message: 'Fehler beim Aktualisieren der Punkte', error: updateError.message });
-    }
-
-    console.log(`${new Date().toISOString()} | Bulk Punkt-Update erfolgreich für ${updatedData?.length || 0} User.`);
-    res.json({ 
-      message: `Punkte erfolgreich für ${updatedData?.length || 0} Benutzer aktualisiert.`, 
-      updatedUsers: updatedData // Optional: Gibt die aktualisierten IDs und neuen Punktestände zurück
+        if (updateError) {
+          console.error(`Fehler beim Aktualisieren von User ${userId}:`, updateError.message);
+          return null; // Überspringen bei Fehler
+        }
+        // Stelle sicher, dass Daten zurückgegeben wurden
+        return updatedUser && updatedUser.length > 0 ? updatedUser[0] : null; 
+      } catch (innerError) {
+        // Fange unerwartete Fehler innerhalb der map-Funktion ab
+        console.error(`Unerwarteter Fehler bei der Verarbeitung von User ${userId}:`, innerError.message);
+        return null;
+      }
     });
 
-  } catch (error) {
+    // Führe alle Update-Promises parallel aus
+    const results = await Promise.all(updatePromises);
+
+    // Filtere fehlerhafte Updates heraus (die null zurückgegeben haben)
+    const successfulUpdates = results.filter(result => result !== null && result !== undefined);
+    const failedUpdatesCount = userIds.length - successfulUpdates.length;
+
+    if (failedUpdatesCount > 0) {
+         console.warn(`${new Date().toISOString()} | Bulk Punkt-Update: ${failedUpdatesCount} Updates fehlgeschlagen.`);
+    }
+
+    console.log(`${new Date().toISOString()} | Bulk Punkt-Update erfolgreich für ${successfulUpdates.length} User.`);
+    res.json({
+      message: `Punkte erfolgreich für ${successfulUpdates.length} von ${userIds.length} Benutzern aktualisiert.`,
+      updatedUsers: successfulUpdates // Gibt die erfolgreich aktualisierten IDs und neuen Punktestände zurück
+    });
+
+  } catch (error) { // Fängt Fehler außerhalb der map-Funktion oder von Promise.all (falls reject verwendet wurde)
     console.error(`${new Date().toISOString()} | Unerwarteter Server-Fehler bei Bulk Punkt-Update:`, error);
     res.status(500).json({ message: 'Interner Serverfehler', error: error.message });
   }
