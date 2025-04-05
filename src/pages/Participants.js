@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
 import '../styles/Participants.css';
 import { toast } from 'react-toastify';
-import { FaSort, FaSortUp, FaSortDown, FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
+import { FaSort, FaSortUp, FaSortDown, FaCheckCircle, FaTimesCircle, FaPlusCircle } from 'react-icons/fa';
 import config from '../config';
 
 const Participants = () => {
@@ -17,6 +17,8 @@ const Participants = () => {
   const [nameFilter, setNameFilter] = useState('');
   const [classFilter, setClassFilter] = useState('');
   const [availableClasses, setAvailableClasses] = useState([]);
+  const [selectedParticipantIds, setSelectedParticipantIds] = useState(new Set());
+  const [loadingBulkUpdate, setLoadingBulkUpdate] = useState(false);
 
   const getHeaders = () => {
     const token = localStorage.getItem('token');
@@ -33,6 +35,7 @@ const Participants = () => {
     try {
       setLoading(true);
       setError(null);
+      setSelectedParticipantIds(new Set());
 
       const response = await axios.get(`${config.API_URL}/users`, {
         headers: getHeaders()
@@ -129,6 +132,11 @@ const Participants = () => {
         setParticipants(prevParticipants =>
           prevParticipants.filter(p => p.id !== userId)
         );
+        setSelectedParticipantIds(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(userId);
+          return newSet;
+        });
 
         toast.success('Benutzer erfolgreich gelöscht');
       } catch (error) {
@@ -144,26 +152,83 @@ const Participants = () => {
     }
   }, [user]);
 
-  const sortedParticipants = [...participants].sort((a, b) => {
-    let comparison = 0;
-    if (sortField === 'name') {
-      comparison = (a.name || '').localeCompare(b.name || '');
-    } else if (sortField === 'email') {
-      comparison = (a.email || '').localeCompare(b.email || '');
-    } else if (sortField === 'class') {
-      comparison = (a.class || '').localeCompare(b.class || '');
-    } else if (sortField === 'points') {
-      comparison = (b.points || 0) - (a.points || 0);
-    }
-    return sortDirection === 'asc' ? comparison : -comparison;
-  });
+  const filteredParticipants = useMemo(() => {
+    const sorted = [...participants].sort((a, b) => {
+        let comparison = 0;
+        if (sortField === 'name') {
+          comparison = (a.name || '').localeCompare(b.name || '');
+        } else if (sortField === 'email') {
+          comparison = (a.email || '').localeCompare(b.email || '');
+        } else if (sortField === 'class') {
+          comparison = (a.class || '').localeCompare(b.class || '');
+        } else if (sortField === 'points') {
+          comparison = (b.points || 0) - (a.points || 0);
+        }
+        return sortDirection === 'asc' ? comparison : -comparison;
+      });
 
-  const filteredParticipants = sortedParticipants.filter(participant => {
-    const nameMatch = (participant.name?.toLowerCase() || '').includes(nameFilter.toLowerCase()) ||
-                     (participant.email?.toLowerCase() || '').includes(nameFilter.toLowerCase());
-    const classMatch = !classFilter || participant.class === classFilter;
-    return nameMatch && classMatch;
-  });
+    return sorted.filter(participant => {
+      const nameMatch = (participant.name?.toLowerCase() || '').includes(nameFilter.toLowerCase()) ||
+                       (participant.email?.toLowerCase() || '').includes(nameFilter.toLowerCase());
+      const classMatch = !classFilter || participant.class === classFilter;
+      return nameMatch && classMatch;
+    });
+  }, [participants, sortField, sortDirection, nameFilter, classFilter]);
+
+  const handleSelectOne = (participantId) => {
+    setSelectedParticipantIds(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(participantId)) {
+        newSet.delete(participantId);
+      } else {
+        newSet.add(participantId);
+      }
+      return newSet;
+    });
+  };
+
+  const handleSelectAll = (e) => {
+    if (e.target.checked) {
+      const allFilteredIds = new Set(filteredParticipants.map(p => p.id));
+      setSelectedParticipantIds(allFilteredIds);
+    } else {
+      setSelectedParticipantIds(new Set());
+    }
+  };
+
+  const handleAdd20Points = async () => {
+    if (selectedParticipantIds.size === 0) {
+      toast.info('Bitte wählen Sie zuerst Teilnehmer aus.');
+      return;
+    }
+    if (!window.confirm(`Möchten Sie wirklich ${selectedParticipantIds.size} Teilnehmern 20 Punkte hinzufügen?`)) {
+      return;
+    }
+
+    setLoadingBulkUpdate(true);
+    try {
+      const response = await axios.post(
+        `${config.API_URL}/bulk-update-points`,
+        { 
+          userIds: Array.from(selectedParticipantIds),
+          pointsToAdd: 20
+        },
+        { headers: getHeaders() }
+      );
+      
+      await fetchParticipants();
+      
+      toast.success(response.data.message || 'Punkte erfolgreich hinzugefügt.');
+      setSelectedParticipantIds(new Set());
+    } catch (error) {
+      console.error('Error adding points:', error);
+      toast.error(error.response?.data?.message || 'Fehler beim Hinzufügen der Punkte.');
+    } finally {
+      setLoadingBulkUpdate(false);
+    }
+  };
+
+  const isAllSelected = filteredParticipants.length > 0 && selectedParticipantIds.size === filteredParticipants.length;
 
   if (!user || user.role !== 'admin') {
     return <div className="participants-error">Nur für Administratoren zugänglich</div>;
@@ -181,7 +246,7 @@ const Participants = () => {
     <div className="participants-container">
       <h1>Teilnehmerverwaltung</h1>
       
-      <div className="filter-controls">
+      <div className="filter-controls participants-filter-controls">
         <div className="filter-group">
           <input
             type="text"
@@ -203,15 +268,33 @@ const Participants = () => {
           </select>
         </div>
 
-        <button className="refresh-button" onClick={fetchParticipants}>
-          Aktualisieren
-        </button>
+        <div className="filter-actions">
+            <button 
+              className="bulk-action-button add-points-button"
+              onClick={handleAdd20Points}
+              disabled={selectedParticipantIds.size === 0 || loadingBulkUpdate}
+            >
+              <FaPlusCircle /> {loadingBulkUpdate ? 'Wird hinzugefügt...' : `+20 Punkte (${selectedParticipantIds.size})`}
+            </button>
+            <button className="refresh-button" onClick={fetchParticipants} disabled={loadingBulkUpdate}>
+              Aktualisieren
+            </button>
+        </div>
       </div>
 
       <div className="participants-table-container">
         <table className="participants-table">
           <thead>
             <tr>
+              <th className="checkbox-column">
+                <input 
+                  type="checkbox" 
+                  onChange={handleSelectAll}
+                  checked={isAllSelected}
+                  disabled={filteredParticipants.length === 0}
+                  title="Alle auf dieser Seite auswählen"
+                />
+              </th>
               <th>
                 <div className="sortable-header" onClick={() => handleSort('name')}>
                   Name {getSortIcon('name')}
@@ -238,7 +321,17 @@ const Participants = () => {
           </thead>
           <tbody>
             {filteredParticipants.map(participant => (
-              <tr key={participant.id}>
+              <tr 
+                key={participant.id} 
+                className={selectedParticipantIds.has(participant.id) ? 'selected-row' : ''}
+              >
+                <td className="checkbox-cell">
+                  <input 
+                    type="checkbox" 
+                    onChange={() => handleSelectOne(participant.id)}
+                    checked={selectedParticipantIds.has(participant.id)}
+                  />
+                </td>
                 <td>{participant.name || '-'}</td>
                 <td>{participant.email}</td>
                 <td>{participant.class || '-'}</td>
