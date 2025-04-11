@@ -3,9 +3,8 @@ import { useAuth } from '../context/AuthContext';
 import { useTasks } from '../context/TaskContext';
 import { FaRunning, FaHeartbeat, FaDumbbell, FaMedal, FaFire, FaStar, FaUpload, FaVideo, FaTrash, FaClock, FaInfoCircle, FaSpinner, FaGift } from 'react-icons/fa';
 import { toast } from 'react-toastify';
-import '../styles/Tasks.css'; // Wir verwenden vorerst die gleichen Basis-Stile
+import '../pages/Tasks.css'; // Korrigierter Pfad zur CSS-Datei
 import { Link } from 'react-router-dom';
-import '../styles/TaskCard.css';
 
 // Die TaskCard Komponente, jetzt ausgelagert
 const TaskCard = ({ task, isChallengeView = false }) => { // Neuer Prop: isChallengeView
