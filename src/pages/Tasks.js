@@ -294,7 +294,9 @@ const Tasks = () => {
     );
   };
 
-  const pendingUserSubmissions = allUserSubmissions.filter(sub => 
+  const safeAllUserSubmissions = Array.isArray(allUserSubmissions) ? allUserSubmissions : [];
+
+  const pendingUserSubmissions = safeAllUserSubmissions.filter(sub => 
     sub.status === 'pending'
   );
 
