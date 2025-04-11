@@ -24,6 +24,7 @@ import VerifyEmail from './pages/VerifyEmail';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 import Support from './pages/Support';
+import EasterChallenge from './pages/EasterChallenge';
 import './App.css';
 import './styles/Layout.css';
 
@@ -61,6 +62,7 @@ function App() {
                 <Route path="/admin-dashboard" element={<AdminDashboard />} />
                 <Route path="/participants" element={<Participants />} />
                 <Route path="/support" element={<Support />} />
+                <Route path="/easter-challenge" element={<EasterChallenge />} />
               </Routes>
             </div>
             <Footer />

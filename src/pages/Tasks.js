@@ -2,28 +2,50 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useTasks } from '../context/TaskContext';
 import { FaRunning, FaHeartbeat, FaDumbbell, FaMedal, FaFire, FaStar, 
-         FaUpload, FaFileImage, FaVideo, FaTrash, FaClock, FaCheck, FaTimes, FaFile, FaImage, FaCheckCircle, FaTimesCircle, FaUser, FaTag, FaFilter, FaInfoCircle } from 'react-icons/fa';
+         FaUpload, FaFileImage, FaVideo, FaTrash, FaClock, FaCheck, FaTimes, FaFile, FaImage, FaCheckCircle, FaTimesCircle, FaUser, FaTag, FaFilter, FaInfoCircle, FaEye, FaSpinner, FaGift } from 'react-icons/fa';
+import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import '../styles/Tasks.css';
+import TaskCard from '../components/TaskCard';
 
 const Tasks = () => {
   const { user } = useAuth();
-  const { tasks, submissions, fetchTasks, fetchSubmissions, submitTask, handleApproveSubmission, handleRejectSubmission, deleteTask, deleteSubmission } = useTasks();
+  const { 
+    tasks, 
+    submissions, 
+    pagination,
+    allUserSubmissions,
+    selectedSubmission,
+    loading: loadingTasks,
+    loadingDetails,
+    loadingUserSubmissions,
+    error, 
+    fetchTasks, 
+    fetchSubmissions, 
+    fetchAllUserSubmissions,
+    fetchSubmissionDetails,
+    submitTask, 
+    handleApproveSubmission, 
+    handleRejectSubmission, 
+    deleteTask, 
+    deleteSubmission 
+  } = useTasks();
   const [selectedFile, setSelectedFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
   const [currentTaskId, setCurrentTaskId] = useState(null);
   const [duration, setDuration] = useState('');
   const [message, setMessage] = useState('');
-  const [adminComment, setAdminComment] = useState('');
+  const [adminComment, setAdminComment] = useState({});
   const [filter, setFilter] = useState('all');
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [filteredTasks, setFilteredTasks] = useState([]);
   const [activeSubmissionId, setActiveSubmissionId] = useState(null);
   const [fileUploads, setFileUploads] = useState({});
   const fileInputRefs = useRef({});
-  const [loading, setLoading] = useState(false);
+  const [loadingPage, setLoadingPage] = useState(true);
   const [showInfoModal, setShowInfoModal] = useState(false);
-  const [submissionsLoaded, setSubmissionsLoaded] = useState(false);
+  const [viewingSubmissionId, setViewingSubmissionId] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
 
   const categories = [
     { value: 'all', label: 'Alle Kategorien' },
@@ -36,36 +58,40 @@ const Tasks = () => {
 
   useEffect(() => {
     const loadData = async () => {
-      setLoading(true);
+      setLoadingPage(true);
       try {
         await fetchTasks();
-        await fetchSubmissions();
-        setSubmissionsLoaded(true);
+        if (user) {
+          await fetchAllUserSubmissions();
+          if (user.role === 'admin') {
+            await fetchSubmissions(currentPage);
+          }
+        }
       } catch (error) {
         console.error('Fehler beim Laden der Daten:', error);
-        toast.error('Fehler beim Laden der Aufgaben und Einreichungen');
+        toast.error('Fehler beim Laden der Aufgaben oder Einreichungen');
       } finally {
-        setLoading(false);
+        setLoadingPage(false);
       }
     };
     
     loadData();
-  }, []);
+  }, [user, fetchTasks, fetchAllUserSubmissions, fetchSubmissions, currentPage]);
 
   useEffect(() => {
-    if (!tasks) return;
+    if (!tasks || !allUserSubmissions) return;
 
     let filtered = [...tasks];
     
     if (filter === 'ausstehend') {
       filtered = filtered.filter(task => {
-        const userSubmission = submissions.find(s => s.task_id === task.id && s.user_email === user?.email);
+        const userSubmission = allUserSubmissions.find(s => s.task_id === task.id);
         return !userSubmission || userSubmission.status === 'rejected';
       });
     } else if (filter === 'abgeschlossen') {
       filtered = filtered.filter(task => {
-        const userSubmission = submissions.find(s => s.task_id === task.id && s.user_email === user?.email);
-        return userSubmission && userSubmission.status === 'approved';
+        const userSubmission = allUserSubmissions.find(s => s.task_id === task.id && s.status === 'approved');
+        return !!userSubmission;
       });
     }
     
@@ -76,7 +102,7 @@ const Tasks = () => {
     }
 
     setFilteredTasks(filtered);
-  }, [tasks, filter, categoryFilter, submissions, user]);
+  }, [tasks, filter, categoryFilter, allUserSubmissions, user]);
 
   const getCategoryIcon = (category) => {
     switch (category.toLowerCase()) {
@@ -117,20 +143,20 @@ const Tasks = () => {
     }
     
     try {
-      setLoading(true);
+      setLoadingPage(true);
       
       const success = await submitTask(taskId, user.email, fileUpload.file, {});
       
       handleRemoveFile(taskId);
       
-      await fetchSubmissions();
+      await fetchSubmissions(currentPage);
       
-      setLoading(false);
+      setLoadingPage(false);
       
       toast.success('Aufgabe erfolgreich eingereicht!');
     } catch (error) {
       console.error('Fehler beim Einreichen:', error);
-      setLoading(false);
+      setLoadingPage(false);
       toast.error('Fehler beim Einreichen der Aufgabe');
     }
   };
@@ -268,8 +294,8 @@ const Tasks = () => {
     );
   };
 
-  const userSubmissions = submissions.filter(sub => 
-    sub.user_email === user?.email && sub.status === 'pending'
+  const pendingUserSubmissions = allUserSubmissions.filter(sub => 
+    sub.status === 'pending'
   );
 
   const renderAdminSubmissionPreview = (submission) => {
@@ -304,10 +330,11 @@ const Tasks = () => {
 
     try {
       await deleteSubmission(submissionId);
-      await fetchSubmissions();
+      await fetchSubmissions(currentPage);
+      toast.success("Einsendung gelöscht.");
     } catch (error) {
       console.error('Fehler beim Löschen der Einsendung:', error);
-      alert('Fehler beim Löschen der Einsendung');
+      toast.error('Fehler beim Löschen der Einsendung');
     }
   };
 
@@ -362,239 +389,35 @@ const Tasks = () => {
     );
   };
 
-  const TaskCard = ({ task }) => {
-    console.log('Task Data:', {
-      expiration_date: task.expiration_date,
-      difficulty: task.difficulty,
-      task: task
-    });
+  const handleAdminCommentChange = (submissionId, value) => {
+    setAdminComment(prev => ({ ...prev, [submissionId]: value }));
+  };
 
-    const [selectedFile, setSelectedFile] = useState(null);
-    const [dynamicValue, setDynamicValue] = useState('');
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    const { user } = useAuth();
-    const { submitTask, submissions } = useTasks();
-    const isExpired = task.expiration_date && new Date(task.expiration_date) < new Date();
+  const handleViewDetails = (submissionId) => {
+    if (viewingSubmissionId === submissionId) {
+      setViewingSubmissionId(null);
+      fetchSubmissionDetails(null);
+    } else {
+      setViewingSubmissionId(submissionId);
+      fetchSubmissionDetails(submissionId);
+    }
+  };
 
-    // Zähle die Einreichungen des Benutzers für diese Aufgabe
-    const userSubmissionsCount = submissions.filter(
-      s => s.task_id === task.id && 
-           s.user_email === user?.email && 
-           (s.status === 'approved' || s.status === 'pending')
-    ).length;
-
-    // Prüfe, ob maximale Anzahl erreicht wurde
-    const hasReachedMaxSubmissions = task.max_submissions && userSubmissionsCount >= task.max_submissions;
-
-    const handleSubmit = async () => {
-      if (!user) {
-        alert('Bitte melde dich an, um eine Aufgabe einzureichen.');
-        return;
-      }
-
-      if (isExpired) {
-        alert('Diese Aufgabe ist bereits abgelaufen.');
-        return;
-      }
-
-      if (hasReachedMaxSubmissions) {
-        alert(`Du hast bereits die maximale Anzahl an Einreichungen (${task.max_submissions}) für diese Aufgabe erreicht.`);
-        return;
-      }
-
-      if (!selectedFile) {
-        alert('Bitte wähle eine Datei aus.');
-        return;
-      }
-
-      if (task.dynamic && (!dynamicValue || parseFloat(dynamicValue) <= 0)) {
-        alert(`Bitte gib einen Wert für ${task.dynamic_type === 'minutes' ? 'Minuten' : 'Kilometer'} ein.`);
-        return;
-      }
-
-      try {
-        setIsSubmitting(true);
-
-        const details = task.dynamic 
-          ? {
-              dynamic_value: dynamicValue,
-              dynamic_type: task.dynamic_type,
-              calculated_points: Math.round(parseFloat(dynamicValue) * task.multiplier)
-            }
-          : {};
-
-        await submitTask(task.id, user.email, selectedFile, details);
-
-        setSelectedFile(null);
-        setDynamicValue('');
-        alert('Aufgabe erfolgreich eingereicht!');
-      } catch (error) {
-        console.error('Fehler beim Einreichen:', error);
-        alert('Fehler beim Einreichen der Aufgabe. Bitte versuche es erneut.');
-      } finally {
-        setIsSubmitting(false);
-      }
-    };
-
-    const formatExpirationDate = (dateString) => {
-      if (!dateString) return null;
-      try {
-        const date = new Date(dateString);
-        return date.toLocaleString('de-DE', {
-          day: '2-digit',
-          month: '2-digit',
-          year: 'numeric',
-          hour: '2-digit',
-          minute: '2-digit'
-        });
-      } catch (error) {
-        console.error('Fehler beim Formatieren des Datums:', error);
-        return null;
-      }
-    };
-
-    const renderDifficultyStars = (difficulty) => {
-      const level = parseInt(difficulty) || 0;
+  const renderAttachmentPreview = (submissionData) => {
+    if (!submissionData || !submissionData.file_url) return <div className="no-attachment">Kein Anhang vorhanden.</div>;
+    
+    const url = submissionData.file_url;
+    if (url.startsWith('data:image')) {
+      return <img src={url} alt="Anhang" className="admin-preview-image" />;
+    } else if (url.startsWith('data:video')) {
       return (
-        <div className="difficulty-stars">
-          {[1, 2, 3].map((star) => (
-            <span 
-              key={star} 
-              className={`star ${star <= level ? 'active' : ''}`}
-            >
-              ★
-            </span>
-          ))}
-        </div>
+        <video controls className="admin-preview-video">
+          <source src={url} /> Ihr Browser unterstützt das Video nicht.
+        </video>
       );
-    };
-
-    return (
-      <div className="task-card">
-        <div className="task-header">
-          <h3 className="task-title">{task.title}</h3>
-          <div className="task-meta-info">
-            <span className={`task-category ${task.category.toLowerCase()}`}>
-              {task.category}
-            </span>
-            <div className="task-points">
-              {task.dynamic ? (
-                <span>{task.multiplier} Punkte pro {task.dynamic_type === 'minutes' ? 'Minute' : 'Kilometer'}</span>
-              ) : (
-                <span>{task.points} Punkte</span>
-              )}
-            </div>
-          </div>
-        </div>
-
-        <div className="task-details">
-          <div className="task-description">
-            {task.description}
-          </div>
-
-          <div className="meta-info">
-            <div className="difficulty">
-              <span>Schwierigkeit: </span>
-              {renderDifficultyStars(task.difficulty)}
-            </div>
-
-            {task.expiration_date && (
-              <div className="expiration">
-                <span>
-                  {new Date(task.expiration_date) < new Date() 
-                    ? 'Abgelaufen am: ' 
-                    : 'Läuft ab am: '
-                  }
-                  {formatExpirationDate(task.expiration_date)}
-                </span>
-              </div>
-            )}
-          </div>
-        </div>
-
-        <div className="task-submission">
-          {task.dynamic && (
-            <div className="dynamic-input-wrapper">
-              <label>
-                {task.dynamic_type === 'minutes' ? 'Minuten' : 'Kilometer'}:
-                <input
-                  type="number"
-                  min="0"
-                  step={task.dynamic_type === 'minutes' ? '1' : '0.1'}
-                  value={dynamicValue}
-                  onChange={(e) => setDynamicValue(e.target.value)}
-                  className="dynamic-input"
-                />
-              </label>
-              {dynamicValue > 0 && (
-                <div className="calculated-points">
-                  = {Math.round(parseFloat(dynamicValue) * task.multiplier)} Punkte
-                </div>
-              )}
-            </div>
-          )}
-          
-          {task.max_submissions && (
-            <div className="submission-count-info">
-              <span className={hasReachedMaxSubmissions ? 'submissions-limit-reached' : ''}>
-                Einreichungen: {userSubmissionsCount} / {task.max_submissions}
-              </span>
-            </div>
-          )}
-
-          <div className="file-upload-section">
-            <label className="file-upload-label">
-              <input
-                type="file"
-                accept="image/*,video/*"
-                onChange={(e) => {
-                  const file = e.target.files[0];
-                  if (file && (file.type.startsWith('image/') || file.type.startsWith('video/'))) {
-                    setSelectedFile(file);
-                  } else {
-                    alert('Bitte nur Bilder oder Videos hochladen');
-                  }
-                }}
-                style={{ display: 'none' }}
-                disabled={hasReachedMaxSubmissions}
-              />
-              {!selectedFile ? (
-                <div className="upload-placeholder">
-                  <FaUpload />
-                  <span>Nachweis hochladen (Bild/Video)</span>
-                </div>
-              ) : (
-                <div className="file-preview">
-                  {selectedFile.type.startsWith('image/') ? (
-                    <img src={URL.createObjectURL(selectedFile)} alt="Vorschau" />
-                  ) : (
-                    <div className="video-preview">
-                      <FaVideo />
-                      <span>{selectedFile.name}</span>
-                    </div>
-                  )}
-                  <button
-                    type="button"
-                    className="remove-file"
-                    onClick={() => setSelectedFile(null)}
-                  >
-                    <FaTrash />
-                  </button>
-                </div>
-              )}
-            </label>
-          </div>
-
-          <button
-            className="submit-button"
-            onClick={handleSubmit}
-            disabled={!selectedFile || (task.dynamic && !dynamicValue) || hasReachedMaxSubmissions || isSubmitting}
-          >
-            {hasReachedMaxSubmissions ? 'Maximale Anzahl erreicht' : 'Aufgabe einreichen'}
-          </button>
-        </div>
-      </div>
-    );
+    } else {
+      return <div className="no-attachment"><FaFile /> Anhang vorhanden (Typ unbekannt)</div>;
+    }
   };
 
   return (
@@ -648,7 +471,7 @@ const Tasks = () => {
         </div>
       </div>
 
-      {loading || !submissionsLoaded ? (
+      {loadingPage ? (
         <div className="loading-container">
           <div className="spinner"></div>
           <p className="loading-text">Aufgaben und Einreichungsdaten werden geladen...</p>
@@ -661,7 +484,7 @@ const Tasks = () => {
             ) : (
               <>
                 {filteredTasks.map(task => (
-                  <TaskCard key={task.id} task={task} />
+                  <TaskCard key={task.id} task={task} isChallengeView={false} />
                 ))}
               </>
             )}
@@ -672,13 +495,15 @@ const Tasks = () => {
               <span className="submissions-title">Meine ausstehenden Einsendungen</span>
             </h2>
             
-            {userSubmissions.length === 0 ? (
+            {loadingUserSubmissions ? (
+              <div className="loading-container small"><div className="spinner small"></div></div>
+            ) : pendingUserSubmissions.length === 0 ? (
               <div className="no-submissions">
                 Keine ausstehenden Einsendungen vorhanden.
               </div>
             ) : (
               <div className="submissions-grid">
-                {userSubmissions.map(submission => {
+                {pendingUserSubmissions.map(submission => {
                   const task = tasks.find(t => t.id === submission.task_id);
                   return (
                     <div key={submission.id} className="submission-card">
@@ -688,9 +513,6 @@ const Tasks = () => {
                           <FaClock /> Ausstehend
                         </span>
                       </div>
-
-                      {renderSubmissionAttachment(submission)}
-
                       <div className="submission-actions">
                         <button 
                           className="delete-button"
@@ -709,79 +531,76 @@ const Tasks = () => {
           {user?.role === 'admin' && (
             <div className="admin-section">
               <h1 className="admin-title">Aufgabenüberprüfung</h1>
-              <div className="admin-submissions-grid">
-                {submissions
-                  .filter(s => s.status === 'pending')
-                  .map(submission => {
-                    const task = tasks.find(t => t.id === submission.task_id);
-                    return (
-                      <div key={submission.id} className="admin-submission-card">
-                        <div className="admin-submission-header">
-                          <h3>{task?.title}</h3>
-                          <div className="admin-submission-info">
-                            <span className="admin-user">
-                              <FaUser /> {submission.user_email}
-                            </span>
-                            <span className="admin-points">
-                              {task?.dynamic ? (
-                                `${submission.submission_details?.task_points || 0} Punkte (${task.multiplier} pro ${task.dynamic_type})`
-                              ) : (
-                                `${task?.points || 0} Punkte`
-                              )}
-                            </span>
+              {loadingTasks ? (
+                 <div className="loading-container small"><div className="spinner small"></div></div>
+              ) : (
+                <div className="admin-submissions-grid">
+                  {submissions
+                    .filter(s => s.status === 'pending')
+                    .map(submission => {
+                      const task = tasks.find(t => t.id === submission.task_id);
+                      const isViewing = viewingSubmissionId === submission.id;
+                      const currentAdminComment = adminComment[submission.id] || '';
+                      
+                      const detailsData = isViewing ? selectedSubmission : null;
+                      
+                      return (
+                        <div key={submission.id} className={`admin-submission-card ${isViewing ? 'details-visible' : ''}`}>
+                          <div className="admin-submission-header">
+                            <h3>{task?.title || 'Unbekannte Aufgabe'}</h3>
+                            <div className="admin-submission-info">
+                              <span className="admin-user">
+                                <FaUser /> {submission.user_email}
+                              </span>
+                            </div>
                           </div>
-                        </div>
 
-                        <div className="admin-submission-content">
-                          {submission.file_url && (
-                            <div className="admin-file-preview">
-                              {submission.file_url.match(/\.(jpg|jpeg|png|gif)$/i) || 
-                              submission.file_url.startsWith('data:image') ? (
-                                <img 
-                                  src={submission.file_url} 
-                                  alt="Eingereichte Datei"
-                                  className="admin-preview-image"
-                                />
+                          <button onClick={() => handleViewDetails(submission.id)} className="view-details-button">
+                            {loadingDetails && isViewing ? <FaSpinner className="spin" /> : <FaEye />}
+                            {isViewing ? ' Details verbergen' : ' Details anzeigen'}
+                          </button>
+
+                          {isViewing && (
+                            <div className="admin-submission-content">
+                              {loadingDetails ? (
+                                <div className="loading-details">Details werden geladen... <FaSpinner className="spin"/></div>
+                              ) : !selectedSubmission || selectedSubmission.id !== submission.id ? (
+                                <div className="error-details">Details konnten nicht geladen werden.</div>
                               ) : (
-                                <video controls className="admin-preview-video">
-                                  <source src={submission.file_url} type="video/mp4" />
-                                  Ihr Browser unterstützt keine Videowiedergabe.
-                                </video>
+                                <> 
+                                  <div className="admin-file-preview">
+                                    {renderAttachmentPreview(selectedSubmission)}
+                                  </div>
+                                  
+                                  <div className="admin-submission-details">
+                                    <div className="admin-points-details"> 
+                                      <strong>Punkte: </strong>
+                                      {selectedSubmission.calculated_points !== undefined 
+                                        ? `${selectedSubmission.calculated_points}`
+                                        : (task?.dynamic ? 'Dynamisch' : `${task?.points || '?'}`) 
+                                      }
+                                      {task?.dynamic && task.multiplier && ` (${task.multiplier} / ${task.dynamic_type === 'minutes' ? 'Min' : 'Km'})`}
+                                    </div>
+                                    <textarea
+                                      className="admin-comment"
+                                      placeholder="Admin-Kommentar..."
+                                      value={currentAdminComment}
+                                      onChange={(e) => handleAdminCommentChange(submission.id, e.target.value)}
+                                    />
+                                    <div className="admin-actions">
+                                      <button className="approve-button" onClick={() => handleApproveSubmission(submission.id, currentAdminComment)}><FaCheckCircle /> Genehmigen</button>
+                                      <button className="reject-button" onClick={() => handleRejectSubmission(submission.id, currentAdminComment)}><FaTimesCircle /> Ablehnen</button>
+                                    </div>
+                                  </div>
+                                </> 
                               )}
                             </div>
                           )}
-
-                          <div className="admin-submission-details">
-                            <textarea
-                              className="admin-comment"
-                              placeholder="Admin-Kommentar..."
-                              value={submission.id === activeSubmissionId ? adminComment : ''}
-                              onChange={(e) => {
-                                setAdminComment(e.target.value);
-                                setActiveSubmissionId(submission.id);
-                              }}
-                            />
-
-                            <div className="admin-actions">
-                              <button 
-                                className="approve-button"
-                                onClick={() => handleApproveSubmission(submission.id, adminComment)}
-                              >
-                                Genehmigen
-                              </button>
-                              <button 
-                                className="reject-button"
-                                onClick={() => handleRejectSubmission(submission.id, adminComment)}
-                              >
-                                Ablehnen
-                              </button>
-                            </div>
-                          </div>
                         </div>
-                      </div>
-                    );
-                  })}
-              </div>
+                      );
+                    })}
+                </div>
+              )}
             </div>
           )}
         </div>

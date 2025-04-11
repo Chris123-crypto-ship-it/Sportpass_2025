@@ -1,0 +1,95 @@
+/* src/pages/EasterChallenge.css */
+
+.easter-challenge-container {
+  max-width: 1100px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background-color: #fffcf2; /* Heller Oster-Hintergrund */
+  border-radius: 16px;
+  box-shadow: 0 6px 25px rgba(243, 160, 78, 0.15);
+}
+
+.easter-challenge-title {
+  text-align: center;
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #e67e22; /* Oster-Orange */
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.easter-challenge-title .fa-gift {
+  font-size: 2.2rem;
+  opacity: 0.8;
+}
+
+.challenge-info {
+  background-color: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  margin-bottom: 2.5rem;
+  text-align: center;
+  color: #5d4037;
+  line-height: 1.6;
+  border: 1px solid #ffe0b2;
+}
+
+.challenge-info strong {
+  color: #e67e22;
+}
+
+.section-title {
+  font-size: 1.6rem;
+  color: #333;
+  margin-top: 2.5rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #ffe0b2;
+}
+
+.easter-eggs-grid {
+  display: grid;
+  /* Nutzt das gleiche Grid wie die normale Task-Liste */
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1.5rem;
+}
+
+.no-eggs {
+  text-align: center;
+  padding: 2rem;
+  color: #777;
+  font-style: italic;
+}
+
+/* Placeholder für die Eier-Karten (wird später durch TaskCard ersetzt) */
+.egg-placeholder {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.07);
+  border: 1px solid #eee;
+  text-align: center;
+}
+
+/* Stile für die eigentliche TaskCard Komponente, wenn sie hier verwendet wird */
+/* (Wir müssen diese ggf. aus Tasks.css übernehmen/anpassen oder TaskCard auslagern) */
+.easter-eggs-grid .task-card {
+  /* Ggf. spezifische Anpassungen für Eier-Karten hier */
+  border-color: #ffcc80; /* Osterlicher Rahmen */
+}
+
+.easter-eggs-grid .task-card .task-category {
+  background: linear-gradient(135deg, #f3a04e, #ffcc80); /* Spezielle Kategorie-Farbe */
+  color: #5d4037;
+}
+
+/* Loading Container Styling (falls noch nicht global vorhanden) */
+.loading-container {
+  text-align: center;
+  padding: 3rem;
+  font-size: 1.2rem;
+  color: #777;
+} 
