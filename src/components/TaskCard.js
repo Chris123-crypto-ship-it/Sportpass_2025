@@ -4,6 +4,8 @@ import { useTasks } from '../context/TaskContext';
 import { FaRunning, FaHeartbeat, FaDumbbell, FaMedal, FaFire, FaStar, FaUpload, FaVideo, FaTrash, FaClock, FaInfoCircle, FaSpinner, FaGift } from 'react-icons/fa';
 import { toast } from 'react-toastify';
 import '../styles/Tasks.css'; // Wir verwenden vorerst die gleichen Basis-Stile
+import { Link } from 'react-router-dom';
+import '../styles/TaskCard.css';
 
 // Die TaskCard Komponente, jetzt ausgelagert
 const TaskCard = ({ task, isChallengeView = false }) => { // Neuer Prop: isChallengeView
@@ -14,25 +16,41 @@ const TaskCard = ({ task, isChallengeView = false }) => { // Neuer Prop: isChall
   const [dynamicValue, setDynamicValue] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const { id, title, description, points, dynamic, dynamic_type, multiplier, category, difficulty, expiration_date, max_submissions, details_link, is_easter_egg, available_date } = task;
+
+  // Heutiges Datum im Format YYYY-MM-DD
+  const today = new Date().toISOString().split('T')[0];
+
+  // Prüfen, ob es sich um ein heute verfügbares Osterei handelt
+  const isAvailableEasterEgg = is_easter_egg && available_date === today;
+
+  // Wenn es ein Osterei ist, aber nicht heute verfügbar, zeige nichts an.
+  if (is_easter_egg && !isAvailableEasterEgg) {
+    return null; // Gib nichts zurück, wenn das Osterei nicht heute ist
+  }
+
+  // Bestimme die anzuzeigenden Punkte
+  const displayPoints = is_easter_egg ? 5 : (dynamic ? `Dynamisch (${multiplier} Pkt/${dynamic_type || 'Einheit'})` : `${points} Pkt`);
+
   // --- Logik zur Bestimmung des Task-Status & Einreichbarkeit --- START ---
-  const isEasterEgg = task.is_easter_egg === true;
-  const isExpired = !isEasterEgg && task.expiration_date && new Date(task.expiration_date) < new Date();
+  const isExpired = expiration_date && new Date(expiration_date) < new Date();
+  const cardClass = `task-card ${isExpired ? 'expired' : ''} ${isChallengeView ? 'challenge-view' : ''}`;
 
   // Finde relevante Einreichungen des Users (approved oder pending)
   const userSubmissionsForThisTask = allUserSubmissions.filter(
-    s => s.task_id === task.id && (s.status === 'approved' || s.status === 'pending')
+    s => s.task_id === id && (s.status === 'approved' || s.status === 'pending')
   );
   const userSubmissionsCount = userSubmissionsForThisTask.length;
 
   // Prüfe, ob das Osterei heute verfügbar ist
-  const isSubmittableEasterEgg = isEasterEgg && task.available_date === new Date().toISOString().split('T')[0];
+  const isSubmittableEasterEgg = is_easter_egg && available_date === today;
 
   // Kombinierte Deaktivierungslogik
   const isDisabled = isSubmitting ||
-                     (!isEasterEgg && isExpired) || // Normale abgelaufene Tasks
-                     (!isEasterEgg && task.max_submissions && userSubmissionsCount >= task.max_submissions) || // Limit normaler Tasks
-                     (isEasterEgg && !isSubmittableEasterEgg) || // Osterei nicht heute verfügbar
-                     (isEasterEgg && userSubmissionsCount > 0); // Osterei bereits gesammelt
+                     (!is_easter_egg && isExpired) || // Normale abgelaufene Tasks
+                     (!is_easter_egg && max_submissions && userSubmissionsCount >= max_submissions) || // Limit normaler Tasks
+                     (is_easter_egg && !isSubmittableEasterEgg) || // Osterei nicht heute verfügbar
+                     (is_easter_egg && userSubmissionsCount > 0); // Osterei bereits gesammelt
   // --- Logik zur Bestimmung des Task-Status & Einreichbarkeit --- ENDE ---
 
   const handleSubmit = async () => {
@@ -41,19 +59,19 @@ const TaskCard = ({ task, isChallengeView = false }) => { // Neuer Prop: isChall
       return;
     }
     // Spezifische Prüfungen basierend auf dem Task-Typ
-    if (!isEasterEgg && isExpired) {
+    if (!is_easter_egg && isExpired) {
       toast.warn('Diese Aufgabe ist bereits abgelaufen.');
       return;
     }
-    if (isEasterEgg && !isSubmittableEasterEgg) {
+    if (is_easter_egg && !isSubmittableEasterEgg) {
       toast.warn('Dieses Osterei ist heute nicht verfügbar.');
       return;
     }
-    if (isEasterEgg && userSubmissionsCount > 0) {
+    if (is_easter_egg && userSubmissionsCount > 0) {
       toast.warn('Du hast dieses Osterei bereits gesammelt.');
       return;
     }
-    if (!isEasterEgg && task.max_submissions && userSubmissionsCount >= task.max_submissions) {
+    if (!is_easter_egg && max_submissions && userSubmissionsCount >= max_submissions) {
         toast.warn('Maximale Anzahl an Einreichungen erreicht.');
         return;
     }
@@ -63,29 +81,29 @@ const TaskCard = ({ task, isChallengeView = false }) => { // Neuer Prop: isChall
       toast.error('Bitte wähle eine Datei aus.');
       return;
     }
-    if (!isEasterEgg && task.dynamic && (!dynamicValue || parseFloat(dynamicValue) <= 0)) {
-      toast.error(`Bitte gib einen Wert für ${task.dynamic_type === 'minutes' ? 'Minuten' : 'Kilometer'} ein.`);
+    if (!is_easter_egg && dynamic && (!dynamicValue || parseFloat(dynamicValue) <= 0)) {
+      toast.error(`Bitte gib einen Wert für ${dynamic_type === 'minutes' ? 'Minuten' : 'Kilometer'} ein.`);
       return;
     }
 
     try {
       setIsSubmitting(true);
       // Details nur für normale dynamische Aufgaben sammeln
-      const details = !isEasterEgg && task.dynamic
+      const details = !is_easter_egg && dynamic
         ? {
             dynamic_value: dynamicValue,
-            dynamic_type: task.dynamic_type,
+            dynamic_type: dynamic_type,
           }
         : {};
 
-      await submitTask(task.id, user.email, selectedFile, details);
+      await submitTask(id, user.email, selectedFile, details);
       setSelectedFile(null);
       setDynamicValue('');
-      toast.success(isEasterEgg ? 'Osterei erfolgreich gesammelt!' : 'Aufgabe erfolgreich eingereicht!');
+      toast.success(is_easter_egg ? 'Osterei erfolgreich gesammelt!' : 'Aufgabe erfolgreich eingereicht!');
       // Kein Neuladen von Submissions hier, das sollte der übergeordnete Kontext/Seite machen
     } catch (error) {
       console.error('Fehler beim Einreichen:', error);
-      const errorMsg = error.response?.data?.message || (isEasterEgg ? 'Fehler beim Sammeln des Ostereis.' : 'Fehler beim Einreichen der Aufgabe.');
+      const errorMsg = error.response?.data?.message || (is_easter_egg ? 'Fehler beim Sammeln des Ostereis.' : 'Fehler beim Einreichen der Aufgabe.');
       toast.error(errorMsg);
     } finally {
       setIsSubmitting(false);
@@ -126,38 +144,33 @@ const TaskCard = ({ task, isChallengeView = false }) => { // Neuer Prop: isChall
   };
 
   return (
-    <div className={`task-card ${!isEasterEgg && isExpired ? 'expired' : ''} ${isChallengeView ? 'challenge-view' : ''}`}>
+    <div className={cardClass}>
+      {is_easter_egg && <span className="easter-egg-badge">🥚 Osterei!</span>}
       <div className="task-header">
-        {isEasterEgg && <FaGift className="easter-egg-icon" />} {/* Icon nur für Eier */}
-        <h3 className="task-title">{task.title}</h3>
+        {is_easter_egg && <FaGift className="easter-egg-icon" />} {/* Icon nur für Eier */}
+        <h3 className="task-title">{title}</h3>
         <div className="task-meta-info">
-          <span className={`task-category ${isEasterEgg ? 'easter' : (task.category?.toLowerCase() || 'default')}`}> {/* Kategorie anpassen */} 
-            {isEasterEgg ? 'Oster-Challenge' : task.category}
+          <span className={`task-category ${is_easter_egg ? 'easter' : (category?.toLowerCase() || 'default')}`}> {/* Kategorie anpassen */} 
+            {is_easter_egg ? 'Oster-Challenge' : category}
           </span>
           <div className="task-points">
-            {isEasterEgg ? (
-              <span>{task.points || 5} Punkte</span> // Feste Punkte für Eier
-            ) : task.dynamic ? (
-              <span>{task.multiplier} Punkte pro {task.dynamic_type === 'minutes' ? 'Minute' : 'Kilometer'}</span>
-            ) : (
-              <span>{task.points} Punkte</span>
-            )}
+            {displayPoints}
           </div>
         </div>
       </div>
 
       {/* Details nur für normale Aufgaben anzeigen */} 
-      {!isEasterEgg && (
+      {!is_easter_egg && (
         <>
           <div className="task-details">
             <div className="task-description">
-              {task.description}
+              {description}
             </div>
 
-            {task.details_link && (
+            {details_link && (
               <div className="task-details-link">
                 <a
-                  href={task.details_link}
+                  href={details_link}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="details-link-button"
@@ -172,17 +185,17 @@ const TaskCard = ({ task, isChallengeView = false }) => { // Neuer Prop: isChall
           <div className="meta-info">
             <div className="difficulty">
               <span>Schwierigkeit: </span>
-              {renderDifficultyStars(task.difficulty)}
+              {renderDifficultyStars(difficulty)}
             </div>
 
-            {task.expiration_date && (
+            {expiration_date && (
               <div className={`expiration ${isExpired ? 'expired-text' : ''}`}>
                 <span>
-                  {new Date(task.expiration_date) < new Date()
+                  {new Date(expiration_date) < new Date()
                     ? 'Abgelaufen am: '
                     : 'Läuft ab am: '
                   }
-                  {formatExpirationDate(task.expiration_date)}
+                  {formatExpirationDate(expiration_date)}
                 </span>
               </div>
             )}
@@ -192,33 +205,33 @@ const TaskCard = ({ task, isChallengeView = false }) => { // Neuer Prop: isChall
 
       <div className="task-submission">
         {/* Dynamisches Feld nur für normale dynamische Aufgaben */} 
-        {!isEasterEgg && task.dynamic && (
+        {!is_easter_egg && dynamic && (
           <div className="dynamic-input-wrapper">
             <label>
-              {task.dynamic_type === 'minutes' ? 'Minuten' : 'Kilometer'}:
+              {dynamic_type === 'minutes' ? 'Minuten' : 'Kilometer'}:
               <input
                 type="number"
                 min="0"
-                step={task.dynamic_type === 'minutes' ? '1' : '0.1'}
+                step={dynamic_type === 'minutes' ? '1' : '0.1'}
                 value={dynamicValue}
                 onChange={(e) => setDynamicValue(e.target.value)}
                 className="dynamic-input"
                 disabled={isDisabled}
               />
             </label>
-            {dynamicValue > 0 && task.multiplier && (
+            {dynamicValue > 0 && multiplier && (
               <div className="calculated-points">
-                = {Math.round(parseFloat(dynamicValue) * task.multiplier)} Punkte
+                = {Math.round(parseFloat(dynamicValue) * multiplier)} Punkte
               </div>
             )}
           </div>
         )}
 
         {/* Einreichungslimit nur für normale Aufgaben anzeigen */} 
-        {!isEasterEgg && task.max_submissions && (
+        {!is_easter_egg && max_submissions && (
           <div className="submission-count-info">
-            <span className={userSubmissionsCount >= task.max_submissions ? 'submissions-limit-reached' : ''}>
-              Einreichungen: {userSubmissionsCount} / {task.max_submissions}
+            <span className={userSubmissionsCount >= max_submissions ? 'submissions-limit-reached' : ''}>
+              Einreichungen: {userSubmissionsCount} / {max_submissions}
             </span>
           </div>
         )}
@@ -275,9 +288,9 @@ const TaskCard = ({ task, isChallengeView = false }) => { // Neuer Prop: isChall
           disabled={!selectedFile || isDisabled} // Kombinierte Deaktivierung
         >
           {isSubmitting ? <FaSpinner className="spin" /> :
-            (isEasterEgg ?
+            (is_easter_egg ?
                 (isSubmittableEasterEgg ? (userSubmissionsCount > 0 ? 'Bereits gesammelt' : 'Osterei sammeln') : 'Nicht verfügbar') :
-                (isExpired ? 'Abgelaufen' : (task.max_submissions && userSubmissionsCount >= task.max_submissions ? 'Limit erreicht' : 'Aufgabe einreichen'))
+                (isExpired ? 'Abgelaufen' : (max_submissions && userSubmissionsCount >= max_submissions ? 'Limit erreicht' : 'Aufgabe einreichen'))
             )
           }
         </button>
