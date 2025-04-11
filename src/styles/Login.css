@@ -137,4 +137,22 @@
 
 .forgot-password-link span:hover {
   color: #004d99;
+}
+
+/* Neue Info-Box Stile */
+.info-box-login {
+  background-color: #e0f7fa; /* Helles Cyan */
+  color: #00796b; /* Dunkleres Cyan */
+  border: 1px solid #4dd0e1; /* Mittleres Cyan */
+  padding: 15px;
+  margin-bottom: 20px;
+  border-radius: 8px;
+  display: flex;
+  align-items: flex-start; /* Icons und Text oben ausrichten */
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
+.info-box-login strong {
+  font-weight: 600;
 } 

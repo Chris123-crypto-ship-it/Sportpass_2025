@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import '../styles/Login.css';
-import { FaEnvelope, FaLock } from 'react-icons/fa';
+import { FaEnvelope, FaLock, FaInfoCircle } from 'react-icons/fa';
 import { useAuth } from '../context/AuthContext';
 import config from '../config';
 
@@ -84,6 +84,18 @@ const Login = () => {
   return (
     <div className="login-container">
       <h2>Anmelden</h2>
+
+      <div className="info-box-login">
+        <FaInfoCircle style={{ marginRight: '10px', marginTop: '3px', flexShrink: 0 }} />
+        <div>
+          <strong>Liebe Sportpass Teilnehmer!</strong>
+          <p>Punkte für die erste Workoutwoche in den Turnstunden sind absofort eingetragen!</p>
+          <p>Neue Woche Neue Aufgaben. Absofort sind neue Aufgaben für euch einzusehen. Alte Einsendungen werden in naher Zukunft aus dem Archiv gelöscht. Dies hat aber KEINEN Einfluss auf eure Punkte!</p>
+          <p>Bei Fragen oder Problemen sind wir jederzeit unter unserem Support (ganz unten zu finden) für euch da!</p>
+          <p>Viel Spaß,<br/>Euer Sportpass Team</p>
+        </div>
+      </div>
+
       <form onSubmit={handleSubmit} className="login-form">
         <div className="form-group">
           <label htmlFor="email">E-Mail</label>

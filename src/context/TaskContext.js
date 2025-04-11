@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext, useCallback } from 'react';
+import React, { createContext, useState, useContext, useCallback, useEffect } from 'react';
 import { useAuth } from './AuthContext';
 import axios from 'axios';
 import { toast } from 'react-toastify';
@@ -10,16 +10,22 @@ export const TaskProvider = ({ children }) => {
   const { user } = useAuth();
   const [tasks, setTasks] = useState([]);
   const [submissions, setSubmissions] = useState([]);
-  const [archive, setArchive] = useState([]);
+  const [pagination, setPagination] = useState(null);
+  const [allUserSubmissions, setAllUserSubmissions] = useState([]);
+  const [allArchiveSubmissions, setAllArchiveSubmissions] = useState([]);
+  const [userStatsSubmissions, setUserStatsSubmissions] = useState([]);
+  const [selectedSubmission, setSelectedSubmission] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [loadingDetails, setLoadingDetails] = useState(false);
+  const [loadingStats, setLoadingStats] = useState(false);
+  const [loadingArchive, setLoadingArchive] = useState(false);
+  const [loadingUserSubmissions, setLoadingUserSubmissions] = useState(false);
   const [error, setError] = useState(null);
-  const [selectedFile, setSelectedFile] = useState(null);
-  const [submissionDetails, setSubmissionDetails] = useState('');
 
   const getHeaders = useCallback(() => {
     const token = localStorage.getItem('token');
     if (!token) {
-      throw new Error('Kein Token vorhanden');
+      return null;
     }
     return {
       'Content-Type': 'application/json',
@@ -27,24 +33,22 @@ export const TaskProvider = ({ children }) => {
     };
   }, []);
 
-  const checkToken = useCallback(() => {
+  const checkUserAndToken = useCallback(() => {
     const token = localStorage.getItem('token');
-    if (!token) {
-      throw new Error('Kein Token vorhanden');
-    }
-    return token;
-  }, []);
+    return user && token;
+  }, [user]);
 
   const fetchTasks = useCallback(async (view) => {
+    if (!checkUserAndToken()) return;
+    const headers = getHeaders();
+    if (!headers) return;
+
     try {
-      checkToken();
       setLoading(true);
       setError(null);
-
       const response = await axios.get(`${config.API_URL}/tasks${view ? `?view=${view}` : ''}`, {
-        headers: getHeaders()
+        headers
       });
-
       setTasks(response.data);
     } catch (error) {
       console.error('Fehler beim Abrufen der Aufgaben:', error);
@@ -53,58 +57,121 @@ export const TaskProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  }, [checkToken, getHeaders]);
+  }, [checkUserAndToken, getHeaders]);
 
-  const fetchSubmissions = async () => {
+  const fetchSubmissions = useCallback(async (page = 1, limit = 50) => {
+    if (!checkUserAndToken()) return;
+    const headers = getHeaders();
+    if (!headers) return;
+
     try {
-      checkToken();
       setLoading(true);
       setError(null);
-
-      const response = await axios.get(`${config.API_URL}/submissions`, {
-        headers: getHeaders()
+      const response = await axios.get(`${config.API_URL}/submissions?page=${page}&limit=${limit}`, {
+        headers
       });
-      
-      setSubmissions(response.data);
+      setSubmissions(response.data.submissions || []);
+      setPagination(response.data.pagination || null);
     } catch (error) {
-      console.error('Fehler beim Abrufen der Einsendungen:', error);
-      setError('Fehler beim Laden der Einsendungen');
+      console.error('Fehler beim Abrufen der Einsendungsliste (Admin):', error);
+      setError('Fehler beim Laden der Admin-Einsendungsliste');
       setSubmissions([]);
+      setPagination(null);
     } finally {
       setLoading(false);
     }
-  };
+  }, [checkUserAndToken, getHeaders]);
 
-  const fetchArchive = useCallback(async () => {
+  const fetchAllUserSubmissions = useCallback(async () => {
+    if (!checkUserAndToken()) return;
+    const headers = getHeaders();
+    if (!headers) return;
+
     try {
-      checkToken();
-      setLoading(true);
+      setLoadingUserSubmissions(true);
       setError(null);
-
-      const response = await axios.get(`${config.API_URL}/submissions`, {
-        headers: getHeaders()
-      });
-      
-      // Nur genehmigte oder abgelehnte Submissions in das Archiv
-      const archivedSubmissions = response.data.filter(sub => 
-        ['approved', 'rejected'].includes(sub.status)
-      );
-      setArchive(archivedSubmissions);
+      const response = await axios.get(`${config.API_URL}/user-all-submissions`, { headers });
+      setAllUserSubmissions(response.data || []);
     } catch (error) {
-      console.error('Fehler beim Abrufen des Archivs:', error);
-      setError('Fehler beim Laden des Archivs');
-      setArchive([]);
+      console.error('Fehler beim Abrufen aller User-Submissions:', error);
+      setError('Fehler beim Laden deiner Einsendungen');
+      setAllUserSubmissions([]);
     } finally {
-      setLoading(false);
+      setLoadingUserSubmissions(false);
     }
-  }, [checkToken, getHeaders]);
+  }, [checkUserAndToken, getHeaders]);
+
+  const fetchAllArchiveSubmissions = useCallback(async () => {
+    if (!checkUserAndToken()) return;
+    const headers = getHeaders();
+    if (!headers) return;
+
+    try {
+      setLoadingArchive(true);
+      setError(null);
+      const response = await axios.get(`${config.API_URL}/archive-submissions`, { headers });
+      setAllArchiveSubmissions(response.data || []);
+    } catch (error) {
+      console.error('Fehler beim Abrufen der Archiv-Submissions:', error);
+      setError('Fehler beim Laden des Archivs');
+      setAllArchiveSubmissions([]);
+    } finally {
+      setLoadingArchive(false);
+    }
+  }, [checkUserAndToken, getHeaders]);
+
+  const fetchSubmissionDetails = useCallback(async (id) => {
+    if (!id) {
+      setSelectedSubmission(null);
+      return null;
+    }
+    if (!checkUserAndToken()) return null;
+    const headers = getHeaders();
+    if (!headers) return null;
+
+    try {
+      setLoadingDetails(true);
+      setError(null);
+      const response = await axios.get(`${config.API_URL}/submissions/${id}`, { headers });
+      setSelectedSubmission(response.data);
+      return response.data;
+    } catch (error) {
+      console.error(`Fehler beim Abrufen der Submission-Details (ID: ${id}):`, error);
+      setError('Fehler beim Laden der Submission-Details');
+      setSelectedSubmission(null);
+      return null;
+    } finally {
+      setLoadingDetails(false);
+    }
+  }, [checkUserAndToken, getHeaders]);
+
+  const fetchUserStatsSubmissions = useCallback(async () => {
+    if (!checkUserAndToken()) return;
+    const headers = getHeaders();
+    if (!headers) return;
+
+    try {
+      setLoadingStats(true);
+      setError(null);
+      const response = await axios.get(`${config.API_URL}/user-stats-submissions`, { headers });
+      setUserStatsSubmissions(response.data || []);
+    } catch (error) {
+      console.error('Fehler beim Abrufen der Statistik-Submissions:', error);
+      setError('Fehler beim Laden der Statistikdaten');
+      setUserStatsSubmissions([]);
+    } finally {
+      setLoadingStats(false);
+    }
+  }, [checkUserAndToken, getHeaders]);
 
   const submitTask = async (taskId, userEmail, file, details) => {
+    if (!checkUserAndToken()) throw new Error("Nicht eingeloggt");
+    const headers = getHeaders();
+    if (!headers) throw new Error("Kein Token");
+
     try {
-      checkToken();
       setLoading(true);
       let file_url = null;
-
       if (file) {
         const reader = new FileReader();
         file_url = await new Promise((resolve) => {
@@ -114,10 +181,8 @@ export const TaskProvider = ({ children }) => {
       }
 
       const task = tasks.find(t => t.id === taskId);
-      
       let calculatedPoints = task?.points || 0;
       let dynamicValue = null;
-      
       if (task?.dynamic && details?.dynamic_value) {
         dynamicValue = parseFloat(details.dynamic_value);
         calculatedPoints = Math.round(dynamicValue * (task.multiplier || 1));
@@ -133,11 +198,13 @@ export const TaskProvider = ({ children }) => {
         },
         file_url,
         fileName: file?.name
-      }, {
-        headers: getHeaders()
-      });
+      }, { headers });
 
-      await fetchSubmissions();
+      await fetchAllUserSubmissions();
+      if (user?.role === 'admin') {
+         await fetchSubmissions(pagination?.page || 1);
+      }
+
       return true;
     } catch (error) {
       console.error('Fehler beim Einreichen der Aufgabe:', error);
@@ -148,20 +215,24 @@ export const TaskProvider = ({ children }) => {
   };
 
   const handleApproveSubmission = async (submissionId, adminComment = '') => {
-    try {
-      checkToken();
-      const response = await axios.post(`${config.API_URL}/approve-submission`, 
-        { 
-          submissionId, 
-          adminComment
-        },
-        {
-          headers: getHeaders()
-        }
-      );
+    if (!checkUserAndToken()) throw new Error("Nicht eingeloggt");
+    const headers = getHeaders();
+    if (!headers) throw new Error("Kein Token");
 
-      await fetchSubmissions();
-      await fetchArchive();
+    try {
+      const response = await axios.post(`${config.API_URL}/approve-submission`, 
+        { submissionId, adminComment },
+        { headers }
+      );
+      
+      await fetchSubmissions(pagination?.page || 1);
+      await fetchAllUserSubmissions();
+      await fetchAllArchiveSubmissions();
+      await fetchUserStatsSubmissions();
+
+      if (selectedSubmission?.id === submissionId) {
+        setSelectedSubmission(prev => ({ ...prev, status: 'approved', admin_comment: adminComment }));
+      }
       return response.data;
     } catch (error) {
       console.error('Fehler bei der Genehmigung:', error);
@@ -170,20 +241,23 @@ export const TaskProvider = ({ children }) => {
   };
 
   const handleRejectSubmission = async (submissionId, adminComment = '') => {
+    if (!checkUserAndToken()) throw new Error("Nicht eingeloggt");
+    const headers = getHeaders();
+    if (!headers) throw new Error("Kein Token");
+    
     try {
-      checkToken();
       const response = await axios.post(`${config.API_URL}/reject-submission`,
-        { 
-          submissionId, 
-          adminComment
-        },
-        {
-          headers: getHeaders()
-        }
+        { submissionId, adminComment },
+        { headers }
       );
+      
+      await fetchSubmissions(pagination?.page || 1);
+      await fetchAllUserSubmissions();
+      await fetchAllArchiveSubmissions();
 
-      await fetchSubmissions();
-      await fetchArchive();
+      if (selectedSubmission?.id === submissionId) {
+        setSelectedSubmission(prev => ({ ...prev, status: 'rejected', admin_comment: adminComment }));
+      }
       return response.data;
     } catch (error) {
       console.error('Fehler bei der Ablehnung:', error);
@@ -193,17 +267,20 @@ export const TaskProvider = ({ children }) => {
   };
 
   const deleteSubmission = async (submissionId) => {
+    if (!checkUserAndToken()) throw new Error("Nicht eingeloggt");
+    const headers = getHeaders();
+    if (!headers) throw new Error("Kein Token");
+
     try {
-      checkToken();
       setLoading(true);
       setError(null);
 
-      const response = await axios.delete(`${config.API_URL}/delete-submission/${submissionId}`, {
-        headers: getHeaders()
-      });
+      const response = await axios.delete(`${config.API_URL}/delete-submission/${submissionId}`, { headers });
 
       console.log('Einsendung erfolgreich gelöscht');
-      await fetchSubmissions();
+      await fetchAllUserSubmissions();
+      await fetchSubmissions(pagination?.page || 1);
+      
     } catch (error) {
       console.error('Fehler beim Löschen der Einsendung:', error);
       setError('Fehler beim Löschen der Einsendung');
@@ -214,14 +291,13 @@ export const TaskProvider = ({ children }) => {
   };
 
   const deleteTask = async (taskId) => {
-    try {
-      checkToken();
-      setLoading(true);
-      
-      const response = await axios.delete(`${config.API_URL}/delete-task/${taskId}`, {
-        headers: getHeaders()
-      });
+    if (!checkUserAndToken()) throw new Error("Nicht eingeloggt");
+    const headers = getHeaders();
+    if (!headers) throw new Error("Kein Token");
 
+    try {
+      setLoading(true);
+      const response = await axios.delete(`${config.API_URL}/delete-task/${taskId}`, { headers });
       await fetchTasks();
     } catch (error) {
       console.error('Fehler beim Löschen der Aufgabe:', error);
@@ -232,27 +308,19 @@ export const TaskProvider = ({ children }) => {
     }
   };
 
-  const handlePointChange = (userId, newPoints) => {
-    // Logik zum Aktualisieren der Punkte
-  };
-
-  const sendConfirmationEmail = (email, code) => {
-    // Logik zum Senden der E-Mail
-  };
-
   const toggleTaskVisibility = async (taskId, isHidden) => {
+    if (!checkUserAndToken()) throw new Error("Nicht eingeloggt");
+    const headers = getHeaders();
+    if (!headers) throw new Error("Kein Token");
+
     try {
-      checkToken();
       setLoading(true);
       setError(null);
-
       const response = await axios.post(
         `${config.API_URL}/toggle-task-visibility/${taskId}`,
         { is_hidden: isHidden },
-        { headers: getHeaders() }
+        { headers }
       );
-
-      // Aktualisiere die lokale Tasks-Liste
       setTasks(prevTasks => 
         prevTasks.map(task => 
           task.id === taskId 
@@ -260,7 +328,6 @@ export const TaskProvider = ({ children }) => {
             : task
         )
       );
-
       toast.success(isHidden ? 'Aufgabe ausgeblendet' : 'Aufgabe wieder eingeblendet');
     } catch (error) {
       console.error('Fehler beim Ändern der Sichtbarkeit:', error);
@@ -272,21 +339,31 @@ export const TaskProvider = ({ children }) => {
   };
 
   const contextValue = {
+    user,
     tasks,
     submissions,
-    archive,
+    pagination,
+    allUserSubmissions,
+    allArchiveSubmissions,
+    userStatsSubmissions,
+    selectedSubmission,
     loading,
+    loadingDetails,
+    loadingStats,
+    loadingArchive,
+    loadingUserSubmissions,
     error,
     fetchTasks,
     fetchSubmissions,
-    fetchArchive,
+    fetchAllUserSubmissions,
+    fetchAllArchiveSubmissions,
+    fetchSubmissionDetails,
+    fetchUserStatsSubmissions,
     submitTask,
     handleApproveSubmission,
     handleRejectSubmission,
     deleteSubmission,
     deleteTask,
-    handlePointChange,
-    sendConfirmationEmail,
     toggleTaskVisibility,
   };
 

@@ -14,9 +14,9 @@
   font-size: 1.8rem;
 }
 
-.filter-controls {
+.participants-filter-controls {
   display: grid;
-  grid-template-columns: 3fr 2fr 1fr;
+  grid-template-columns: 2fr 1fr auto;
   gap: 1rem;
   margin-bottom: 1.5rem;
   background-color: white;
@@ -34,6 +34,43 @@
   border-radius: 6px;
   font-size: 0.95rem;
   box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.filter-actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+.bulk-action-button {
+  padding: 10px 12px;
+  background-color: #ffc107;
+  color: #333;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  height: 42px;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+}
+
+.bulk-action-button:hover:not(:disabled) {
+  background-color: #e0a800;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.bulk-action-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.bulk-action-button svg {
+  margin-right: 3px;
 }
 
 .refresh-button {
@@ -91,38 +128,59 @@
 }
 
 /* Spaltenbreiten präzise definieren */
-.participants-table th:nth-child(1), /* Name */
+.participants-table th:nth-child(1), /* Checkbox */
 .participants-table td:nth-child(1) {
-  width: 12%;
+  width: 40px;
 }
 
-.participants-table th:nth-child(2), /* Email */
+.participants-table th:nth-child(2), /* Name */
 .participants-table td:nth-child(2) {
-  width: 22%;
+  width: 15%;
 }
 
-.participants-table th:nth-child(3), /* Klasse */
+.participants-table th:nth-child(3), /* Email */
 .participants-table td:nth-child(3) {
+  width: 15%;
+}
+
+.participants-table th:nth-child(4), /* Klasse */
+.participants-table td:nth-child(4) {
   width: 8%;
   text-align: center;
 }
 
-.participants-table th:nth-child(4), /* Punkte */
-.participants-table td:nth-child(4) {
-  width: 7%;
+.participants-table th:nth-child(5), /* Punkte */
+.participants-table td:nth-child(5) {
+  width: 12%;
   text-align: center;
 }
 
-.participants-table th:nth-child(5), /* Status */
-.participants-table td:nth-child(5) {
+.participants-table th:nth-child(6), /* Status */
+.participants-table td:nth-child(6) {
   width: 13%;
   text-align: center;
 }
 
-.participants-table th:nth-child(6), /* Aktionen */
-.participants-table td:nth-child(6) {
-  width: 38%;
+.participants-table th:nth-child(7), /* Aktionen */
+.participants-table td:nth-child(7) {
+  width: 33%;
   text-align: right;
+  padding-right: 12px;
+}
+
+.participants-table th.checkbox-column,
+.participants-table td.checkbox-cell {
+  width: 40px;
+  text-align: center;
+  padding-left: 12px;
+  padding-right: 0;
+}
+
+.participants-table th.checkbox-column input,
+.participants-table td.checkbox-cell input {
+  cursor: pointer;
+  width: 16px;
+  height: 16px;
 }
 
 .participants-table tbody tr {
@@ -137,6 +195,11 @@
 .participants-table tbody tr:hover {
   background-color: #f0f7ff;
   box-shadow: 0 0 0 1px #e3f0ff inset;
+}
+
+.participants-table tbody tr.selected-row {
+  background-color: #e6f7ff !important;
+  box-shadow: inset 3px 0 0 0 #007bff;
 }
 
 .sortable-header {
@@ -162,11 +225,14 @@
 }
 
 .points-cell input {
-  width: 80%;
-  padding: 8px 10px;
+  /* width: 90%; /* Relative Breite kann problematisch sein */
+  min-width: 60px; /* Feste Mindestbreite */
+  padding: 6px 8px; /* Etwas weniger Padding für mehr Platz innen */
+  height: 30px; /* Feste Höhe */
+  font-size: 1rem; /* Größere Schrift */
+  box-sizing: border-box; /* Verhindert, dass Padding die Breite erhöht */
   border: 1px solid #ddd;
   border-radius: 4px;
-  font-size: 0.95rem;
   text-align: center;
 }
 
@@ -180,7 +246,6 @@
 /* Aktionsspalte speziell stylen */
 .actions-header {
   text-align: right;
-  width: 35%;
 }
 
 .actions-cell {
@@ -193,7 +258,6 @@
   display: flex;
   justify-content: flex-end;
   align-items: center;
-  padding-right: 0;
   width: 100%;
 }
 
@@ -320,13 +384,13 @@
 }
 
 @media (max-width: 992px) {
-  .filter-controls {
+  .participants-filter-controls {
     grid-template-columns: 1fr 1fr 1fr;
   }
 }
 
 @media (max-width: 768px) {
-  .filter-controls {
+  .participants-filter-controls {
     grid-template-columns: 1fr;
     grid-template-rows: auto auto auto;
   }

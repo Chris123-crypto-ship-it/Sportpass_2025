@@ -9,30 +9,17 @@ const nodemailer = require('nodemailer');
 
 const app = express();
 
-// CORS-Konfiguration
-const corsOptions = {
-  origin: [
-    'https://sportpass-2025.vercel.app',
-    'http://localhost:3000'  // Für lokale Entwicklung
-  ],
+// Aktiviere CORS für alle Routen
+app.use(cors({
+  origin: 'https://sportpass-2025.vercel.app',
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true,
-  optionsSuccessStatus: 200
-};
+  credentials: true
+}));
 
-app.use(cors(corsOptions));
-app.use(express.json());
-
-// Erhöhe das Limit für JSON-Payloads
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ limit: '10mb', extended: true }));
-
-// Middleware zum Debuggen von CORS
-app.use((req, res, next) => {
-  console.log(`${new Date().toISOString()} | ${req.method} ${req.url} | Origin: ${req.headers.origin || 'keine'}`);
-  next();
-});
+// Body Parser
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 // Supabase Client
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
@@ -293,14 +280,11 @@ app.post('/add-task', authenticateToken, async (req, res) => {
       static_points,
       difficulty,
       expiration_date,
-      max_submissions,
-      details_link,
-      is_easter_egg,
-      available_date
+      max_submissions
     } = req.body;
 
     // Debug-Log
-    console.log('Received task data:', { ...req.body, available_date });
+    console.log('Received task data:', req.body);
 
     // Validierung
     if (!title) {
@@ -322,16 +306,6 @@ app.post('/add-task', authenticateToken, async (req, res) => {
       });
     }
 
-    // Osterei-spezifische Logik
-    const isEasterEgg = is_easter_egg === true;
-    // Punkte: 5 für Ostereier, sonst normal berechnen (oder Standard 0 für dynamisch)
-    let taskPoints = 0;
-    if (isEasterEgg) {
-        taskPoints = 5;
-    } else if (!isDynamic) {
-        taskPoints = parseInt(static_points) || 0;
-    }
-
     // Aufgabendaten vorbereiten
     const taskData = {
       title: title.trim(),
@@ -340,13 +314,10 @@ app.post('/add-task', authenticateToken, async (req, res) => {
       dynamic: isDynamic,
       dynamic_type: isDynamic ? dynamic_type : null,
       multiplier: isDynamic ? parseFloat(points_per_unit) || 1 : null,
-      points: taskPoints,
+      points: !isDynamic ? parseInt(static_points) : 0, // 0 für dynamische Aufgaben
       difficulty: parseInt(difficulty) || 1,
       expiration_date: expiration_date ? new Date(expiration_date).toISOString() : null,
-      max_submissions: max_submissions ? parseInt(max_submissions) : null,
-      details_link: details_link || null, 
-      is_easter_egg: isEasterEgg,
-      available_date: isEasterEgg && available_date ? new Date(available_date).toISOString().split('T')[0] : null
+      max_submissions: max_submissions ? parseInt(max_submissions) : null
     };
 
     // Debug-Log
@@ -378,21 +349,18 @@ app.post('/add-task', authenticateToken, async (req, res) => {
 // 🔹 Alle Aufgaben abrufen
 app.get('/tasks', authenticateToken, async (req, res) => {
   try {
+    const currentDate = new Date().toISOString();
     const { view } = req.query;
-    const today = new Date().toISOString().split('T')[0];
-
+    
     // Basis-Query erstellen
     let query = supabase
       .from('tasks')
       .select('*')
       .order('created_at', { ascending: false });
 
-    // Filterlogik für die normale Benutzeransicht
+    // Nur in der normalen Tasks-Ansicht (wenn kein view Parameter) ausgeblendete Aufgaben filtern
     if (!view) {
-        query = query.or(`and(is_easter_egg.eq.false,is_hidden.eq.false),and(is_easter_egg.eq.true,available_date.eq.${today})`);
-        console.log(`Lade Tasks für Benutzeransicht am ${today}`);
-    } else {
-        console.log("Admin-Ansicht: Lade alle Tasks");
+      query = query.eq('is_hidden', false);
     }
 
     const { data: tasks, error } = await query;
@@ -504,7 +472,7 @@ app.post('/submit-task', authenticateToken, async (req, res) => {
     // Hole die Aufgabe aus der Datenbank
     const { data: task, error: taskError } = await supabase
       .from('tasks')
-      .select('*, is_easter_egg, available_date')
+      .select('*')
       .eq('id', taskId)
       .single();
     
@@ -512,24 +480,6 @@ app.post('/submit-task', authenticateToken, async (req, res) => {
       console.error('Fehler beim Abrufen der Aufgabe:', taskError);
       return res.status(404).json({ message: 'Aufgabe nicht gefunden' });
     }
-
-    // --- Prüfung für Ostereier --- START ---
-    if (task.is_easter_egg === true) {
-        const today = new Date().toISOString().split('T')[0];
-        const availableDate = task.available_date;
-
-        if (!availableDate) {
-            console.error(`Osterei (Task ID: ${taskId}) hat kein available_date!`);
-            return res.status(500).json({ message: 'Fehler bei der Aufgabenkonfiguration.' });
-        }
-
-        if (availableDate !== today) {
-            const formattedAvailableDate = new Date(availableDate + 'T00:00:00Z').toLocaleDateString('de-DE');
-            console.log(`Versuchte Einreichung für Osterei ${taskId} am falschen Tag. Verfügbar: ${availableDate}, Heute: ${today}`);
-            return res.status(400).json({ message: `Dieses Osterei kann nur am ${formattedAvailableDate} gesammelt werden.` });
-        }
-    }
-    // --- Prüfung für Ostereier --- ENDE ---
 
     // Prüfe, ob die maximale Anzahl an Einreichungen erreicht wurde
     if (task.max_submissions) {
@@ -554,10 +504,7 @@ app.post('/submit-task', authenticateToken, async (req, res) => {
 
     // Berechne die Punkte
     let calculatedPoints;
-    if (task.is_easter_egg === true) {
-        calculatedPoints = 5;
-        console.log('Osterei Punkte gesetzt:', calculatedPoints);
-    } else if (task.dynamic && details?.dynamic_value) {
+    if (task.dynamic && details?.dynamic_value) {
       // Für dynamische Aufgaben
       const dynamicValue = parseFloat(details.dynamic_value);
       calculatedPoints = Math.round(dynamicValue * task.multiplier);
@@ -569,12 +516,6 @@ app.post('/submit-task', authenticateToken, async (req, res) => {
     } else {
       // Für statische Aufgaben
       calculatedPoints = task.points;
-    }
-
-    // Stelle sicher, dass calculatedPoints definiert ist (Sicherheitscheck)
-    if (calculatedPoints === undefined || calculatedPoints === null) {
-        console.error(`Fehler: calculatedPoints ist undefined/null für Task ${taskId}. Task-Details:`, task);
-        calculatedPoints = 0; // Setze auf 0, um Fehler zu vermeiden, aber logge das Problem
     }
 
     // Speichere die Submission mit allen relevanten Informationen
@@ -626,63 +567,55 @@ app.post('/submit-task', authenticateToken, async (req, res) => {
 
 // 🔹 Einsendungen abrufen
 app.get('/submissions', async (req, res) => {
+  console.log(`${new Date().toISOString()} | Submissions Request erhalten (VEREINFACHT) für Seite ${req.query.page || 1}`);
   try {
-    const { data: submissions, error } = await supabase
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 50;
+    const offset = (page - 1) * limit;
+
+    console.log(`${new Date().toISOString()} | Führe SEHR VEREINFACHTE Datenbankabfrage aus (limit: ${limit}, offset: ${offset})...`);
+    
+    // SEHR VEREINFACHTE Abfrage: Kein Join, nur minimale Felder
+    const { data: submissions, error, count } = await supabase
       .from('submissions')
       .select(`
-        *,
-        tasks:task_id (
-          id,
-          title,
-          dynamic,
-          dynamic_type,
-          multiplier,
-          points,
-          expiration_date
-        )
-      `)
-      .order('created_at', { ascending: false });
+        id, 
+        task_id, 
+        user_email,
+        status,
+        created_at,
+        admin_comment 
+      `, { count: 'exact' })
+      .order('created_at', { ascending: false })
+      .range(offset, offset + limit - 1);
 
     if (error) {
-      console.error('Fehler beim Abrufen der Einsendungen:', error);
-      return res.status(500).json({ message: 'Fehler beim Abrufen der Einsendungen' });
+      console.error(`${new Date().toISOString()} | Fehler beim Abrufen der Einsendungen (VEREINFACHT):`, error);
+      return res.status(500).json({ 
+        message: 'Fehler beim Abrufen der Einsendungen', 
+        error: error.message 
+      });
     }
+    
+    console.log(`${new Date().toISOString()} | SEHR VEREINFACHTE Datenbankabfrage erfolgreich (${submissions?.length || 0} Einträge). Sende minimale Rohdaten...`);
 
-    // Einsendungen mit berechneten Punkten anreichern
-    const submissionsWithInfo = submissions.map(submission => {
-      let submissionDetails;
-      try {
-        submissionDetails = typeof submission.details === 'string' 
-          ? JSON.parse(submission.details) 
-          : submission.details;
-      } catch (e) {
-        console.error('Fehler beim Parsen der Submission-Details:', e);
-        submissionDetails = {};
+    // Sende minimale Rohdaten und Pagination-Informationen
+    res.json({
+      submissions: submissions || [], // Sende nur die Basis-Daten
+      pagination: {
+        total: count,
+        page,
+        limit,
+        pages: Math.ceil(count / limit)
       }
-
-      // Punkte aus den gespeicherten Details verwenden
-      const calculatedPoints = submissionDetails.task_points || 0;
-      
-      const isExpired = submission.tasks.expiration_date && 
-        new Date(submission.tasks.expiration_date) < new Date();
-
-      return {
-        ...submission,
-        calculated_points: calculatedPoints,
-        task_status: isExpired ? 'expired' : 'active',
-        submission_details: {
-          ...submissionDetails,
-          task_type: submission.tasks.dynamic ? 'dynamic' : 'static',
-          base_points: submission.tasks.points,
-          multiplier: submission.tasks.multiplier
-        }
-      };
     });
-
-    res.json(submissionsWithInfo);
+    console.log(`${new Date().toISOString()} | Minimale Rohe Antwort erfolgreich gesendet.`);
   } catch (error) {
-    console.error('Server-Fehler:', error);
-    res.status(500).json({ message: 'Interner Serverfehler' });
+    console.error(`${new Date().toISOString()} | Unerwarteter Server-Fehler (VEREINFACHT):`, error);
+    res.status(500).json({ 
+      message: 'Interner Serverfehler', 
+      error: error.message 
+    });
   }
 });
 
@@ -1702,6 +1635,284 @@ app.delete('/users/:id', authenticateToken, isAdmin, async (req, res) => {
 // Ping-Endpunkt für Keep-Alive
 app.get('/ping', (req, res) => {
   res.status(200).json({ status: 'ok', message: 'Server is alive' });
+});
+
+// NEUER ENDPUNKT: Alle für Statistiken relevanten Submissions eines Benutzers laden
+app.get('/user-stats-submissions', authenticateToken, async (req, res) => {
+  const userEmail = req.user.email; // Email aus dem Token holen
+  console.log(`${new Date().toISOString()} | Stats-Submissions angefordert für User: ${userEmail}`);
+  try {
+    // Nur genehmigte Submissions holen, nur relevante Felder auswählen
+    const { data: submissions, error } = await supabase
+      .from('submissions')
+      .select(`
+        id,
+        task_id,
+        user_email,
+        status,
+        created_at,
+        details, 
+        admin_comment
+      `)
+      .eq('user_email', userEmail)
+      .eq('status', 'approved'); // Nur genehmigte für Gesamtpunkte etc.
+      // Optional: Nach Datum sortieren, falls benötigt
+      // .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error(`${new Date().toISOString()} | Fehler beim Abrufen der Stats-Submissions für ${userEmail}:`, error);
+      return res.status(500).json({ message: 'Fehler beim Abrufen der Statistikdaten', error: error.message });
+    }
+
+    console.log(`${new Date().toISOString()} | Stats-Submissions für ${userEmail} erfolgreich abgerufen (${submissions?.length || 0} Einträge).`);
+
+    // Optional: Hier könnten die Punkte bereits extrahiert werden, um das Frontend zu entlasten
+    const processedSubmissions = submissions.map(sub => {
+        let points = 0;
+        try {
+            const details = typeof sub.details === 'string' ? JSON.parse(sub.details) : (sub.details || {});
+            points = details.task_points || details.calculated_points || 0;
+        } catch (e) {
+            console.warn(`Warnung: Konnte Details für Submission ${sub.id} nicht parsen.`);
+            // Fallback vielleicht über Task-Daten? Hier nicht inkludiert, da Task-Join fehlt.
+        }
+        return {
+            id: sub.id,
+            task_id: sub.task_id,
+            created_at: sub.created_at,
+            calculated_points: points // Direkt die Punkte mitgeben
+            // Weitere benötigte Felder hier hinzufügen
+        };
+    });
+
+    res.json(processedSubmissions || []); // Verarbeitete Daten senden
+
+  } catch (error) {
+    console.error(`${new Date().toISOString()} | Unerwarteter Server-Fehler bei Stats-Submissions für ${userEmail}:`, error);
+    res.status(500).json({ message: 'Interner Serverfehler', error: error.message });
+  }
+});
+
+// NEUER ENDPUNKT: Einzelne Submission mit allen Details laden
+app.get('/submissions/:id', authenticateToken, async (req, res) => {
+  const { id } = req.params;
+  console.log(`${new Date().toISOString()} | Einzelne Submission Details angefordert (ID: ${id})`);
+  try {
+    const { data: submission, error } = await supabase
+      .from('submissions')
+      .select(`
+        *,
+        tasks (
+          id,
+          title,
+          dynamic,
+          dynamic_type,
+          multiplier,
+          points,
+          description,
+          category,
+          difficulty,
+          expiration_date
+        )
+      `)
+      .eq('id', id)
+      .maybeSingle(); // Gibt null zurück, wenn nicht gefunden, statt Fehler
+
+    if (error) {
+      console.error(`${new Date().toISOString()} | Fehler beim Abrufen der Submission-Details (ID: ${id}):`, error);
+      return res.status(500).json({ message: 'Fehler beim Abrufen der Submission-Details', error: error.message });
+    }
+
+    if (!submission) {
+      console.log(`${new Date().toISOString()} | Submission nicht gefunden (ID: ${id})`);
+      return res.status(404).json({ message: 'Submission nicht gefunden' });
+    }
+
+    console.log(`${new Date().toISOString()} | Submission-Details erfolgreich abgerufen (ID: ${id})`);
+    
+    // Parse details JSON sicher
+    let submissionDetails;
+    try {
+      submissionDetails = typeof submission.details === 'string' 
+        ? JSON.parse(submission.details) 
+        : (submission.details || {});
+    } catch (e) {
+      console.error(`${new Date().toISOString()} | Fehler beim Parsen der Details (ID: ${id}):`, e);
+      submissionDetails = {}; // Fallback
+    }
+    
+    // Berechne Punkte (falls nötig, hier oder im Frontend)
+    const calculatedPoints = submissionDetails.task_points || 0; 
+
+    // Kombiniere die Daten für die Antwort
+    const responseData = {
+      ...submission,
+      details: submissionDetails, // Geparsed
+      calculated_points: calculatedPoints,
+      // Füge hier ggf. weitere berechnete Felder hinzu
+    };
+
+    res.json(responseData);
+
+  } catch (error) {
+    console.error(`${new Date().toISOString()} | Unerwarteter Server-Fehler bei Submission-Details (ID: ${id}):`, error);
+    res.status(500).json({ message: 'Interner Serverfehler', error: error.message });
+  }
+});
+
+// NEUER ENDPUNKT: Alle archivierten Submissions eines Benutzers laden (approved/rejected)
+app.get('/archive-submissions', authenticateToken, async (req, res) => {
+  const userEmail = req.user.email;
+  console.log(`${new Date().toISOString()} | Archiv-Submissions angefordert für User: ${userEmail}`);
+  try {
+    const { data: submissions, error } = await supabase
+      .from('submissions')
+      .select(`
+        id,
+        task_id,
+        user_email,
+        status,
+        created_at,
+        admin_comment,
+        details,
+        file_url, 
+        tasks ( title ) 
+      `)
+      .eq('user_email', userEmail)
+      .in('status', ['approved', 'rejected']) // Nur genehmigte oder abgelehnte
+      .order('created_at', { ascending: false }); // Neueste zuerst
+
+    if (error) {
+      console.error(`${new Date().toISOString()} | Fehler beim Abrufen der Archiv-Submissions für ${userEmail}:`, error);
+      return res.status(500).json({ message: 'Fehler beim Abrufen der Archivdaten', error: error.message });
+    }
+
+    console.log(`${new Date().toISOString()} | Archiv-Submissions für ${userEmail} erfolgreich abgerufen (${submissions?.length || 0} Einträge).`);
+    
+    // Optional: Details parsen, falls im Frontend benötigt (kann auch dort geschehen)
+    const processedSubmissions = submissions.map(sub => {
+       let parsedDetails = {};
+       try {
+         parsedDetails = typeof sub.details === 'string' ? JSON.parse(sub.details) : (sub.details || {});
+       } catch(e) {
+          console.warn(`Warnung: Konnte Details für Archiv-Submission ${sub.id} nicht parsen.`);
+       }
+       return {
+         ...sub,
+         details: parsedDetails, // Sende geparste Details
+         task_title: sub.tasks?.title || 'Unbekannte Aufgabe' // Füge Task-Titel hinzu
+       };
+    });
+
+    res.json(processedSubmissions || []);
+
+  } catch (error) {
+    console.error(`${new Date().toISOString()} | Unerwarteter Server-Fehler bei Archiv-Submissions für ${userEmail}:`, error);
+    res.status(500).json({ message: 'Interner Serverfehler', error: error.message });
+  }
+});
+
+// NEUER ENDPUNKT: Alle Submissions eines Benutzers laden (minimal für Zählung/Status)
+app.get('/user-all-submissions', authenticateToken, async (req, res) => {
+  const userEmail = req.user.email;
+  console.log(`${new Date().toISOString()} | ALLE User-Submissions (minimal) angefordert für User: ${userEmail}`);
+  try {
+    const { data: submissions, error } = await supabase
+      .from('submissions')
+      .select(`
+        id,
+        task_id,
+        user_email,
+        status,
+        created_at 
+      `)
+      .eq('user_email', userEmail)
+      .order('created_at', { ascending: false }); // Optional: Neueste zuerst
+
+    if (error) {
+      console.error(`${new Date().toISOString()} | Fehler beim Abrufen ALLER User-Submissions für ${userEmail}:`, error);
+      return res.status(500).json({ message: 'Fehler beim Abrufen der Benutzer-Einsendungen', error: error.message });
+    }
+
+    console.log(`${new Date().toISOString()} | ALLE User-Submissions für ${userEmail} erfolgreich abgerufen (${submissions?.length || 0} Einträge).`);
+    
+    res.json(submissions || []); // Nur die minimalen Daten senden
+
+  } catch (error) {
+    console.error(`${new Date().toISOString()} | Unerwarteter Server-Fehler bei ALLEN User-Submissions für ${userEmail}:`, error);
+    res.status(500).json({ message: 'Interner Serverfehler', error: error.message });
+  }
+});
+
+// NEUER ENDPUNKT: Punkte für mehrere Benutzer gleichzeitig aktualisieren
+app.post('/bulk-update-points', authenticateToken, isAdmin, async (req, res) => {
+  const { userIds, pointsToAdd } = req.body;
+  console.log(`${new Date().toISOString()} | Bulk Punkt-Update angefordert für ${userIds?.length} User. Punkte: ${pointsToAdd}`);
+
+  if (!Array.isArray(userIds) || userIds.length === 0 || typeof pointsToAdd !== 'number') {
+    return res.status(400).json({ message: 'Ungültige Anfrage: userIds (Array) und pointsToAdd (Nummer) sind erforderlich.' });
+  }
+
+  try {
+    // Erstelle ein Array von Promises für die einzelnen Updates
+    const updatePromises = userIds.map(async (userId) => {
+      try {
+        // Hole zuerst den aktuellen Punktestand, um Inkrementierung sicherzustellen
+        const { data: currentUser, error: fetchUserError } = await supabase
+          .from('users')
+          .select('points')
+          .eq('id', userId)
+          .single();
+          
+        if (fetchUserError || !currentUser) {
+            console.error(`Fehler beim Abrufen von User ${userId} oder User nicht gefunden:`, fetchUserError?.message || 'Nicht gefunden');
+            return null; // Überspringen dieses Users, gibt null zurück für das Ergebnisarray
+        }
+
+        const currentPoints = currentUser.points || 0;
+        const newPoints = currentPoints + pointsToAdd;
+
+        // Führe das einzelne Update nur für die 'points'-Spalte durch
+        const { data: updatedUser, error: updateError } = await supabase
+          .from('users')
+          .update({ points: newPoints })
+          .eq('id', userId)
+          .select('id, points'); // Gibt das aktualisierte Objekt zurück
+
+        if (updateError) {
+          console.error(`Fehler beim Aktualisieren von User ${userId}:`, updateError.message);
+          return null; // Überspringen bei Fehler
+        }
+        // Stelle sicher, dass Daten zurückgegeben wurden
+        return updatedUser && updatedUser.length > 0 ? updatedUser[0] : null; 
+      } catch (innerError) {
+        // Fange unerwartete Fehler innerhalb der map-Funktion ab
+        console.error(`Unerwarteter Fehler bei der Verarbeitung von User ${userId}:`, innerError.message);
+        return null;
+      }
+    });
+
+    // Führe alle Update-Promises parallel aus
+    const results = await Promise.all(updatePromises);
+
+    // Filtere fehlerhafte Updates heraus (die null zurückgegeben haben)
+    const successfulUpdates = results.filter(result => result !== null && result !== undefined);
+    const failedUpdatesCount = userIds.length - successfulUpdates.length;
+
+    if (failedUpdatesCount > 0) {
+         console.warn(`${new Date().toISOString()} | Bulk Punkt-Update: ${failedUpdatesCount} Updates fehlgeschlagen.`);
+    }
+
+    console.log(`${new Date().toISOString()} | Bulk Punkt-Update erfolgreich für ${successfulUpdates.length} User.`);
+    res.json({
+      message: `Punkte erfolgreich für ${successfulUpdates.length} von ${userIds.length} Benutzern aktualisiert.`,
+      updatedUsers: successfulUpdates // Gibt die erfolgreich aktualisierten IDs und neuen Punktestände zurück
+    });
+
+  } catch (error) { // Fängt Fehler außerhalb der map-Funktion oder von Promise.all (falls reject verwendet wurde)
+    console.error(`${new Date().toISOString()} | Unerwarteter Server-Fehler bei Bulk Punkt-Update:`, error);
+    res.status(500).json({ message: 'Interner Serverfehler', error: error.message });
+  }
 });
 
 // 🔹 Server starten

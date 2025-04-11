@@ -66,7 +66,7 @@
 .task-description {
   color: #5a6a7e;
   line-height: 1.6;
-  margin-bottom: 12px;
+  margin-bottom: 20px;
 }
 
 .task-meta {
@@ -671,111 +671,4 @@
 /* Container für die Tasks-Inhalte */
 .tasks-content {
   width: 100%;
-}
-
-/* NEU: Styling für den Detail-Link */
-.task-details-link {
-  margin-bottom: 20px; /* Abstand nach dem Link */
-}
-
-.details-link-button {
-  display: inline-flex; /* Damit Icon und Text nebeneinander sind */
-  align-items: center;
-  background-color: #e8f4fd; /* Helles Blau */
-  color: #2980b9; /* Dunkleres Blau */
-  padding: 8px 15px;
-  border-radius: 20px;
-  text-decoration: none;
-  font-weight: 500;
-  font-size: 0.9rem;
-  border: 1px solid #bce0fb;
-  transition: all 0.2s ease;
-}
-
-.details-link-button:hover {
-  background-color: #d1e9fc;
-  color: #2573a7;
-  border-color: #a9d6fa;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  transform: translateY(-1px);
-}
-
-/* NEU: Styling für Challenge Banner */
-.challenge-banner {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 1.5rem 2rem;
-  border-radius: 12px;
-  margin-bottom: 2.5rem; /* Abstand zu den normalen Aufgaben */
-  background: linear-gradient(135deg, #f3a04e, #ffcc80); /* Osterliche Farben (Orange/Gelb) */
-  color: #5d4037; /* Dunkles Braun für Text */
-  box-shadow: 0 4px 15px rgba(243, 160, 78, 0.3);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.challenge-banner .banner-icon {
-  font-size: 2.5rem;
-  margin-right: 1.5rem;
-  flex-shrink: 0;
-  opacity: 0.8;
-}
-
-.challenge-banner .banner-content {
-  flex-grow: 1;
-}
-
-.challenge-banner .banner-content h3 {
-  margin: 0 0 0.3rem 0;
-  font-size: 1.3rem;
-  font-weight: 600;
-}
-
-.challenge-banner .banner-content p {
-  margin: 0;
-  font-size: 0.95rem;
-  opacity: 0.9;
-}
-
-.challenge-banner .banner-button {
-  padding: 0.8rem 1.5rem;
-  background-color: white;
-  color: #f3a04e; /* Passend zum Banner-Gradient */
-  border: none;
-  border-radius: 8px;
-  text-decoration: none;
-  font-weight: 600;
-  font-size: 0.9rem;
-  transition: all 0.2s ease;
-  margin-left: 1rem;
-  white-space: nowrap;
-}
-
-.challenge-banner .banner-button:hover {
-  background-color: #fff5e6; /* Sehr helles Orange */
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  transform: translateY(-1px);
-}
-
-/* Optional: Responsive Anpassung für den Banner */
-@media (max-width: 768px) {
-  .challenge-banner {
-    flex-direction: column;
-    text-align: center;
-    padding: 1rem 1.5rem;
-  }
-
-  .challenge-banner .banner-icon {
-    margin-right: 0;
-    margin-bottom: 0.8rem;
-    font-size: 2rem;
-  }
-
-  .challenge-banner .banner-button {
-    margin-left: 0;
-    margin-top: 1rem;
-    width: 100%;
-    text-align: center;
-    display: block;
-  }
 } 

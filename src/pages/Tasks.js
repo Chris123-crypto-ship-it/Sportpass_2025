@@ -2,11 +2,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useTasks } from '../context/TaskContext';
 import { FaRunning, FaHeartbeat, FaDumbbell, FaMedal, FaFire, FaStar, 
-         FaUpload, FaFileImage, FaVideo, FaTrash, FaClock, FaCheck, FaTimes, FaFile, FaImage, FaCheckCircle, FaTimesCircle, FaUser, FaTag, FaFilter, FaInfoCircle, FaEye, FaSpinner, FaGift } from 'react-icons/fa';
-import { Link } from 'react-router-dom';
+         FaUpload, FaFileImage, FaVideo, FaTrash, FaClock, FaCheck, FaTimes, FaFile, FaImage, FaCheckCircle, FaTimesCircle, FaUser, FaTag, FaFilter, FaInfoCircle, FaEye, FaSpinner } from 'react-icons/fa';
 import { toast } from 'react-toastify';
 import '../styles/Tasks.css';
-import TaskCard from '../components/TaskCard';
 
 const Tasks = () => {
   const { user } = useAuth();
@@ -294,9 +292,7 @@ const Tasks = () => {
     );
   };
 
-  const safeAllUserSubmissions = Array.isArray(allUserSubmissions) ? allUserSubmissions : [];
-
-  const pendingUserSubmissions = safeAllUserSubmissions.filter(sub => 
+  const pendingUserSubmissions = allUserSubmissions.filter(sub => 
     sub.status === 'pending'
   );
 
@@ -405,6 +401,230 @@ const Tasks = () => {
     }
   };
 
+  const TaskCard = ({ task }) => {
+    console.log('Task Data:', {
+      expiration_date: task.expiration_date,
+      difficulty: task.difficulty,
+      task: task
+    });
+
+    const [selectedFile, setSelectedFile] = useState(null);
+    const [dynamicValue, setDynamicValue] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const isExpired = task.expiration_date && new Date(task.expiration_date) < new Date();
+
+    const userSubmissionsForThisTask = allUserSubmissions.filter(
+      s => s.task_id === task.id
+    );
+    
+    const userSubmissionsCount = userSubmissionsForThisTask.filter(
+      s => s.status === 'approved' || s.status === 'pending'
+    ).length;
+
+    const handleSubmit = async () => {
+      if (!user) {
+        toast.error('Bitte melde dich an.');
+        return;
+      }
+      if (isExpired) {
+        toast.warn('Diese Aufgabe ist bereits abgelaufen.');
+        return;
+      }
+
+      if (!selectedFile) {
+        toast.error('Bitte wähle eine Datei aus.');
+        return;
+      }
+      if (task.dynamic && (!dynamicValue || parseFloat(dynamicValue) <= 0)) {
+        toast.error(`Bitte gib einen Wert für ${task.dynamic_type === 'minutes' ? 'Minuten' : 'Kilometer'} ein.`);
+        return;
+      }
+
+      try {
+        setIsSubmitting(true);
+        const details = task.dynamic 
+          ? {
+              dynamic_value: dynamicValue,
+              dynamic_type: task.dynamic_type,
+            }
+          : {};
+        await submitTask(task.id, user.email, selectedFile, details);
+        setSelectedFile(null);
+        setDynamicValue('');
+        toast.success('Aufgabe erfolgreich eingereicht!');
+      } catch (error) {
+        console.error('Fehler beim Einreichen:', error);
+        const errorMsg = error.response?.data?.message || 'Fehler beim Einreichen der Aufgabe.';
+        toast.error(errorMsg);
+      } finally {
+        setIsSubmitting(false);
+      }
+    };
+
+    const formatExpirationDate = (dateString) => {
+      if (!dateString) return null;
+      try {
+        const date = new Date(dateString);
+        return date.toLocaleString('de-DE', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+      } catch (error) {
+        console.error('Fehler beim Formatieren des Datums:', error);
+        return null;
+      }
+    };
+
+    const renderDifficultyStars = (difficulty) => {
+      const level = parseInt(difficulty) || 0;
+      return (
+        <div className="difficulty-stars">
+          {[1, 2, 3].map((star) => (
+            <span 
+              key={star} 
+              className={`star ${star <= level ? 'active' : ''}`}
+            >
+              ★
+            </span>
+          ))}
+        </div>
+      );
+    };
+
+    return (
+      <div className={`task-card ${isExpired ? 'expired' : ''}`}>
+        <div className="task-header">
+          <h3 className="task-title">{task.title}</h3>
+          <div className="task-meta-info">
+            <span className={`task-category ${task.category.toLowerCase()}`}>
+              {task.category}
+            </span>
+            <div className="task-points">
+              {task.dynamic ? (
+                <span>{task.multiplier} Punkte pro {task.dynamic_type === 'minutes' ? 'Minute' : 'Kilometer'}</span>
+              ) : (
+                <span>{task.points} Punkte</span>
+              )}
+            </div>
+          </div>
+        </div>
+
+        <div className="task-details">
+          <div className="task-description">
+            {task.description}
+          </div>
+
+          <div className="meta-info">
+            <div className="difficulty">
+              <span>Schwierigkeit: </span>
+              {renderDifficultyStars(task.difficulty)}
+            </div>
+
+            {task.expiration_date && (
+              <div className={`expiration ${isExpired ? 'expired-text' : ''}`}>
+                <span>
+                  {new Date(task.expiration_date) < new Date() 
+                    ? 'Abgelaufen am: ' 
+                    : 'Läuft ab am: '
+                  }
+                  {formatExpirationDate(task.expiration_date)}
+                </span>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="task-submission">
+          {task.dynamic && (
+            <div className="dynamic-input-wrapper">
+              <label>
+                {task.dynamic_type === 'minutes' ? 'Minuten' : 'Kilometer'}:
+                <input
+                  type="number"
+                  min="0"
+                  step={task.dynamic_type === 'minutes' ? '1' : '0.1'}
+                  value={dynamicValue}
+                  onChange={(e) => setDynamicValue(e.target.value)}
+                  className="dynamic-input"
+                />
+              </label>
+              {dynamicValue > 0 && task.multiplier && (
+                <div className="calculated-points">
+                  = {Math.round(parseFloat(dynamicValue) * task.multiplier)} Punkte
+                </div>
+              )}
+            </div>
+          )}
+          
+          {task.max_submissions && (
+            <div className="submission-count-info">
+              <span className={userSubmissionsCount >= task.max_submissions ? 'submissions-limit-reached' : ''}>
+                Einreichungen: {userSubmissionsCount} / {task.max_submissions}
+              </span>
+            </div>
+          )}
+
+          <div className="file-upload-section">
+            <label className="file-upload-label">
+              <input
+                type="file"
+                accept="image/*,video/*"
+                onChange={(e) => {
+                  const file = e.target.files[0];
+                  if (file && (file.type.startsWith('image/') || file.type.startsWith('video/'))) {
+                    setSelectedFile(file);
+                  } else {
+                    toast.warn('Bitte nur Bilder oder Videos hochladen');
+                    e.target.value = null;
+                    setSelectedFile(null);
+                  }
+                }}
+                style={{ display: 'none' }}
+                disabled={userSubmissionsCount >= task.max_submissions || isSubmitting || isExpired}
+              />
+              {!selectedFile ? (
+                <div className={`upload-placeholder ${userSubmissionsCount >= task.max_submissions || isExpired ? 'disabled' : ''}`}>
+                  <FaUpload />
+                  <span>Nachweis hochladen (Bild/Video)</span>
+                </div>
+              ) : (
+                <div className="file-preview">
+                  {selectedFile.type.startsWith('image/') ? (
+                    <img src={URL.createObjectURL(selectedFile)} alt="Vorschau" />
+                  ) : (
+                    <div className="video-preview">
+                      <FaVideo />
+                      <span>{selectedFile.name}</span>
+                    </div>
+                  )}
+                  <button
+                    type="button"
+                    className="remove-file"
+                    onClick={() => setSelectedFile(null)}
+                    disabled={isSubmitting}
+                  >
+                    <FaTrash />
+                  </button>
+                </div>
+              )}
+            </label>
+          </div>
+
+          <button
+            className="submit-button"
+            onClick={handleSubmit}
+            disabled={!selectedFile || (task.dynamic && !dynamicValue) || userSubmissionsCount >= task.max_submissions || isSubmitting || isExpired}
+          >
+            {isSubmitting ? <FaSpinner className="spin" /> : (isExpired ? 'Abgelaufen' : (userSubmissionsCount >= task.max_submissions ? 'Maximale Anzahl erreicht' : 'Aufgabe einreichen'))}
+          </button>
+        </div>
+      </div>
+    );
+  };
+
   const renderAttachmentPreview = (submissionData) => {
     if (!submissionData || !submissionData.file_url) return <div className="no-attachment">Kein Anhang vorhanden.</div>;
     
@@ -486,7 +706,7 @@ const Tasks = () => {
             ) : (
               <>
                 {filteredTasks.map(task => (
-                  <TaskCard key={task.id} task={task} isChallengeView={false} />
+                  <TaskCard key={task.id} task={task} />
                 ))}
               </>
             )}

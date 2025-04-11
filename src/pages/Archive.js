@@ -1,127 +1,76 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTasks } from '../context/TaskContext';
-import { useAuth } from '../context/AuthContext'; // Für den eingeloggten Benutzer
-import { FaCheckCircle, FaTimesCircle, FaFile, FaImage, FaVideo, FaUser, FaClock, FaInfoCircle } from 'react-icons/fa';
+import { useAuth } from '../context/AuthContext';
+import { FaCheckCircle, FaTimesCircle, FaFile, FaImage, FaVideo, FaClock, FaInfoCircle, FaEye, FaSpinner } from 'react-icons/fa';
 import './Archive.css';
 
 const Archive = () => {
-  const { archive, tasks, fetchArchive, fetchTasks, loading, error } = useTasks();
+  const {
+    allArchiveSubmissions,
+    fetchAllArchiveSubmissions,
+    selectedSubmission,
+    fetchSubmissionDetails,
+    loadingArchive,
+    loadingDetails,
+    error
+  } = useTasks();
   const { user } = useAuth();
+  const [viewingSubmissionId, setViewingSubmissionId] = useState(null);
 
   useEffect(() => {
-    fetchArchive();
-    fetchTasks('archive'); // Wir brauchen auch die Tasks für die Titel
-  }, []);
+    if (user) {
+      fetchAllArchiveSubmissions();
+    }
+  }, [user, fetchAllArchiveSubmissions]);
 
-  const getTaskTitle = (taskId) => {
-    const task = tasks.find(t => t.id === taskId);
-    return task ? task.title : 'Unbekannte Aufgabe';
+  const getTaskTitle = (submission) => {
+    return submission.task_title || 'Unbekannte Aufgabe';
   };
 
   const formatDate = (dateString) => {
     if (!dateString) return 'Kein Datum';
     try {
-      const options = { 
-        year: 'numeric', 
-        month: 'long', 
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-      };
-      return new Date(dateString).toLocaleDateString('de-DE', options);
+      return new Date(dateString).toLocaleDateString('de-DE', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+      });
     } catch (error) {
+      console.error('Fehler beim Formatieren des Datums:', error);
       return 'Ungültiges Datum';
     }
   };
 
-  const renderFilePreview = (fileUrl, fileName) => {
-    if (!fileUrl) return null;
-    
-    if (fileUrl.match(/\.(jpg|jpeg|png|gif)$/i) || fileUrl.startsWith('data:image')) {
-      return (
-        <div className="archive-file-preview">
-          <img src={fileUrl} alt={fileName || "Eingereichte Datei"} />
-          <div className="archive-file-name">{fileName || "Bild"}</div>
-        </div>
-      );
-    }
-    
-    if (fileUrl.match(/\.(mp4|webm|ogg)$/i) || fileUrl.startsWith('data:video')) {
-      return (
-        <div className="archive-file-preview">
-          <video controls>
-            <source src={fileUrl} type="video/mp4" />
-            Ihr Browser unterstützt keine Videowiedergabe.
-          </video>
-          <div className="archive-file-name">{fileName || "Video"}</div>
-        </div>
-      );
-    }
-
-    return (
-      <div className="archive-file">
-        <FaFile className="archive-file-icon" /> 
-        <span className="archive-file-name">{fileName || "Datei angehängt"}</span>
-      </div>
-    );
-  };
-
-  const formatDetails = (details) => {
-    if (!details) return '';
-    try {
-      // Falls details ein String ist, der ein JSON enthält
-      const detailsObj = typeof details === 'string' ? JSON.parse(details) : details;
-      
-      // Wenn es ein duration-Objekt ist
-      if (detailsObj.duration) {
-        return `Dauer: ${detailsObj.duration} Minuten`;
-      }
-      
-      // Wenn es ein normaler String ist
-      if (typeof detailsObj === 'string') {
-        return detailsObj;
-      }
-      
-      // Fallback: Objekt in lesbaren String umwandeln
-      return JSON.stringify(detailsObj);
-    } catch (e) {
-      // Falls JSON.parse fehlschlägt oder andere Fehler auftreten
-      return String(details);
+  const handleViewDetails = (submissionId) => {
+    if (viewingSubmissionId === submissionId) {
+      setViewingSubmissionId(null);
+    } else {
+      setViewingSubmissionId(submissionId);
+      fetchSubmissionDetails(submissionId);
     }
   };
 
-  // Filter für benutzerspezifische, archivierte Submissions
-  const userArchive = archive.filter(submission => 
-    submission.user_email === user?.email && 
-    (submission.status === 'approved' || submission.status === 'rejected')
+  const renderAttachmentPreview = (submissionData) => {
+    if (!submissionData || !submissionData.file_url) return null;
+
+    const url = submissionData.file_url;
+    if (url.startsWith('data:image')) {
+      return <img src={url} alt="Anhang" className="archive-file-preview-image" />;
+    } else if (url.startsWith('data:video')) {
+      return (
+        <video controls className="archive-file-preview-video">
+          <source src={url} /> Ihr Browser unterstützt das Video nicht.
+        </video>
+      );
+    }
+    return <div className="archive-file-preview-other"><FaFile /> Anhang</div>;
+  };
+
+  const userFilteredArchive = allArchiveSubmissions.filter(submission =>
+    submission.user_email === user?.email
   );
 
-  const renderSubmissionAttachment = (submission) => {
-    if (!submission.file_url) return null;
-
-    if (submission.file_url.match(/\.(jpg|jpeg|png|gif)$/i) || submission.file_url.startsWith('data:image')) {
-      return (
-        <div className="archive-file-preview">
-          <img src={submission.file_url} alt="Eingereichte Datei" />
-        </div>
-      );
-    }
-
-    if (submission.file_url.match(/\.(mp4|webm|ogg)$/i) || submission.file_url.startsWith('data:video')) {
-      return (
-        <div className="archive-file-preview">
-          <video controls>
-            <source src={submission.file_url} type="video/mp4" />
-            Ihr Browser unterstützt keine Videowiedergabe.
-          </video>
-        </div>
-      );
-    }
-
-    return null;
-  };
-
-  if (error) {
+  if (error && !userFilteredArchive.length) {
     return (
       <div className="archive-container">
         <h1 className="archive-header">Fehler</h1>
@@ -133,58 +82,87 @@ const Archive = () => {
   return (
     <div className="archive-container">
       <div className="archive-info">
-        <FaInfoCircle className="info-icon" />
+        <FaInfoCircle />
         <div className="info-text">
-          Hier findest du deine letzten akzeptierten und abgelehnten Einsendungen mit Datum. Aufgaben werden automatisch nach einer Woche aus dem Archiv gelöscht. Deine erreichten Punkte in der Rangliste bleiben davon unberührt und werden dauerhaft gespeichert.
+          Hier findest du eine Übersicht deiner genehmigten oder abgelehnten Einsendungen.
+          <strong>Beachte:</strong> Einträge werden nach 7 Tagen automatisch aus dieser Ansicht entfernt, deine erreichten Punkte bleiben jedoch bestehen.
         </div>
       </div>
       <h1 className="archive-header">Mein Archiv</h1>
-      {loading ? (
-        <div className="no-archive">Archiv wird geladen...</div>
-      ) : !userArchive || userArchive.length === 0 ? (
-        <div className="no-archive">Keine archivierten Einsendungen vorhanden</div>
+
+      {loadingArchive ? (
+        <div className="loading-container"><div className="spinner"></div><p>Archiv wird geladen...</p></div>
+      ) : !userFilteredArchive || userFilteredArchive.length === 0 ? (
+        <div className="no-archive">Keine archivierten Einsendungen gefunden.</div>
       ) : (
-        <div className="archive-grid">
-          {userArchive.map((submission) => (
-            <div key={submission.id} className="archive-card">
-              <div className="archive-card-header">
-                <h2 className="archive-task-title">
-                  {getTaskTitle(submission.task_id)}
-                </h2>
-                <span className={`archive-status ${submission.status}`}>
-                  {submission.status === 'approved' ? (
-                    <React.Fragment>
-                      <FaCheckCircle /> Genehmigt
-                    </React.Fragment>
-                  ) : (
-                    <React.Fragment>
-                      <FaTimesCircle /> Abgelehnt
-                    </React.Fragment>
+        <>
+          <div className="archive-grid">
+            {userFilteredArchive.map((submission) => {
+              const isViewing = viewingSubmissionId === submission.id;
+              const detailsData = (isViewing && selectedSubmission?.id === submission.id) ? selectedSubmission : null;
+
+              return (
+                <div key={submission.id} className={`archive-card ${isViewing ? 'details-visible' : ''}`}>
+                  <div className="archive-card-header">
+                    <h2 className="archive-task-title">
+                      {getTaskTitle(submission)}
+                    </h2>
+                    <span className={`archive-status ${submission.status}`}>
+                      {submission.status === 'approved' ? <FaCheckCircle /> : <FaTimesCircle />}
+                      {submission.status === 'approved' ? ' Genehmigt' : ' Abgelehnt'}
+                    </span>
+                  </div>
+
+                  <div className="archive-meta">
+                    <div className="archive-date">
+                      <FaClock /> {formatDate(submission.created_at)}
+                    </div>
+                  </div>
+
+                  {submission.admin_comment && (
+                    <div className="archive-comment">
+                      <strong>Admin:</strong> {submission.admin_comment}
+                    </div>
                   )}
-                </span>
-              </div>
-              
-              {submission.file_url && (
-                <div className="archive-file-container">
-                  {renderSubmissionAttachment(submission)}
-                </div>
-              )}
 
-              {submission.admin_comment && (
-                <div className="archive-comment">
-                  <strong>Admin-Kommentar:</strong> {submission.admin_comment}
-                </div>
-              )}
+                  <button onClick={() => handleViewDetails(submission.id)} className="view-details-button archive-details-button">
+                    {loadingDetails && isViewing ? <FaSpinner className="spin" /> : <FaEye />}
+                    {isViewing ? ' Details verbergen' : ' Details anzeigen'}
+                  </button>
 
-              <div className="archive-meta">
-                <div className="archive-date">
-                  <FaClock />
-                  {formatDate(submission.created_at)}
+                  {isViewing && (
+                    <div className="archive-details-content">
+                      {loadingDetails ? (
+                        <div className="loading-details"><FaSpinner className="spin"/> Lade Details...</div>
+                      ) : !detailsData ? (
+                         <div className="error-details">Details nicht verfügbar oder werden geladen...</div>
+                      ) : (
+                         <>
+                          <div className="archive-file-container">
+                             {renderAttachmentPreview(detailsData)}
+                          </div>
+                          {detailsData.details && typeof detailsData.details === 'object' && Object.keys(detailsData.details).length > 0 && (
+                            <div className="additional-details">
+                              <h4>Zusätzliche Informationen:</h4>
+                              <ul>
+                                {Object.entries(detailsData.details).map(([key, value]) => {
+                                  if (!['task_points', 'task_type', 'base_points', 'calculated_points', 'dynamic_value', 'multiplier'].includes(key) && value !== null && value !== '') {
+                                    return <li key={key}><strong>{key.replace(/_/g, ' ')}:</strong> {String(value)}</li>;
+                                  }
+                                  return null;
+                                })}
+                              </ul>
+                            </div>
+                          )}
+                         </>
+                      )}
+                    </div>
+                  )}
                 </div>
-              </div>
-            </div>
-          ))}
-        </div>
+              );
+            })}
+          </div>
+        </>
       )}
     </div>
   );
