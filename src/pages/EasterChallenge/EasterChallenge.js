@@ -164,7 +164,7 @@ const EasterChallenge = () => {
       <div className="easter-challenge-header">
         <h1 className="easter-title">
           <FaEgg className="easter-egg-icon" />
-          Oster-Challenge 2023
+          Oster-Challenge 2025
         </h1>
         <div className="easter-stats">
           <div className="collected-eggs">
