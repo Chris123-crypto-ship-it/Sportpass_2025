@@ -431,10 +431,17 @@ app.get('/tasks', authenticateToken, async (req, res) => {
       .select('*')
       .order('created_at', { ascending: false });
 
-    // Nur in der normalen Tasks-Ansicht (wenn kein view Parameter) ausgeblendete Aufgaben und Oster-Eier filtern
-    if (!view) {
+    // Spezielle Behandlung für Oster-Challenge
+    if (view === 'easter') {
+      // Nur Oster-Eier anzeigen
+      query = query.eq('is_easter_egg', true);
+    } else if (!view) {
+      // In der normalen Ansicht (wenn kein view Parameter) ausgeblendete Aufgaben und Oster-Eier filtern
       query = query.eq('is_hidden', false);
-      query = query.eq('is_easter_egg', false); // Oster-Eier ausfiltern in der normalen Ansicht
+      query = query.eq('is_easter_egg', false);
+    } else {
+      // Für andere Ansichten nur ausgeblendete Aufgaben filtern
+      query = query.eq('is_hidden', false);
     }
 
     const { data: tasks, error } = await query;
