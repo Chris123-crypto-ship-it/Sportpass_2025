@@ -431,9 +431,10 @@ app.get('/tasks', authenticateToken, async (req, res) => {
       .select('*')
       .order('created_at', { ascending: false });
 
-    // Nur in der normalen Tasks-Ansicht (wenn kein view Parameter) ausgeblendete Aufgaben filtern
+    // Nur in der normalen Tasks-Ansicht (wenn kein view Parameter) ausgeblendete Aufgaben und Oster-Eier filtern
     if (!view) {
       query = query.eq('is_hidden', false);
+      query = query.eq('is_easter_egg', false); // Oster-Eier ausfiltern in der normalen Ansicht
     }
 
     const { data: tasks, error } = await query;
