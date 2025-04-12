@@ -299,7 +299,7 @@ export const TaskProvider = ({ children }) => {
     try {
       setLoading(true);
       const response = await axios.delete(`${config.API_URL}/delete-task/${taskId}`, { headers });
-      await fetchTasks();
+      await fetchTasks(user?.role === 'admin' ? 'admin' : undefined);
     } catch (error) {
       console.error('Fehler beim Löschen der Aufgabe:', error);
       setError(error.message);
@@ -330,6 +330,9 @@ export const TaskProvider = ({ children }) => {
         )
       );
       toast.success(isHidden ? 'Aufgabe ausgeblendet' : 'Aufgabe wieder eingeblendet');
+      if (user?.role === 'admin') {
+        await fetchTasks('admin');
+      }
     } catch (error) {
       console.error('Fehler beim Ändern der Sichtbarkeit:', error);
       setError('Fehler beim Ändern der Sichtbarkeit');
