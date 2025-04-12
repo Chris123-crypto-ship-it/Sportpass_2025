@@ -89,7 +89,7 @@ const Login = () => {
         <FaInfoCircle style={{ marginRight: '10px', marginTop: '3px', flexShrink: 0 }} />
         <div>
           <strong>Liebe Sportpass Teilnehmer!</strong>
-          <p>Punkte für die erste Workoutwoche in den Turnstunden sind absofort eingetragen!</p>
+          <p>Oster-Challenge! Die Oster-Challenge ist nun verfügbar. Sammle die Eier und hol dir den Punkte-Jackpot!</p>
           <p>Neue Woche Neue Aufgaben. Absofort sind neue Aufgaben für euch einzusehen. Alte Einsendungen werden in naher Zukunft aus dem Archiv gelöscht. Dies hat aber KEINEN Einfluss auf eure Punkte!</p>
           <p>Bei Fragen oder Problemen sind wir jederzeit unter unserem Support (ganz unten zu finden) für euch da!</p>
           <p>Viel Spaß,<br/>Euer Sportpass Team</p>
