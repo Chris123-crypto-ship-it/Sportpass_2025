@@ -11,7 +11,9 @@ const app = express();
 
 // Aktiviere CORS für alle Routen
 app.use(cors({
-  origin: 'https://sportpass-2025.vercel.app',
+  origin: ['https://sportpass-2025.vercel.app',
+         'http://localhost:3000',
+        'http://localhost:3001'],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true
