@@ -175,8 +175,8 @@ const EasterChallenge = () => {
 
       <div className="easter-challenge-description">
         <p>
-          Finde die versteckten Ostereier auf der SportPass-Webseite und sammle Punkte! 
-          Jeden Tag werden neue Eier versteckt, die nach einem Tag ablaufen.
+          Sammle die Ostereier auf dieser Seite und sichere dir Punkte! 
+          Jeden Tag werden neue Eier hinzugefügt, die nach einem Tag ablaufen.
           Für jedes gefundene Ei bekommst du 5 Punkte. 
           Der Benutzer mit den meisten gesammelten Eiern am Ende der Challenge erhält einen Bonus von 100 Punkten!
         </p>
