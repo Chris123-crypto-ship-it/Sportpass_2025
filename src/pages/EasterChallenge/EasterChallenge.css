@@ -1,0 +1,520 @@
+/* Easter Challenge Container */
+.easter-challenge-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+  min-height: calc(100vh - 80px);
+  background: linear-gradient(135deg, #f8f9fc, #eef2f7);
+}
+
+/* Header */
+.easter-challenge-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid rgba(226, 232, 240, 0.8);
+}
+
+.easter-title {
+  font-size: 2.4rem;
+  font-weight: 800;
+  color: #2c3e50;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: linear-gradient(90deg, #fd7e14, #e74c3c);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.easter-egg-icon {
+  font-size: 2rem;
+  color: #fd7e14;
+}
+
+.easter-stats {
+  background: white;
+  border-radius: 1rem;
+  padding: 1rem 1.5rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+}
+
+.collected-eggs {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.egg-count {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: #fd7e14;
+}
+
+.egg-label {
+  font-size: 0.9rem;
+  color: #718096;
+  font-weight: 500;
+}
+
+/* Description */
+.easter-challenge-description {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 1rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+}
+
+.easter-challenge-description p {
+  color: #4a5568;
+  line-height: 1.6;
+  font-size: 1.1rem;
+}
+
+/* Content Layout */
+.easter-content {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 2rem;
+}
+
+/* Section Titles */
+.section-title {
+  font-size: 1.6rem;
+  color: #2d3748;
+  margin-bottom: 1.5rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Easter Eggs Grid */
+.easter-eggs-section {
+  background: white;
+  padding: 2rem;
+  border-radius: 1rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+}
+
+.easter-eggs-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1.5rem;
+}
+
+.easter-egg-card {
+  background: #f8fafc;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  border: 2px solid transparent;
+  position: relative;
+  overflow: hidden;
+}
+
+.easter-egg-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  border-color: #fd7e14;
+}
+
+.easter-egg-card.submitted {
+  opacity: 0.7;
+  background: #f1f5f9;
+  cursor: default;
+}
+
+.easter-egg-card.submitted:hover {
+  transform: none;
+  box-shadow: none;
+  border-color: transparent;
+}
+
+.easter-egg-icon-container {
+  position: relative;
+  width: 60px;
+  height: 60px;
+  background: linear-gradient(135deg, #fd7e14, #e74c3c);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
+.egg-icon {
+  font-size: 1.8rem;
+  color: white;
+}
+
+.submitted-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(72, 187, 120, 0.9);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 700;
+  font-size: 1.5rem;
+}
+
+.easter-egg-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin: 0.5rem 0;
+  color: #2d3748;
+}
+
+.easter-egg-description {
+  color: #718096;
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+  flex-grow: 1;
+}
+
+.easter-egg-points {
+  font-weight: 700;
+  color: #fd7e14;
+  margin-bottom: 1rem;
+}
+
+.collect-button {
+  background: linear-gradient(135deg, #fd7e14, #e74c3c);
+  color: white;
+  border: none;
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.collect-button:hover {
+  background: linear-gradient(135deg, #e74c3c, #fd7e14);
+  transform: translateY(-2px);
+}
+
+/* Ranking Section */
+.easter-ranking-section {
+  background: white;
+  padding: 2rem;
+  border-radius: 1rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+}
+
+.easter-ranking-list {
+  margin-bottom: 2rem;
+}
+
+.ranking-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  border-bottom: 1px solid #edf2f7;
+  transition: all 0.3s ease;
+}
+
+.ranking-item:hover {
+  background: #f8fafc;
+}
+
+.ranking-item.current-user {
+  background: #fdedea;
+  border-left: 4px solid #fd7e14;
+  font-weight: 600;
+}
+
+.ranking-item.top-three {
+  background: #fffbea;
+}
+
+.ranking-item.top-three:first-child {
+  background: linear-gradient(to right, #fffbea, #feecdc);
+  border-left: 4px solid #d69e2e;
+}
+
+.ranking-position {
+  font-weight: 700;
+  color: #4a5568;
+  width: 40px;
+}
+
+.ranking-user {
+  flex: 1;
+  color: #2d3748;
+}
+
+.ranking-eggs {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #fd7e14;
+  font-weight: 700;
+}
+
+.ranking-info {
+  background: #f8fafc;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  border-left: 4px solid #4299e1;
+}
+
+.ranking-info p {
+  color: #4a5568;
+  margin: 0.5rem 0;
+  font-size: 0.9rem;
+}
+
+/* Loading and Empty States */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 3rem 0;
+  color: #718096;
+}
+
+.spinner {
+  border: 5px solid rgba(0, 0, 0, 0.1);
+  border-radius: 50%;
+  border-top: 5px solid #fd7e14;
+  width: 50px;
+  height: 50px;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.no-eggs {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 3rem 1rem;
+  color: #718096;
+  text-align: center;
+  border: 2px dashed #cbd5e0;
+  border-radius: 1rem;
+}
+
+.no-eggs svg {
+  font-size: 2rem;
+  color: #cbd5e0;
+  margin-bottom: 1rem;
+}
+
+/* Modal */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 1rem;
+  padding: 2rem;
+  width: 90%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+}
+
+.modal-content h3 {
+  margin-top: 0;
+  color: #2d3748;
+  border-bottom: 2px solid #edf2f7;
+  padding-bottom: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.error-message {
+  background: #fed7d7;
+  color: #c53030;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.selected-egg-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: #f8fafc;
+  border-radius: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.selected-egg-info .egg-icon {
+  color: #fd7e14;
+}
+
+.file-upload-container {
+  margin-bottom: 1.5rem;
+}
+
+.file-upload-label {
+  display: block;
+  width: 100%;
+  cursor: pointer;
+}
+
+.file-input {
+  display: none;
+}
+
+.upload-placeholder {
+  padding: 2rem;
+  border: 2px dashed #cbd5e0;
+  border-radius: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  color: #718096;
+  transition: all 0.3s ease;
+}
+
+.upload-placeholder:hover {
+  border-color: #fd7e14;
+  background: #fffaf0;
+}
+
+.upload-placeholder svg {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+  color: #fd7e14;
+}
+
+.file-preview {
+  margin: 1rem 0;
+}
+
+.file-preview img {
+  width: 100%;
+  max-height: 250px;
+  object-fit: contain;
+  border-radius: 0.5rem;
+  border: 1px solid #edf2f7;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.cancel-button {
+  padding: 0.75rem 1.5rem;
+  background: #edf2f7;
+  color: #4a5568;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.cancel-button:hover:not(:disabled) {
+  background: #e2e8f0;
+}
+
+.submit-button {
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(135deg, #fd7e14, #e74c3c);
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.submit-button:hover:not(:disabled) {
+  background: linear-gradient(135deg, #e74c3c, #fd7e14);
+}
+
+.submit-button:disabled, .cancel-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.spinner-icon {
+  animation: spin 1s linear infinite;
+}
+
+/* Responsive Design */
+@media (max-width: 992px) {
+  .easter-content {
+    grid-template-columns: 1fr;
+  }
+  
+  .easter-ranking-section {
+    margin-top: 2rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .easter-challenge-container {
+    padding: 1rem;
+  }
+  
+  .easter-challenge-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  
+  .easter-title {
+    font-size: 2rem;
+  }
+  
+  .easter-stats {
+    width: 100%;
+  }
+  
+  .easter-eggs-grid {
+    grid-template-columns: 1fr;
+  }
+} 

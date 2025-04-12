@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { 
   FaTachometerAlt, FaMedal, FaTasks, FaChartBar, FaArchive, FaSignInAlt, 
   FaUserPlus, FaSignOutAlt, FaUser, FaAngleDown, FaUserCog, FaUserFriends,
-  FaBars, FaTimes
+  FaBars, FaTimes, FaEgg
 } from 'react-icons/fa';
 import logo from '../assets/logo.png';
 import '../styles/Navbar.css';
@@ -78,6 +78,13 @@ const Navbar = () => {
               {location.pathname === '/tasks' && (
                 <span className="task-info">Neue Aufgaben jeden Sonntag!</span>
               )}
+            </Link>
+          </li>
+          <li>
+            <Link to="/easter-challenge" className={location.pathname === '/easter-challenge' ? 'active' : ''}>
+              <FaEgg />
+              <span>Oster-Challenge</span>
+              <span className="task-info easter-info">Neue Eier täglich!</span>
             </Link>
           </li>
           <li>

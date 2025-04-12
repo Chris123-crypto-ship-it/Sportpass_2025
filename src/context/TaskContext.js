@@ -46,7 +46,8 @@ export const TaskProvider = ({ children }) => {
     try {
       setLoading(true);
       setError(null);
-      const response = await axios.get(`${config.API_URL}/tasks${view ? `?view=${view}` : ''}`, {
+      const queryParams = view ? `?view=${view}` : '';
+      const response = await axios.get(`${config.API_URL}/tasks${queryParams}`, {
         headers
       });
       setTasks(response.data);

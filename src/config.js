@@ -1,7 +1,5 @@
-// API-Konfiguration für verschiedene Umgebungen
-const API_URL = process.env.NODE_ENV === 'production'
-  ? 'https://sportpass-2025.onrender.com' // Aktualisierte URL für den gehosteten Backend
-  : 'http://localhost:3001';
+// API-Konfiguration - immer auf Remote-Server zeigen (zum Testen)
+const API_URL = 'https://sportpass-2025.onrender.com';
 
 export default {
   API_URL

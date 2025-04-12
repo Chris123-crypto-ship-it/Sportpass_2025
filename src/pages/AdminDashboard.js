@@ -14,15 +14,15 @@ const AdminDashboard = () => {
   const [newTask, setNewTask] = useState({
     title: '',
     description: '',
-    category: 'cardio',
+    category: 'Ausdauer',
+    difficulty: 1,
+    points: 5,
+    dynamic: false,
     dynamic_type: 'none',
     points_per_unit: 1,
-    static_points: 10,
     expiration_date: '',
-    difficulty: 1,
-    required_proof: ['photo'],
     max_submissions: '',
-    additional_details: {}
+    is_easter_egg: false
   });
   const [currentAdminComment, setCurrentAdminComment] = useState('');
   const [error, setError] = useState(null);
@@ -103,8 +103,8 @@ const AdminDashboard = () => {
       const isDynamic = newTask.dynamic_type !== 'none';
       
       // Validierung je nach Aufgabentyp
-      if (!isDynamic && (!newTask.static_points || parseInt(newTask.static_points) <= 0)) {
-        throw new Error('Bitte geben Sie eine positive Punktzahl für statische Aufgaben ein');
+      if (!isDynamic && (!newTask.points || parseInt(newTask.points) <= 0)) {
+        throw new Error('Bitte geben Sie eine positive Punktzahl ein');
       }
       
       if (isDynamic && (!newTask.points_per_unit || parseFloat(newTask.points_per_unit) <= 0)) {
@@ -114,17 +114,31 @@ const AdminDashboard = () => {
       // Debug-Log
       console.log('Sending task data:', newTask);
 
-      const taskData = {
+      let taskData = {
         title: newTask.title.trim(),
         description: newTask.description.trim(),
         category: newTask.category,
         dynamic_type: newTask.dynamic_type,
         points_per_unit: parseFloat(newTask.points_per_unit) || 1,
-        static_points: parseInt(newTask.static_points) || 10,
+        points: parseInt(newTask.points) || 5,
         difficulty: parseInt(newTask.difficulty) || 1,
         expiration_date: newTask.expiration_date,
-        max_submissions: newTask.max_submissions ? parseInt(newTask.max_submissions) : null
+        max_submissions: newTask.max_submissions ? parseInt(newTask.max_submissions) : null,
+        is_easter_egg: newTask.is_easter_egg
       };
+
+      // Bei Oster-Eiern werden einige Werte fest gesetzt
+      if (taskData.is_easter_egg) {
+        taskData.category = 'Ostern';
+        taskData.points = 5;
+        taskData.dynamic = false;
+        taskData.dynamic_type = 'none';
+      }
+
+      // Format für das Ablaufdatum anpassen
+      if (taskData.expiration_date) {
+        taskData.expiration_date = new Date(taskData.expiration_date).toISOString();
+      }
 
       const response = await axios.post(`${config.API_URL}/add-task`, taskData, {
         headers: getHeaders()
@@ -136,13 +150,15 @@ const AdminDashboard = () => {
       setNewTask({
         title: '',
         description: '',
-        category: 'cardio',
+        category: 'Ausdauer',
+        difficulty: 1,
+        points: 5,
+        dynamic: false,
         dynamic_type: 'none',
         points_per_unit: 1,
-        static_points: 10,
-        difficulty: 1,
         expiration_date: '',
-        max_submissions: ''
+        max_submissions: '',
+        is_easter_egg: false
       });
 
       // Tasks neu laden
@@ -255,18 +271,20 @@ const AdminDashboard = () => {
 
           <div className="form-row">
             <div className="form-group">
-              <label>Kategorie: *</label>
-              <select
-                value={newTask.category}
+              <label>Kategorie:</label>
+              <select 
+                name="category" 
+                value={newTask.category} 
                 onChange={handleChange}
-                name="category"
-                required
+                disabled={newTask.is_easter_egg}
               >
-                <option value="cardio">Cardio</option>
-                <option value="strength">Kraft</option>
-                <option value="flexibility">Flexibilität</option>
-                <option value="endurance">Ausdauer</option>
-                <option value="team">Team</option>
+                <option value="Ausdauer">Ausdauer</option>
+                <option value="Kraft">Kraft</option>
+                <option value="Beweglichkeit">Beweglichkeit</option>
+                <option value="Koordination">Koordination</option>
+                <option value="Spiel & Sport">Spiel & Sport</option>
+                <option value="Ernährung">Ernährung</option>
+                <option value="Sonstiges">Sonstiges</option>
               </select>
             </div>
 
@@ -286,14 +304,14 @@ const AdminDashboard = () => {
 
           {newTask.dynamic_type === 'none' ? (
             <div className="form-group">
-              <label>Punkte: *</label>
-              <input
-                type="number"
-                value={newTask.static_points}
-                onChange={handleChange}
-                name="static_points"
-                min="1"
-                required
+              <label>Punkte:</label>
+              <input 
+                type="number" 
+                name="points" 
+                value={newTask.points} 
+                onChange={handleChange} 
+                min="0"
+                disabled={newTask.is_easter_egg || newTask.dynamic}
               />
             </div>
           ) : (
@@ -347,6 +365,36 @@ const AdminDashboard = () => {
               placeholder="Unbegrenzt, wenn leer"
             />
             <small className="form-text text-muted">Leer lassen für unbegrenzte Einreichungen.</small>
+          </div>
+
+          <div className="form-group checkbox-group">
+            <label>
+              <input
+                type="checkbox"
+                name="is_easter_egg"
+                checked={newTask.is_easter_egg}
+                onChange={(e) => {
+                  const isEasterEgg = e.target.checked;
+                  setNewTask({
+                    ...newTask,
+                    is_easter_egg: isEasterEgg,
+                    ...(isEasterEgg && {
+                      category: 'Ostern',
+                      points: 5,
+                      dynamic: false,
+                      dynamic_type: 'none'
+                    })
+                  });
+                }}
+              />
+              <span>Oster-Ei</span>
+            </label>
+            {newTask.is_easter_egg && (
+              <div className="easter-egg-info">
+                Oster-Eier sind spezielle Aufgaben für die Oster-Challenge. 
+                Sie haben immer 5 Punkte und sind nicht dynamisch.
+              </div>
+            )}
           </div>
 
           <button type="submit" className="submit-button">

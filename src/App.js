@@ -24,6 +24,7 @@ import VerifyEmail from './pages/VerifyEmail';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 import Support from './pages/Support';
+import EasterChallenge from './pages/EasterChallenge/EasterChallenge';
 import './App.css';
 import './styles/Layout.css';
 
@@ -55,6 +56,7 @@ function App() {
                 {/* Geschützte Routen */}
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/tasks" element={<Tasks />} />
+                <Route path="/easter-challenge" element={<EasterChallenge />} />
                 <Route path="/stats" element={<Stats />} />
                 <Route path="/archive" element={<Archive />} />
                 <Route path="/profile" element={<Profile />} />
