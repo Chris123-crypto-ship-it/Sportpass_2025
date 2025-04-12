@@ -266,6 +266,75 @@ app.get('/users', authenticateToken, isAdmin, async (req, res) => {
   }
 });
 
+// 🔹 Rangliste für Oster-Challenge abrufen
+app.get('/easter-ranking', authenticateToken, async (req, res) => {
+  try {
+    // Bestimme alle Aufgaben, die als Oster-Eier markiert sind
+    const { data: easterEggTasks, error: tasksError } = await supabase
+      .from('tasks')
+      .select('id')
+      .eq('is_easter_egg', true);
+    
+    if (tasksError) throw tasksError;
+    
+    // Wenn keine Oster-Eier-Aufgaben gefunden wurden
+    if (!easterEggTasks || easterEggTasks.length === 0) {
+      return res.status(200).json({ 
+        ranking: [],
+        message: 'Keine Oster-Challenge-Aufgaben gefunden'
+      });
+    }
+    
+    // Extrahiere die Task-IDs
+    const easterEggTaskIds = easterEggTasks.map(task => task.id);
+    
+    // Zähle genehmigte Einsendungen für jedes Ei pro Benutzer
+    const { data: submissions, error: submissionsError } = await supabase
+      .from('submissions')
+      .select(`
+        user_email,
+        users:user_email (
+          name
+        )
+      `)
+      .in('task_id', easterEggTaskIds)
+      .eq('status', 'approved');
+    
+    if (submissionsError) throw submissionsError;
+    
+    // Berechne die Anzahl der Eier pro Benutzer
+    const userEggCounts = {};
+    submissions.forEach(submission => {
+      const email = submission.user_email;
+      userEggCounts[email] = (userEggCounts[email] || 0) + 1;
+    });
+    
+    // Erstelle die Rangliste
+    const ranking = Object.entries(userEggCounts).map(([email, count]) => {
+      // Finde den Benutzernamen
+      const submissionWithUser = submissions.find(s => s.user_email === email);
+      const userName = submissionWithUser?.users?.name || email;
+      
+      return {
+        email,
+        name: userName,
+        eggs: count
+      };
+    });
+    
+    // Sortiere die Rangliste absteigend nach Anzahl der Eier
+    ranking.sort((a, b) => b.eggs - a.eggs);
+    
+    return res.status(200).json({ ranking });
+  } catch (error) {
+    console.error('Fehler beim Abrufen der Oster-Rangliste:', error);
+    res.status(500).json({ 
+      message: 'Interner Serverfehler', 
+      error: error.message 
+    });
+  }
+});
+
 // Aufgabe erstellen (nur für Admins)
 app.post('/add-task', authenticateToken, async (req, res) => {
   try {
@@ -282,7 +351,8 @@ app.post('/add-task', authenticateToken, async (req, res) => {
       static_points,
       difficulty,
       expiration_date,
-      max_submissions
+      max_submissions,
+      is_easter_egg // Neues Feld für Oster-Eier
     } = req.body;
 
     // Debug-Log
@@ -294,7 +364,7 @@ app.post('/add-task', authenticateToken, async (req, res) => {
     }
 
     // Validierung für dynamische vs. statische Aufgaben
-    const isDynamic = dynamic_type !== 'none';
+    const isDynamic = dynamic_type !== 'none' && !is_easter_egg; // Oster-Eier sind nie dynamisch
     
     if (!isDynamic && (!static_points || static_points < 0)) {
       return res.status(400).json({ 
@@ -312,14 +382,15 @@ app.post('/add-task', authenticateToken, async (req, res) => {
     const taskData = {
       title: title.trim(),
       description: description?.trim() || '',
-      category,
+      category: is_easter_egg ? 'Ostern' : category, // Für Oster-Eier immer "Ostern" als Kategorie
       dynamic: isDynamic,
       dynamic_type: isDynamic ? dynamic_type : null,
       multiplier: isDynamic ? parseFloat(points_per_unit) || 1 : null,
-      points: !isDynamic ? parseInt(static_points) : 0, // 0 für dynamische Aufgaben
+      points: is_easter_egg ? 5 : (!isDynamic ? parseInt(static_points) : 0), // 5 Punkte für Oster-Eier
       difficulty: parseInt(difficulty) || 1,
       expiration_date: expiration_date ? new Date(expiration_date).toISOString() : null,
-      max_submissions: max_submissions ? parseInt(max_submissions) : null
+      max_submissions: max_submissions ? parseInt(max_submissions) : null,
+      is_easter_egg: !!is_easter_egg // Konvertiere zu Boolean
     };
 
     // Debug-Log
