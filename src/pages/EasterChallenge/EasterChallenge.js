@@ -37,9 +37,8 @@ const EasterChallenge = () => {
 
   useEffect(() => {
     if (tasks && tasks.length > 0) {
-      // Da wir bereits nach Ostereiern gefiltert haben, brauchen wir hier keinen Filter mehr
-      // oder können spezifischer filtern
-      const eggs = tasks.filter(task => !task.is_hidden);
+      // Stelle sicher, dass nur Oster-Eier angezeigt werden
+      const eggs = tasks.filter(task => !task.is_hidden && task.is_easter_egg === true);
       setEasterEggs(eggs);
     }
   }, [tasks]);
