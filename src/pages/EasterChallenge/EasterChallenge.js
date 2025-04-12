@@ -45,17 +45,16 @@ const EasterChallenge = () => {
   }, [tasks]);
 
   useEffect(() => {
-    if (allUserSubmissions && easterEggs.length > 0) {
+    if (allUserSubmissions) {
       // Zähle die gesammelten Eier des aktuellen Benutzers
+      // Verwende direkt die is_easter_egg-Eigenschaft der Submissions
       const collectedEggsCount = allUserSubmissions.filter(
-        submission => 
-          easterEggs.some(egg => egg.id === submission.task_id) && 
-          submission.status === 'approved'
+        submission => submission.is_easter_egg && submission.status === 'approved'
       ).length;
       
       setCollectedEggCount(collectedEggsCount);
     }
-  }, [allUserSubmissions, easterEggs]);
+  }, [allUserSubmissions]);
 
   // Funktion um Rangliste zu berechnen
   const fetchEasterRanking = useCallback(async () => {
