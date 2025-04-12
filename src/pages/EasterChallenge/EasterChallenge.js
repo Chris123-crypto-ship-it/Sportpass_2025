@@ -176,9 +176,9 @@ const EasterChallenge = () => {
       <div className="easter-challenge-description">
         <p>
           Finde die versteckten Ostereier auf der SportPass-Webseite und sammle Punkte! 
-          Jeden Tag werden neue Eier versteckt.
+          Jeden Tag werden neue Eier versteckt, die nach einem Tag ablaufen.
           Für jedes gefundene Ei bekommst du 5 Punkte. 
-          Der Benutzer mit den meisten gesammelten Eiern am Ende der Challenge erhält einen Bonus von 70 Punkten!
+          Der Benutzer mit den meisten gesammelten Eiern am Ende der Challenge erhält einen Bonus von 100 Punkten!
         </p>
       </div>
 
@@ -263,7 +263,8 @@ const EasterChallenge = () => {
           
           <div className="ranking-info">
             <p>Die Challenge läuft bis zum Ostersonntag (20. April 2025). Sammle fleißig weiter!</p>
-            <p>Dem Gewinner winken <span className="bonus-points">70 zusätzliche Punkte!</span></p>
+            <p>Achtung: Jedes Ei läuft nach einem Tag ab - verpasse keine Chance!</p>
+            <p>Dem Gewinner winken <span className="bonus-points">100 zusätzliche Punkte!</span></p>
           </div>
         </div>
       </div>
