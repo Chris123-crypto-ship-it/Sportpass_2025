@@ -497,7 +497,10 @@ const Tasks = () => {
     return (
       <div className={`task-card ${isExpired ? 'expired' : ''}`}>
         <div className="task-header">
-          <h3 className="task-title">{task?.title || 'Unbekannte Aufgabe'}</h3>
+          <h3 className="task-title">
+            {task?.is_easter_egg && <span className="easter-egg-icon">🥚 </span>}
+            {task?.title || 'Unbekannte Aufgabe'}
+          </h3>
           <div className="task-meta-info">
             <span className={`task-category ${(task?.category || '').toLowerCase()}`}>
               {task?.category || 'Keine Kategorie'}
