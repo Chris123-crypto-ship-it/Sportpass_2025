@@ -162,7 +162,7 @@ const AdminDashboard = () => {
       });
 
       // Tasks neu laden
-      await fetchTasks();
+      await fetchTasks('admin');
     } catch (error) {
       console.error('Error creating task:', error);
       toast.error(error.response?.data?.message || error.message || 'Fehler beim Erstellen der Aufgabe');
