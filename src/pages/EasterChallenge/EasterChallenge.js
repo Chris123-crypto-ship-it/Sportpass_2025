@@ -30,15 +30,16 @@ const EasterChallenge = () => {
 
   useEffect(() => {
     if (user) {
-      fetchTasks();
+      fetchTasks('easter');
       fetchAllUserSubmissions();
     }
   }, [user, fetchTasks, fetchAllUserSubmissions]);
 
   useEffect(() => {
     if (tasks && tasks.length > 0) {
-      // Filter für Oster-Eier-Aufgaben
-      const eggs = tasks.filter(task => task.is_easter_egg && !task.is_hidden);
+      // Da wir bereits nach Ostereiern gefiltert haben, brauchen wir hier keinen Filter mehr
+      // oder können spezifischer filtern
+      const eggs = tasks.filter(task => !task.is_hidden);
       setEasterEggs(eggs);
     }
   }, [tasks]);
@@ -164,7 +165,7 @@ const EasterChallenge = () => {
       <div className="easter-challenge-header">
         <h1 className="easter-title">
           <FaEgg className="easter-egg-icon" />
-          Oster-Challenge 2025
+          Oster-Challenge 2023
         </h1>
         <div className="easter-stats">
           <div className="collected-eggs">
