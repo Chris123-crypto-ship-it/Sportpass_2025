@@ -733,7 +733,7 @@ const Tasks = () => {
                   return (
                     <div key={submission.id} className="submission-card">
                       <div className="submission-header">
-                        <h4 className="submission-title">{task?.title || 'Unbekannte Aufgabe'}</h4>
+                        <h4 className="submission-title">{submission.task_title || task?.title || 'Unbekannte Aufgabe'}</h4>
                         <span className="submission-status pending">
                           <FaClock /> Ausstehend
                         </span>
@@ -772,7 +772,7 @@ const Tasks = () => {
                       return (
                         <div key={submission.id} className={`admin-submission-card ${isViewing ? 'details-visible' : ''}`}>
                           <div className="admin-submission-header">
-                            <h3>{task?.title || 'Unbekannte Aufgabe'}</h3>
+                            <h3>{submission.task_title || task?.title || 'Unbekannte Aufgabe'}</h3>
                             <div className="admin-submission-info">
                               <span className="admin-user">
                                 <FaUser /> {submission.user_email}
