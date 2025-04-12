@@ -431,8 +431,12 @@ app.get('/tasks', authenticateToken, async (req, res) => {
       .select('*')
       .order('created_at', { ascending: false });
 
+    // Wenn Admin-User, zeige alle Aufgaben an
+    if (req.user.role === 'admin' && view === 'admin') {
+      // Keine Filter für Admins im Admin-View - zeige alle Aufgaben
+    }
     // Spezielle Behandlung für Oster-Challenge
-    if (view === 'easter') {
+    else if (view === 'easter') {
       // Nur Oster-Eier anzeigen
       query = query.eq('is_easter_egg', true);
     } else if (!view) {
