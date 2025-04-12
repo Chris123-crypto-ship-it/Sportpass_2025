@@ -401,6 +401,39 @@ const Tasks = () => {
     }
   };
 
+  const formatExpirationDate = (dateString) => {
+    if (!dateString) return null;
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleString('de-DE', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    } catch (error) {
+      console.error('Fehler beim Formatieren des Datums:', error);
+      return null;
+    }
+  };
+
+  const renderDifficultyStars = (difficulty) => {
+    const level = parseInt(difficulty) || 0;
+    return (
+      <div className="difficulty-stars">
+        {[1, 2, 3].map((star) => (
+          <span 
+            key={star} 
+            className={`star ${star <= level ? 'active' : ''}`}
+          >
+            ★
+          </span>
+        ))}
+      </div>
+    );
+  };
+
   const TaskCard = ({ task }) => {
     const userSubmissions = allUserSubmissions?.filter(s => s.task_id === task.id) || [];
     const hasApprovedSubmission = userSubmissions.some(s => s.status === 'approved');
