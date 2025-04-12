@@ -50,7 +50,13 @@ export const TaskProvider = ({ children }) => {
       const response = await axios.get(`${config.API_URL}/tasks${queryParams}`, {
         headers
       });
-      setTasks(response.data);
+      
+      const processedTasks = response.data.map(task => ({
+        ...task,
+        title: task.title || 'Unbekannte Aufgabe'
+      }));
+      
+      setTasks(processedTasks);
     } catch (error) {
       console.error('Fehler beim Abrufen der Aufgaben:', error);
       setError('Fehler beim Laden der Aufgaben');
