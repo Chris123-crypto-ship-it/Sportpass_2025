@@ -386,7 +386,7 @@ app.post('/add-task', authenticateToken, async (req, res) => {
       dynamic: isDynamic,
       dynamic_type: isDynamic ? dynamic_type : null,
       multiplier: isDynamic ? parseFloat(points_per_unit) || 1 : null,
-      points: is_easter_egg ? 5 : (!isDynamic ? parseInt(static_points) : 0), // 5 Punkte für Oster-Eier
+      points: is_easter_egg ? 5 : (!isDynamic ? parseInt(static_points || req.body.points) : 0), // 5 Punkte für Oster-Eier
       difficulty: parseInt(difficulty) || 1,
       expiration_date: expiration_date ? new Date(expiration_date).toISOString() : null,
       max_submissions: max_submissions ? parseInt(max_submissions) : null,
