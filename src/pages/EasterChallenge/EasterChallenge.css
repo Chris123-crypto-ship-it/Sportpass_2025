@@ -5,6 +5,20 @@
   padding: 2rem;
   min-height: calc(100vh - 80px);
   background: linear-gradient(135deg, #f8f9fc, #eef2f7);
+  position: relative;
+  overflow: hidden;
+}
+
+.easter-challenge-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23fd7e14' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  opacity: 0.5;
+  z-index: 0;
 }
 
 /* Header */
@@ -15,10 +29,12 @@
   margin-bottom: 2rem;
   padding-bottom: 1rem;
   border-bottom: 2px solid rgba(226, 232, 240, 0.8);
+  position: relative;
+  z-index: 1;
 }
 
 .easter-title {
-  font-size: 2.4rem;
+  font-size: 2.6rem;
   font-weight: 800;
   color: #2c3e50;
   display: flex;
@@ -27,19 +43,26 @@
   background: linear-gradient(90deg, #fd7e14, #e74c3c);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+  text-shadow: 0 2px 10px rgba(253, 126, 20, 0.2);
 }
 
 .easter-egg-icon {
-  font-size: 2rem;
+  font-size: 2.4rem;
   color: #fd7e14;
 }
 
 .easter-stats {
   background: white;
   border-radius: 1rem;
-  padding: 1rem 1.5rem;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-  border: 1px solid rgba(226, 232, 240, 0.8);
+  padding: 1.2rem 1.8rem;
+  box-shadow: 0 4px 20px rgba(253, 126, 20, 0.15);
+  border: 1px solid rgba(253, 126, 20, 0.2);
+  transform: rotate(2deg);
+  transition: all 0.3s ease;
+}
+
+.easter-stats:hover {
+  transform: rotate(0deg) scale(1.05);
 }
 
 .collected-eggs {
@@ -49,13 +72,14 @@
 }
 
 .egg-count {
-  font-size: 2.5rem;
+  font-size: 2.8rem;
   font-weight: 800;
   color: #fd7e14;
+  text-shadow: 0 2px 4px rgba(253, 126, 20, 0.2);
 }
 
 .egg-label {
-  font-size: 0.9rem;
+  font-size: 1rem;
   color: #718096;
   font-weight: 500;
 }
@@ -63,17 +87,20 @@
 /* Description */
 .easter-challenge-description {
   background: white;
-  padding: 1.5rem;
+  padding: 1.8rem;
   border-radius: 1rem;
   margin-bottom: 2rem;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   border: 1px solid rgba(226, 232, 240, 0.8);
+  position: relative;
+  z-index: 1;
 }
 
 .easter-challenge-description p {
   color: #4a5568;
-  line-height: 1.6;
-  font-size: 1.1rem;
+  line-height: 1.7;
+  font-size: 1.15rem;
+  text-align: center;
 }
 
 /* Content Layout */
@@ -81,17 +108,31 @@
   display: grid;
   grid-template-columns: 2fr 1fr;
   gap: 2rem;
+  position: relative;
+  z-index: 1;
 }
 
 /* Section Titles */
 .section-title {
-  font-size: 1.6rem;
+  font-size: 1.7rem;
   color: #2d3748;
   margin-bottom: 1.5rem;
   font-weight: 700;
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  position: relative;
+}
+
+.section-title::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 0;
+  width: 60px;
+  height: 4px;
+  background: linear-gradient(90deg, #fd7e14, #e74c3c);
+  border-radius: 2px;
 }
 
 /* Easter Eggs Grid */
@@ -99,7 +140,7 @@
   background: white;
   padding: 2rem;
   border-radius: 1rem;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   border: 1px solid rgba(226, 232, 240, 0.8);
 }
 
@@ -274,16 +315,32 @@
 }
 
 .ranking-info {
-  background: #f8fafc;
-  padding: 1rem;
-  border-radius: 0.5rem;
-  border-left: 4px solid #4299e1;
+  background: #FFF5F1;
+  padding: 1.5rem;
+  border-radius: 0.8rem;
+  margin-top: 2rem;
+  border-left: 4px solid #fd7e14;
 }
 
 .ranking-info p {
   color: #4a5568;
-  margin: 0.5rem 0;
-  font-size: 0.9rem;
+  margin-bottom: 0.8rem;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.ranking-info p:last-child {
+  margin-bottom: 0;
+}
+
+.bonus-points {
+  color: #fd7e14;
+  font-weight: 700;
+  font-size: 1.1rem;
+  display: inline-block;
+  background: rgba(253, 126, 20, 0.1);
+  padding: 0.2rem 0.5rem;
+  border-radius: 0.3rem;
 }
 
 /* Loading and Empty States */

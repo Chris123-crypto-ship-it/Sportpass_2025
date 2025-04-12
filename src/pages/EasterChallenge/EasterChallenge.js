@@ -164,7 +164,7 @@ const EasterChallenge = () => {
       <div className="easter-challenge-header">
         <h1 className="easter-title">
           <FaEgg className="easter-egg-icon" />
-          Oster-Challenge 2023
+          Oster-Challenge 2025
         </h1>
         <div className="easter-stats">
           <div className="collected-eggs">
@@ -176,9 +176,10 @@ const EasterChallenge = () => {
 
       <div className="easter-challenge-description">
         <p>
-          Finde die versteckten Ostereier und sammle Punkte! Jeden Tag werden 2 neue Eier versteckt.
+          Finde die versteckten Ostereier auf der SportPass-Webseite und sammle Punkte! 
+          Jeden Tag werden neue Eier versteckt.
           Für jedes gefundene Ei bekommst du 5 Punkte. 
-          Der Benutzer mit den meisten gesammelten Eiern erhält einen Bonus von 70 Punkten!
+          Der Benutzer mit den meisten gesammelten Eiern am Ende der Challenge erhält einen Bonus von 70 Punkten!
         </p>
       </div>
 
@@ -262,8 +263,8 @@ const EasterChallenge = () => {
           )}
           
           <div className="ranking-info">
-            <p>Die Challenge läuft noch 5 Tage. Sammle fleißig weiter!</p>
-            <p>Dem Gewinner winken 70 zusätzliche Punkte!</p>
+            <p>Die Challenge läuft bis zum Ostersonntag (20. April 2025). Sammle fleißig weiter!</p>
+            <p>Dem Gewinner winken <span className="bonus-points">70 zusätzliche Punkte!</span></p>
           </div>
         </div>
       </div>
