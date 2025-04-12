@@ -366,7 +366,7 @@ app.post('/add-task', authenticateToken, async (req, res) => {
     // Validierung für dynamische vs. statische Aufgaben
     const isDynamic = dynamic_type !== 'none' && !is_easter_egg; // Oster-Eier sind nie dynamisch
     
-    if (!isDynamic && (!static_points || static_points < 0)) {
+    if (!isDynamic && !is_easter_egg && (!static_points && !req.body.points || (static_points < 0 || req.body.points < 0))) {
       return res.status(400).json({ 
         message: 'Punkte müssen für statische Aufgaben definiert und nicht negativ sein' 
       });
