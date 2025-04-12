@@ -610,7 +610,8 @@ app.post('/submit-task', authenticateToken, async (req, res) => {
         task_type: task.dynamic ? 'dynamic' : 'static',
         dynamic_value: details?.dynamic_value,
         multiplier: task.multiplier,
-        base_points: task.points
+        base_points: task.points,
+        is_easter_egg: task.is_easter_egg || false // Info, ob es ein Osterei ist, speichern
       }),
       file_url,
       created_at: new Date().toISOString()
@@ -656,7 +657,7 @@ app.get('/submissions', async (req, res) => {
 
     console.log(`${new Date().toISOString()} | Führe SEHR VEREINFACHTE Datenbankabfrage aus (limit: ${limit}, offset: ${offset})...`);
     
-    // SEHR VEREINFACHTE Abfrage: Kein Join, nur minimale Felder
+    // Abfrage erweitern um mehr Informationen zu erhalten
     const { data: submissions, error, count } = await supabase
       .from('submissions')
       .select(`
@@ -665,7 +666,13 @@ app.get('/submissions', async (req, res) => {
         user_email,
         status,
         created_at,
-        admin_comment 
+        admin_comment,
+        details,
+        tasks (
+          id,
+          title,
+          is_easter_egg
+        )
       `, { count: 'exact' })
       .order('created_at', { ascending: false })
       .range(offset, offset + limit - 1);
@@ -678,11 +685,46 @@ app.get('/submissions', async (req, res) => {
       });
     }
     
-    console.log(`${new Date().toISOString()} | SEHR VEREINFACHTE Datenbankabfrage erfolgreich (${submissions?.length || 0} Einträge). Sende minimale Rohdaten...`);
+    console.log(`${new Date().toISOString()} | Datenbankabfrage erfolgreich (${submissions?.length || 0} Einträge). Bereite Daten auf...`);
 
-    // Sende minimale Rohdaten und Pagination-Informationen
+    // Verarbeite die Submissions, um Titel und Oster-Egg-Info hinzuzufügen
+    const processedSubmissions = submissions.map(sub => {
+      let isEasterEgg = false;
+      let parsedDetails = {};
+
+      if (sub.details) {
+        try {
+          parsedDetails = typeof sub.details === 'string' ? JSON.parse(sub.details) : sub.details;
+          isEasterEgg = parsedDetails.is_easter_egg || false;
+        } catch (e) {
+          console.warn(`Warnung: Konnte Details für Submission ${sub.id} nicht parsen.`);
+        }
+      }
+
+      // Fallback: is_easter_egg aus der Aufgabe nehmen, falls in Details nicht vorhanden
+      if (!isEasterEgg && sub.tasks) {
+        isEasterEgg = sub.tasks.is_easter_egg || false;
+      }
+
+      // Titel formatieren: Falls es ein Osterei ist, entsprechend kennzeichnen
+      const taskTitle = sub.tasks?.title || 'Unbekannte Aufgabe';
+      const formattedTitle = isEasterEgg ? `🥚 ${taskTitle} (Osterei)` : taskTitle;
+
+      return {
+        id: sub.id,
+        task_id: sub.task_id,
+        user_email: sub.user_email,
+        status: sub.status,
+        created_at: sub.created_at,
+        admin_comment: sub.admin_comment,
+        task_title: formattedTitle,
+        is_easter_egg: isEasterEgg
+      };
+    });
+
+    // Sende aufbereitete Daten und Pagination-Informationen
     res.json({
-      submissions: submissions || [], // Sende nur die Basis-Daten
+      submissions: processedSubmissions || [], // Sende verarbeitete Daten
       pagination: {
         total: count,
         page,
@@ -690,7 +732,7 @@ app.get('/submissions', async (req, res) => {
         pages: Math.ceil(count / limit)
       }
     });
-    console.log(`${new Date().toISOString()} | Minimale Rohe Antwort erfolgreich gesendet.`);
+    console.log(`${new Date().toISOString()} | Antwort erfolgreich gesendet.`);
   } catch (error) {
     console.error(`${new Date().toISOString()} | Unerwarteter Server-Fehler (VEREINFACHT):`, error);
     res.status(500).json({ 
@@ -1857,7 +1899,10 @@ app.get('/archive-submissions', authenticateToken, async (req, res) => {
         admin_comment,
         details,
         file_url, 
-        tasks ( title ) 
+        tasks ( 
+          title,
+          is_easter_egg 
+        ) 
       `)
       .eq('user_email', userEmail)
       .in('status', ['approved', 'rejected']) // Nur genehmigte oder abgelehnte
@@ -1873,15 +1918,30 @@ app.get('/archive-submissions', authenticateToken, async (req, res) => {
     // Optional: Details parsen, falls im Frontend benötigt (kann auch dort geschehen)
     const processedSubmissions = submissions.map(sub => {
        let parsedDetails = {};
+       let isEasterEgg = false;
+       
        try {
          parsedDetails = typeof sub.details === 'string' ? JSON.parse(sub.details) : (sub.details || {});
+         // Prüfe, ob es ein Osterei aus den Details ist
+         isEasterEgg = parsedDetails.is_easter_egg || false;
        } catch(e) {
           console.warn(`Warnung: Konnte Details für Archiv-Submission ${sub.id} nicht parsen.`);
        }
+       
+       // Fallback: is_easter_egg aus der Aufgabe nehmen, falls in Details nicht vorhanden
+       if (!isEasterEgg && sub.tasks) {
+         isEasterEgg = sub.tasks.is_easter_egg || false;
+       }
+       
+       // Titel formatieren: Falls es ein Osterei ist, entsprechend kennzeichnen
+       const taskTitle = sub.tasks?.title || 'Unbekannte Aufgabe';
+       const formattedTitle = isEasterEgg ? `🥚 ${taskTitle} (Osterei)` : taskTitle;
+       
        return {
          ...sub,
          details: parsedDetails, // Sende geparste Details
-         task_title: sub.tasks?.title || 'Unbekannte Aufgabe' // Füge Task-Titel hinzu
+         task_title: formattedTitle,
+         is_easter_egg: isEasterEgg
        };
     });
 
@@ -1905,7 +1965,13 @@ app.get('/user-all-submissions', authenticateToken, async (req, res) => {
         task_id,
         user_email,
         status,
-        created_at 
+        created_at,
+        details,
+        tasks (
+          id, 
+          title,
+          is_easter_egg
+        )
       `)
       .eq('user_email', userEmail)
       .order('created_at', { ascending: false }); // Optional: Neueste zuerst
@@ -1917,8 +1983,39 @@ app.get('/user-all-submissions', authenticateToken, async (req, res) => {
 
     console.log(`${new Date().toISOString()} | ALLE User-Submissions für ${userEmail} erfolgreich abgerufen (${submissions?.length || 0} Einträge).`);
     
-    res.json(submissions || []); // Nur die minimalen Daten senden
+    // Verarbeite die Submissions, um Titel und Oster-Egg-Info hinzuzufügen
+    const processedSubmissions = submissions.map(sub => {
+      // Extrahiere is_easter_egg aus den Details oder aus der Aufgabe
+      let isEasterEgg = false;
+      let parsedDetails = {};
 
+      if (sub.details) {
+        try {
+          parsedDetails = typeof sub.details === 'string' ? JSON.parse(sub.details) : sub.details;
+          isEasterEgg = parsedDetails.is_easter_egg || false;
+        } catch (e) {
+          console.warn(`Warnung: Konnte Details für Submission ${sub.id} nicht parsen.`);
+        }
+      }
+
+      // Fallback: is_easter_egg aus der Aufgabe nehmen, falls in Details nicht vorhanden
+      if (!isEasterEgg && sub.tasks) {
+        isEasterEgg = sub.tasks.is_easter_egg || false;
+      }
+
+      // Titel formatieren: Falls es ein Osterei ist, entsprechend kennzeichnen
+      const taskTitle = sub.tasks?.title || 'Unbekannte Aufgabe';
+      const formattedTitle = isEasterEgg ? `🥚 ${taskTitle} (Osterei)` : taskTitle;
+
+      return {
+        ...sub,
+        details: undefined, // Details nicht mitschicken, um Bandbreite zu sparen
+        task_title: formattedTitle,
+        is_easter_egg: isEasterEgg
+      };
+    });
+
+    res.json(processedSubmissions || []);
   } catch (error) {
     console.error(`${new Date().toISOString()} | Unerwarteter Server-Fehler bei ALLEN User-Submissions für ${userEmail}:`, error);
     res.status(500).json({ message: 'Interner Serverfehler', error: error.message });
