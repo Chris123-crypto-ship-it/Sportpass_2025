@@ -175,10 +175,9 @@ const EasterChallenge = () => {
 
       <div className="easter-challenge-description">
         <p>
-          Sammle die Ostereier auf dieser Seite und sichere dir Punkte! 
-          Jeden Tag werden neue Eier hinzugefügt, die nach einem Tag ablaufen.
-          Für jedes gefundene Ei bekommst du 5 Punkte. 
-          Der Benutzer mit den meisten gesammelten Eiern am Ende der Challenge erhält einen Bonus von 100 Punkten!
+          Somit ist die Oster-Challenge zu Ende! Wir gratulieren herzlich unseren 3 Gewinnern. Diese bekommen zusätzlich zu ihren Punkten
+          durch die gefundenen Eier noch 40 Punkte. (100 Punkte werden geteilt weil 3 Gewinner)
+          Vielen Dank für eure zahlreichen Einsendungen! 
         </p>
       </div>
 
