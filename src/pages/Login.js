@@ -89,7 +89,7 @@ const Login = () => {
         <FaInfoCircle style={{ marginRight: '10px', marginTop: '3px', flexShrink: 0 }} />
         <div>
           <strong>Liebe Sportpass Teilnehmer!</strong>
-          <p>Neue Woche Neue Aufgaben. Absofort sind neue Aufgaben für euch einzusehen. Alte Einsendungen werden in naher Zukunft aus dem Archiv gelöscht. Dies hat aber KEINEN Einfluss auf eure Punkte!</p>
+          <p>Der Sprtpass hat nun sein Ende gefunden. Wir danken für die zahlreiche Teilnahme! Am Freitag dem 11.06.2025 findet eine kleine Siegerehrung statt - die Top 10 können Preise erwarten!/p>
           <p>Bei Fragen oder Problemen sind wir jederzeit unter unserem Support (ganz unten zu finden) für euch da!</p>
           <p>Viel Spaß,<br/>Euer Sportpass Team</p>
         </div>
